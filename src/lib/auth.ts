@@ -3,6 +3,8 @@ import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { db } from "@/lib/db"
 import { nanoid } from "nanoid"
+import Credentials from "next-auth/providers/credentials"
+import bcrypt from "bcrypt"
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(db),
@@ -16,6 +18,36 @@ export const authOptions: NextAuthOptions = {
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        }),
+        Credentials({
+            name: "credentials",
+            credentials: {
+                username: { label: "username", type: "text" },
+                password: { label: "password", type: "password" },
+            },
+            async authorize(credentials) {
+                if (!credentials?.username || !credentials?.password) {
+                    throw new Error("Invalid credentials")
+                }
+                const user = await db.user.findUnique({
+                    where: { username: credentials.username },
+                })
+
+                if (!user || !user?.password) {
+                    throw new Error("Invalid credentials")
+                }
+
+                const passwordMatch = await bcrypt.compare(
+                    credentials.password,
+                    user.password
+                )
+
+                if (!passwordMatch) {
+                    throw new Error("Invalid credentials")
+                }
+
+                return user
+            },
         }),
     ],
     callbacks: {
@@ -31,9 +63,13 @@ export const authOptions: NextAuthOptions = {
             return session
         },
         async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id
+            }
+
             const dbUser = await db.user.findFirst({
                 where: {
-                    email: token.email,
+                    id: token.id,
                 },
             })
 
@@ -50,21 +86,21 @@ export const authOptions: NextAuthOptions = {
                         id: dbUser.id,
                     },
                     data: {
-                        username: nanoid(),
+                        username: nanoid(7),
                     },
                 })
             }
 
             return {
-                id: dbUser.id,
-                name: dbUser.name,
-                email: dbUser.email,
-                picture: dbUser.image,
+                id: token.id,
+                name: token.name,
+                email: token.email,
+                picture: token.image,
                 username: dbUser.username,
             }
         },
-        redirect() {
-            return "/"
+        redirect({ baseUrl }) {
+            return baseUrl
         },
     },
 }
