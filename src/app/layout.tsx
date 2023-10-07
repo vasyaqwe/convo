@@ -4,6 +4,9 @@ import { Inter } from "next/font/google"
 import { Toaster } from "sonner"
 import { TanstackProvider } from "@/components/tanstack-provider"
 import SessionProvider from "@/components/session-provider"
+import { Sidebar } from "@/components/layout/sidebar"
+import { cn } from "@/lib/utils"
+import { MobileNav } from "@/components/layout/mobile-nav"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -18,13 +21,14 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html
-            lang="en"
-            className="dark"
-        >
-            <body className={inter.className}>
-                <SessionProvider>
-                    <TanstackProvider>
+        <SessionProvider>
+            <TanstackProvider>
+                <html
+                    lang="en"
+                    className="dark"
+                >
+                    <body className={cn("flex", inter.className)}>
+                        <Sidebar />
                         <main>
                             <Toaster
                                 theme="dark"
@@ -34,9 +38,10 @@ export default function RootLayout({
                             />
                             {children}
                         </main>
-                    </TanstackProvider>
-                </SessionProvider>
-            </body>
-        </html>
+                        <MobileNav />
+                    </body>
+                </html>
+            </TanstackProvider>
+        </SessionProvider>
     )
 }
