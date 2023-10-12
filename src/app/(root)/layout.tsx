@@ -26,7 +26,8 @@ export default function RootLayout({
             <TanstackProvider>
                 <html
                     lang="en"
-                    className="dark [--chats-width:275px] [--sidebar-width:57px]"
+                    className="dark [--avatar-size:40px] [--chats-width:275px]
+               [--header-height:73px] [--sidebar-width:57px]"
                 >
                     <body className={cn("flex", inter.className)}>
                         <Sidebar />

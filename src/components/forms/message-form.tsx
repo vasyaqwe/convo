@@ -32,7 +32,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 e.preventDefault()
                 mutate()
             }}
-            className="fixed bottom-0  w-[calc(100%-var(--sidebar-width)-var(--chats-width))]"
+            className="relative mt-auto"
         >
             <Button
                 type="button"
@@ -48,7 +48,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Type a message"
-                className="h-[61px] w-full border-t border-secondary/75 px-20"
+                className="w-full border-t border-secondary/75 px-20"
             />
             <Button
                 disabled={body.length < 1}
