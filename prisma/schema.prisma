@@ -38,8 +38,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  conversationIds String[]       @db.ObjectId
-  conversations   Conversation[] @relation(fields: [conversationIds], references: [id])
+  chatIds String[] @db.ObjectId
+  chats   Chat[]   @relation(fields: [chatIds], references: [id])
 
   seenMessageIds String[]  @db.ObjectId
   seenMessages   Message[] @relation("SeenBy", fields: [seenMessageIds], references: [id])
@@ -48,7 +48,7 @@ model User {
   messages Message[]
 }
 
-model Conversation {
+model Chat {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -73,8 +73,8 @@ model Message {
   seenByIds String[] @db.ObjectId
   seenBy    User[]   @relation("SeenBy", fields: [seenByIds], references: [id])
 
-  conversationId String       @db.ObjectId
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  chatId String @db.ObjectId
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   senderId String @db.ObjectId
   sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)

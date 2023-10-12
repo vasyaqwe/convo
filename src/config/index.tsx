@@ -9,11 +9,10 @@ export const axiosInstance = axios.create({
 
 export const nav: {
     label: string
-    href?: string
-    onClick?: () => void
+    onClick: () => void
     icon: ReactElement
 }[] = [
-    { label: "Chats", href: "/", icon: <Icons.chats /> },
-    { label: "Friends", href: "/friends", icon: <Icons.friends /> },
+    { label: "New Group", onClick: () => {}, icon: <Icons.people /> },
+    { label: "Settings", onClick: () => {}, icon: <Icons.settings /> },
     { label: "Sign out", onClick: () => signOut(), icon: <Icons.signOut /> },
 ]

@@ -1,4 +1,4 @@
-import "./globals.css"
+import "../globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Toaster } from "sonner"
@@ -7,6 +7,7 @@ import SessionProvider from "@/components/session-provider"
 import { Sidebar } from "@/components/layout/sidebar"
 import { cn } from "@/lib/utils"
 import { MobileNav } from "@/components/layout/mobile-nav"
+import { Chats } from "@/components/layout/chats"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,20 +26,21 @@ export default function RootLayout({
             <TanstackProvider>
                 <html
                     lang="en"
-                    className="dark"
+                    className="dark [--chats-width:275px] [--sidebar-width:57px]"
                 >
                     <body className={cn("flex", inter.className)}>
                         <Sidebar />
-                        <main>
-                            <Toaster
-                                theme="dark"
-                                position={"top-center"}
-                                richColors
-                                style={{ font: "inherit" }}
-                            />
+                        <main className="flex flex-1">
+                            <Chats />
                             {children}
                         </main>
                         <MobileNav />
+                        <Toaster
+                            theme="dark"
+                            position={"top-center"}
+                            richColors
+                            style={{ font: "inherit" }}
+                        />
                     </body>
                 </html>
             </TanstackProvider>

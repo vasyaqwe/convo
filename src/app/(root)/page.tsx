@@ -7,8 +7,10 @@ export default async function Home() {
     if (!session) redirect("/sign-in")
 
     return (
-        <>
-            <h1>Hello.</h1>
-        </>
+        <div className="grid flex-1 place-content-center">
+            <h1 className="text-2xl font-semibold">
+                Select a chat or create a new group
+            </h1>
+        </div>
     )
 }

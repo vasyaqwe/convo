@@ -17,6 +17,7 @@ export function withErrorHandling(
         try {
             return await handler(req, { params })
         } catch (error) {
+            console.log(error)
             if (error instanceof z.ZodError) {
                 return new NextResponse(error.message, { status: 422 })
             }
