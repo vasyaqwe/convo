@@ -27,7 +27,7 @@ export default function RootLayout({
                 <html
                     lang="en"
                     className="dark [--avatar-size:40px] [--chats-width:275px]
-               [--header-height:73px] [--sidebar-width:57px]"
+               [--header-height:73px] [--sidebar-width:57px] [--message-form-height:61px]"
                 >
                     <body className={cn("flex", inter.className)}>
                         <Sidebar />

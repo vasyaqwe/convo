@@ -16,3 +16,5 @@ export const nav: {
     { label: "Settings", onClick: () => {}, icon: <Icons.settings /> },
     { label: "Sign out", onClick: () => signOut(), icon: <Icons.signOut /> },
 ]
+
+export const MESSAGES_INFINITE_SCROLL_COUNT = 30

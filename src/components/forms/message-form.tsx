@@ -15,28 +15,39 @@ type MessageFormProps = {
 export function MessageForm({ chatId }: MessageFormProps) {
     const [body, setBody] = useState("")
 
-    const { mutate } = useMutation(async () => {
-        const payload: MessagePayload = {
-            chatId,
-            body,
+    const { mutate } = useMutation(
+        async (body: string) => {
+            const payload: MessagePayload = {
+                chatId,
+                body,
+            }
+
+            const { data } = await axiosInstance.post("/message", payload)
+
+            return data
+        },
+        {
+            onMutate: () => setBody(""),
         }
+    )
 
-        const { data } = await axiosInstance.post("/message", payload)
-
-        return data
-    }, {})
+    function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault()
+            mutate(body)
+        }
+    }
 
     return (
         <form
             onSubmit={(e) => {
                 e.preventDefault()
-                mutate()
+                mutate(body)
             }}
-            className="relative mt-auto"
+            className="flex h-[var(--message-form-height)] items-center overflow-hidden border-t border-secondary/75 px-4"
         >
             <Button
                 type="button"
-                className="absolute bottom-3 left-5"
                 variant={"ghost"}
                 size={"icon"}
             >
@@ -44,15 +55,15 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 <span className="sr-only">Attach image</span>
             </Button>
             <TextArea
+                onKeyDown={onKeyDown}
                 autoFocus
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Type a message"
-                className="w-full border-t border-secondary/75 px-20"
+                className="h-[var(--message-form-height)] w-full "
             />
             <Button
                 disabled={body.length < 1}
-                className="absolute bottom-3 right-5"
                 variant={"ghost"}
                 size={"icon"}
             >

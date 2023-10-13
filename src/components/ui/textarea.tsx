@@ -14,11 +14,11 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                 onHeightChange={(height) =>
                     document.documentElement.style.setProperty(
                         "--message-form-height",
-                        `${height + 2}px`
+                        `${height}px`
                     )
                 }
                 className={cn(
-                    "resize-none bg-transparent p-5 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:opacity-50",
+                    "resize-none bg-transparent px-4 py-5 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:opacity-50",
                     className
                 )}
                 ref={ref}

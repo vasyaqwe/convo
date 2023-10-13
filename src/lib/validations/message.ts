@@ -6,4 +6,10 @@ export const messageSchema = z.object({
     image: z.string().optional(),
 })
 
+export const messagesQuerySchema = z.object({
+    limit: z.string(),
+    page: z.string(),
+    chatId: z.string(),
+})
+
 export type MessagePayload = z.infer<typeof messageSchema>

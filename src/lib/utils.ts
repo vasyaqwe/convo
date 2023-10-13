@@ -1,3 +1,4 @@
+import { ExtendedMessage } from "@/types"
 import { type ClassValue, clsx } from "clsx"
 import { NextResponse } from "next/server"
 import { twMerge } from "tailwind-merge"
@@ -29,11 +30,50 @@ export function withErrorHandling(
     }
 }
 
-export function formatDate(date: Date) {
+export function formatDate(date: Date | string) {
+    let dateObject: Date
+
+    if (typeof date === "string") {
+        dateObject = new Date(date)
+    } else {
+        dateObject = date
+    }
+
     const formatter = new Intl.DateTimeFormat(undefined, {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
     })
-    return formatter.format(date)
+
+    return formatter.format(dateObject)
+}
+export function reverseArray(arr: any[]) {
+    const reversed = arr.reverse()
+    return reversed
+}
+
+export function addDisplaySender(messages: ExtendedMessage[]) {
+    let prevSenderId: string | null = null
+    let prevMessageTimestamp: number | null = null
+
+    const newMessages = [...messages].map((message) => {
+        if (message.senderId === prevSenderId) {
+            const currentTimestamp = new Date(message.createdAt).getTime()
+            const timeDiff = currentTimestamp - prevMessageTimestamp!
+            if (timeDiff < 5 * 60 * 1000) {
+                // 5 minutes in milliseconds
+                message.displaySender = false
+            } else {
+                message.displaySender = true
+            }
+            prevMessageTimestamp = currentTimestamp // Update timestamp
+        } else {
+            prevSenderId = message.senderId
+            prevMessageTimestamp = new Date(message.createdAt).getTime()
+            message.displaySender = true
+        }
+        return message
+    })
+
+    return newMessages
 }
