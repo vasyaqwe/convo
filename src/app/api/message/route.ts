@@ -77,7 +77,6 @@ export const POST = withErrorHandling(async function (req: Request) {
             messages: [lastMessage],
         })
     })
-    console.log("========>", updatedChat.users)
 
     return new NextResponse(JSON.stringify(newMessage))
 })

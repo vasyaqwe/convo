@@ -5,10 +5,11 @@ import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
 import { pusherClient } from "@/lib/pusher"
-import { reverseArray } from "@/lib/utils"
+import { addDisplaySender, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
+import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
 type ChatProps = {
@@ -19,9 +20,9 @@ type ChatProps = {
 
 export function Chat({ session, chatId, initialMessages }: ChatProps) {
     const wrapperRef = useRef<HTMLDivElement>(null)
-    const [messages, setMessages] = useState<ExtendedMessage[]>(
-        reverseArray(initialMessages)
-    )
+    const [messages, setMessages] = useState<ExtendedMessage[]>(initialMessages)
+    const router = useRouter()
+
     const queryKey = ["messages"]
 
     const { isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
@@ -36,9 +37,17 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
             },
             {
                 onSuccess: ({ pages }) => {
-                    const data = pages?.flatMap((page) => page)
-                    if (data[0].chatId === chatId) {
-                        setMessages(reverseArray(data))
+                    const reversedPages = reverseArray(
+                        pages.filter((page) => page.length !== 0)
+                    )
+                    const messages = reversedPages?.flatMap((page) => page)
+
+                    if (
+                        messages[0].chatId === chatId &&
+                        messages.length > MESSAGES_INFINITE_SCROLL_COUNT
+                    ) {
+                        setMessages(messages)
+
                         if (
                             pages.length > 1 &&
                             wrapperRef.current &&
@@ -46,9 +55,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                         ) {
                             const prevPage = pages[pages.length - 2]
                             const prevPageFirstMessage =
-                                document.getElementById(
-                                    prevPage[prevPage.length - 1].id
-                                )
+                                document.getElementById(prevPage[0].id)
 
                             prevPageFirstMessage?.scrollIntoView()
                         }
@@ -90,6 +97,11 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
 
                 return [...prev, newMessage]
             })
+            scrollToBottom()
+
+            if (messages.length === 0) {
+                router.refresh()
+            }
         }
 
         function onUpdateMessage(newMessage: ExtendedMessage) {
@@ -100,7 +112,6 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                     return oldMessage
                 })
             )
-            // queryClient.invalidateQueries(queryKey)
         }
 
         pusherClient.bind("message:new", onNewMessage)
@@ -117,57 +128,42 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
     function scrollToBottom() {
         const wrapper = wrapperRef.current
         if (wrapper) {
-            wrapper.scrollTop = wrapper.scrollHeight
+            wrapper.scrollTop = wrapper.scrollHeight + 999
         }
     }
 
     return (
         <div
-            onClick={() => {
-                document
-                    .getElementById("6529164dd01cb837d736a243")
-                    ?.scrollIntoView()
-            }}
             ref={wrapperRef}
             className="relative flex h-[calc(100vh-var(--header-height)-var(--message-form-height))] flex-col 
              overflow-y-auto px-4 py-[var(--chat-padding-block)] [--chat-padding-block:40px]"
         >
-            {messages.length < 1 && (
-                <p className="my-auto self-center text-2xl font-semibold">
-                    No history yet.
-                </p>
-            )}
-
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
             )}
 
-            {isLoading ? (
-                <Loading className=" absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-            ) : (
-                messages.map((message, idx) => {
-                    if (idx === 3) {
-                        return (
-                            <Message
-                                isLast={false}
-                                session={session}
-                                key={message.id}
-                                message={message}
-                                ref={ref}
-                            />
-                        )
-                    }
-
+            {messages.map((message, idx) => {
+                if (idx === 3) {
                     return (
                         <Message
-                            isLast={idx === messages.length - 1}
+                            isLast={false}
                             session={session}
                             key={message.id}
                             message={message}
+                            ref={ref}
                         />
                     )
-                })
-            )}
+                }
+
+                return (
+                    <Message
+                        isLast={idx === messages.length - 1}
+                        session={session}
+                        key={message.id}
+                        message={message}
+                    />
+                )
+            })}
         </div>
     )
 }

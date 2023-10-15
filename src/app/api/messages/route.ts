@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { addDisplaySender, withErrorHandling } from "@/lib/utils"
+import { addDisplaySender, reverseArray, withErrorHandling } from "@/lib/utils"
 import { messagesQuerySchema } from "@/lib/validations/message"
 import { NextResponse } from "next/server"
 
@@ -27,5 +27,7 @@ export const GET = withErrorHandling(async function (req: Request) {
         },
     })
 
-    return new NextResponse(JSON.stringify(addDisplaySender(messages)))
+    return new NextResponse(
+        JSON.stringify(addDisplaySender(reverseArray(messages)))
+    )
 })

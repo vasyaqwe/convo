@@ -5,7 +5,7 @@ import { Icons } from "@/components/ui/icons"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { MessagePayload } from "@/lib/validations/message"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
 type MessageFormProps = {
@@ -14,6 +14,8 @@ type MessageFormProps = {
 
 export function MessageForm({ chatId }: MessageFormProps) {
     const [body, setBody] = useState("")
+
+    const queryClient = useQueryClient()
 
     const { mutate } = useMutation(
         async (body: string) => {
@@ -28,6 +30,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
         },
         {
             onMutate: () => setBody(""),
+            onSuccess: () => queryClient.invalidateQueries(["messages"]),
         }
     )
 

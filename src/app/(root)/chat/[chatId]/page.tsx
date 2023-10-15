@@ -48,11 +48,20 @@ export default async function Page({ params: { chatId } }: PageProps) {
                 <p>{chatPartner.name}</p>
             </header>
 
-            <Chat
-                initialMessages={addDisplaySender(reverseArray(chat.messages))}
-                session={session}
-                chatId={chatId}
-            />
+            {chat.messages.length < 1 ? (
+                <p className="my-auto self-center text-2xl font-semibold">
+                    No history yet.
+                </p>
+            ) : (
+                <Chat
+                    initialMessages={addDisplaySender(
+                        reverseArray(chat.messages)
+                    )}
+                    session={session}
+                    chatId={chatId}
+                />
+            )}
+
             <MessageForm chatId={chatId} />
         </div>
     )
