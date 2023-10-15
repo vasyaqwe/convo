@@ -8,9 +8,9 @@ export function Loading({ className, ...props }: LoadingProps) {
             className={cn("inline-flex items-center gap-px", className)}
             {...props}
         >
-            <span className="animate-blink mx-px h-1.5 w-1.5 rounded-full bg-current"></span>
-            <span className="animate-blink animation-delay-150 mx-px h-1.5 w-1.5 rounded-full bg-current"></span>
-            <span className="animate-blink animation-delay-300 mx-px h-1.5 w-1.5 rounded-full bg-current"></span>
+            <span className="mx-px h-[5px] w-[5px] animate-blink rounded-full bg-current"></span>
+            <span className="mx-px h-[5px] w-[5px] animate-blink rounded-full bg-current animation-delay-150"></span>
+            <span className="mx-px h-[5px] w-[5px] animate-blink rounded-full bg-current animation-delay-300"></span>
         </span>
     )
 }

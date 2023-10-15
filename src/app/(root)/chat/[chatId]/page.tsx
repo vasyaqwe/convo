@@ -1,11 +1,10 @@
 import { Chat } from "@/components/chat"
 import { MessageForm } from "@/components/forms/message-form"
-import { UserAvatar } from "@/components/ui/user-avatar"
+import { ChatHeader } from "@/components/layout/chat-header"
 import { MESSAGES_INFINITE_SCROLL_COUNT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { addDisplaySender, reverseArray } from "@/lib/utils"
-import { User } from "@prisma/client"
 import { notFound } from "next/navigation"
 
 type PageProps = {
@@ -36,18 +35,12 @@ export default async function Page({ params: { chatId } }: PageProps) {
 
     if (!chat) notFound()
 
-    const chatPartner = chat.users.find(
-        (u) => u.id !== session?.user.id
-    ) as User
-    // casting because I know better
-
     return (
         <div className="flex flex-1 flex-col bg-accent">
-            <header className="flex h-[var(--header-height)] items-center gap-3 border-b border-secondary/75 p-4 ">
-                <UserAvatar user={chatPartner} />
-                <p>{chatPartner.name}</p>
-            </header>
-
+            <ChatHeader
+                chat={chat}
+                user={session!.user}
+            />
             {chat.messages.length < 1 ? (
                 <p className="my-auto self-center text-2xl font-semibold">
                     No history yet.

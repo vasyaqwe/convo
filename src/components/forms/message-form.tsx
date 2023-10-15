@@ -6,6 +6,7 @@ import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { MessagePayload } from "@/lib/validations/message"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 type MessageFormProps = {
@@ -16,6 +17,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
     const [body, setBody] = useState("")
 
     const queryClient = useQueryClient()
+    const router = useRouter()
 
     const { mutate } = useMutation(
         async (body: string) => {
@@ -30,7 +32,10 @@ export function MessageForm({ chatId }: MessageFormProps) {
         },
         {
             onMutate: () => setBody(""),
-            onSuccess: () => queryClient.invalidateQueries(["messages"]),
+            onSuccess: () => {
+                queryClient.invalidateQueries(["messages"])
+                router.refresh()
+            },
         }
     )
 

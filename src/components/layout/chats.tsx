@@ -12,6 +12,9 @@ export async function Chats() {
      border-secondary/75 bg-accent px-5 pb-5 pt-5 md:w-[var(--chats-width)]"
         >
             <h2 className="text-3xl font-semibold">Chats</h2>
+            {users.length < 1 && (
+                <p className="mt-8 text-foreground/70">Nobody here yet.</p>
+            )}
             {users
                 .filter((u) => u.id !== session?.user.id)
                 .map((user) => (

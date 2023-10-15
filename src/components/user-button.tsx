@@ -29,6 +29,7 @@ export function UserButton({ user }: UserButtonProps) {
             },
         }
     )
+
     return (
         <button
             onClick={() => mutate(user.id)}
