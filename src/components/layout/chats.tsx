@@ -1,10 +1,26 @@
-import { UserButton } from "@/components/user-button"
+import { ChatsSearch } from "@/components/chats-search"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 
 export async function Chats() {
     const session = await getAuthSession()
-    const users = await db.user.findMany()
+
+    const existingChats = await db.chat.findMany({
+        where: {
+            userIds: {
+                has: session?.user.id,
+            },
+        },
+        include: {
+            users: {
+                select: {
+                    name: true,
+                    username: true,
+                    id: true,
+                },
+            },
+        },
+    })
 
     return (
         <aside
@@ -12,7 +28,11 @@ export async function Chats() {
      border-secondary/75 bg-accent px-5 pb-5 pt-5 md:w-[var(--chats-width)]"
         >
             <h2 className="text-3xl font-semibold">Chats</h2>
-            {users.length < 1 && (
+            <ChatsSearch
+                existingChats={existingChats}
+                session={session}
+            />
+            {/* {users.length < 1 && (
                 <p className="mt-8 text-foreground/70">Nobody here yet.</p>
             )}
             {users
@@ -22,7 +42,7 @@ export async function Chats() {
                         user={user}
                         key={user.id}
                     />
-                ))}
+                ))} */}
         </aside>
     )
 }

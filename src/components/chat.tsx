@@ -97,7 +97,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
 
             setTimeout(() => {
                 document.getElementById(newMessage.id)?.scrollIntoView()
-            }, 500)
+            }, 100)
         }
 
         function onUpdateMessage(newMessage: ExtendedMessage) {

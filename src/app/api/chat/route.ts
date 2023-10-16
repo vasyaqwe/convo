@@ -28,7 +28,13 @@ export const POST = withErrorHandling(async function (req: Request) {
                 },
             },
             include: {
-                users: true,
+                users: {
+                    select: {
+                        id: true,
+                        name: true,
+                        username: true,
+                    },
+                },
             },
         })
 
