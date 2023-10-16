@@ -38,8 +38,20 @@ export const PATCH = withErrorHandling(async function (
             },
         },
         include: {
-            sender: true,
-            seenBy: true,
+            sender: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                },
+            },
+            seenBy: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                },
+            },
         },
     })
 

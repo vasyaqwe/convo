@@ -5,7 +5,12 @@ import { Icons } from "@/components/ui/icons"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { MessagePayload } from "@/lib/validations/message"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { ExtendedMessage } from "@/types"
+import {
+    InfiniteData,
+    useMutation,
+    useQueryClient,
+} from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -34,7 +39,15 @@ export function MessageForm({ chatId }: MessageFormProps) {
             onMutate: () => setBody(""),
             onSuccess: () => {
                 queryClient.invalidateQueries(["messages"])
-                router.refresh()
+
+                const data = queryClient.getQueryData<
+                    InfiniteData<ExtendedMessage>
+                >(["messages"])
+
+                //if first message
+                if (data?.pages.flatMap((page) => page).length === 1 || !data) {
+                    router.refresh()
+                }
             },
         }
     )
@@ -42,7 +55,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
-            mutate(body)
+            if (body.length > 0) {
+                mutate(body)
+            }
         }
     }
 

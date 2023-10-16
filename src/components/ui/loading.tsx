@@ -5,7 +5,10 @@ type LoadingProps = React.ComponentProps<"span">
 export function Loading({ className, ...props }: LoadingProps) {
     return (
         <span
-            className={cn("inline-flex items-center gap-px", className)}
+            className={cn(
+                "inline-flex min-h-[23px] items-center gap-px",
+                className
+            )}
             {...props}
         >
             <span className="mx-px h-[5px] w-[5px] animate-blink rounded-full bg-current"></span>

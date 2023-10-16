@@ -40,8 +40,20 @@ export const POST = withErrorHandling(async function (req: Request) {
             image,
         },
         include: {
-            seenBy: true,
-            sender: true,
+            seenBy: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                },
+            },
+            sender: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                },
+            },
         },
     })
 
@@ -58,10 +70,20 @@ export const POST = withErrorHandling(async function (req: Request) {
             },
         },
         include: {
-            users: true,
+            users: {
+                select: {
+                    id: true,
+                },
+            },
             messages: {
                 include: {
-                    seenBy: true,
+                    seenBy: {
+                        select: {
+                            id: true,
+                            name: true,
+                            username: true,
+                        },
+                    },
                 },
             },
         },
@@ -71,7 +93,7 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     await pusherServer.trigger(chatId, "message:new", newMessage)
 
-    updatedChat.users.forEach((user: User) => {
+    updatedChat.users.forEach((user) => {
         pusherServer.trigger(user.id, "chat:update", {
             id: chatId,
             messages: [lastMessage],

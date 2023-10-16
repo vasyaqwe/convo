@@ -22,8 +22,20 @@ export const GET = withErrorHandling(async function (req: Request) {
             createdAt: "desc",
         },
         include: {
-            sender: true,
-            seenBy: true,
+            sender: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                },
+            },
+            seenBy: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                },
+            },
         },
     })
 

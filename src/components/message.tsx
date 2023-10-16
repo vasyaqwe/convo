@@ -48,9 +48,12 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                 id={message.id}
                 ref={ref}
                 className={cn(
-                    "relative flex scroll-mt-[calc(var(--chat-padding-block)-1px)] gap-[var(--message-gap)] [--message-gap:8px]",
+                    "relative flex  gap-[var(--message-gap)] [--message-gap:8px]",
                     isOwn ? "ml-auto" : "mr-auto flex-row-reverse",
-                    message.displaySender ? "mt-2" : ""
+                    message.displaySender ? "mt-2" : "",
+                    !isLast
+                        ? "scroll-mt-[calc(var(--chat-padding-block)-1px)]"
+                        : ""
                 )}
             >
                 <div>

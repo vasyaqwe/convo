@@ -9,7 +9,6 @@ import { addDisplaySender, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
-import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
 type ChatProps = {
@@ -21,7 +20,6 @@ type ChatProps = {
 export function Chat({ session, chatId, initialMessages }: ChatProps) {
     const wrapperRef = useRef<HTMLDivElement>(null)
     const [messages, setMessages] = useState<ExtendedMessage[]>(initialMessages)
-    const router = useRouter()
 
     const queryKey = ["messages"]
 
@@ -42,10 +40,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                     )
                     const messages = reversedPages?.flatMap((page) => page)
 
-                    if (
-                        messages[0].chatId === chatId &&
-                        messages.length > MESSAGES_INFINITE_SCROLL_COUNT
-                    ) {
+                    if (messages[0].chatId === chatId) {
                         setMessages(messages)
 
                         if (
@@ -81,8 +76,10 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
     }, [entry, hasNextPage, fetchNextPage])
 
     useEffect(() => {
-        scrollToBottom()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const wrapper = wrapperRef.current
+        if (wrapper) {
+            wrapper.scrollTop = wrapper.scrollHeight
+        }
     }, [isLoading])
 
     useEffect(() => {
@@ -95,13 +92,12 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                 )
                     return prev
 
-                return [...prev, newMessage]
+                return addDisplaySender([...prev, newMessage])
             })
-            scrollToBottom()
 
-            if (messages.length === 0) {
-                router.refresh()
-            }
+            setTimeout(() => {
+                document.getElementById(newMessage.id)?.scrollIntoView()
+            }, 500)
         }
 
         function onUpdateMessage(newMessage: ExtendedMessage) {
@@ -112,6 +108,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                     return oldMessage
                 })
             )
+            setMessages((prev) => addDisplaySender(prev))
         }
 
         pusherClient.bind("message:new", onNewMessage)
@@ -124,13 +121,6 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId])
-
-    function scrollToBottom() {
-        const wrapper = wrapperRef.current
-        if (wrapper) {
-            wrapper.scrollTop = wrapper.scrollHeight + 999
-        }
-    }
 
     return (
         <div
