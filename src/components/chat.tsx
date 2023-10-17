@@ -40,7 +40,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                     )
                     const messages = reversedPages?.flatMap((page) => page)
 
-                    if (messages[0].chatId === chatId) {
+                    if (messages && messages[0]?.chatId === chatId) {
                         setMessages(messages)
 
                         if (
@@ -49,10 +49,12 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                             wrapperRef.current.scrollTop < 1
                         ) {
                             const prevPage = pages[pages.length - 2]
-                            const prevPageFirstMessage =
-                                document.getElementById(prevPage[0].id)
+                            if (prevPage && prevPage[0]) {
+                                const prevPageFirstMessage =
+                                    document.getElementById(prevPage[0].id)
 
-                            prevPageFirstMessage?.scrollIntoView()
+                                prevPageFirstMessage?.scrollIntoView()
+                            }
                         }
                     }
                 },
@@ -119,7 +121,6 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
             pusherClient.unbind("message:new", onNewMessage)
             pusherClient.unbind("message:update", onUpdateMessage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId])
 
     return (
@@ -131,7 +132,11 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
             )}
-
+            {messages.length < 1 && (
+                <p className="my-auto self-center text-2xl font-semibold">
+                    No history yet.
+                </p>
+            )}
             {messages.map((message, idx) => {
                 if (idx === 3) {
                     return (

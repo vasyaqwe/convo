@@ -1,3 +1,4 @@
+import { USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
@@ -39,18 +40,10 @@ export const PATCH = withErrorHandling(async function (
         },
         include: {
             sender: {
-                select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                },
+                select: USERS_SELECT,
             },
             seenBy: {
-                select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                },
+                select: USERS_SELECT,
             },
         },
     })

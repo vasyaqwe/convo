@@ -3,27 +3,25 @@
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { Chat } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
 import { ChatPayload } from "@/lib/validations/chat"
-import { ExtendedChat, UserType } from "@/types"
+import { UserType } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
 
 type UserButtonProps = {
     user: UserType
-    chat?: ExtendedChat
-} & React.HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>
+    onSelect: () => void
+} & React.HTMLAttributes<HTMLButtonElement>
 
 export function UserButton({
     user,
     className,
-    chat,
+    onSelect,
     ...props
 }: UserButtonProps) {
     const router = useRouter()
-    const pathname = usePathname()
 
     const { mutate } = useMutation(
         async (userId: string) => {
@@ -36,28 +34,16 @@ export function UserButton({
         {
             onSuccess: (chat) => {
                 router.push(`/chat/${chat.id}`)
+                onSelect()
             },
         }
     )
 
-    return chat ? (
-        <Link
-            aria-current={pathname.includes(chat.id) ? "page" : undefined}
-            href={`/chat/${chat.id}`}
-            className={cn(
-                "mt-5 flex items-center gap-3 rounded-lg px-3 py-2 aria-[current=page]:bg-secondary",
-                className
-            )}
-            {...props}
-        >
-            <UserAvatar user={user} />
-            <p>{user.name}</p>
-        </Link>
-    ) : (
+    return (
         <button
             onClick={() => mutate(user.id)}
             className={cn(
-                "mt-5 flex items-center gap-3 rounded-lg px-3 py-2 aria-[current=page]:bg-secondary",
+                "mt-5 flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
                 className
             )}
             {...props}

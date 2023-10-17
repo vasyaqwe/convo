@@ -1,9 +1,42 @@
+import { USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
 import { chatSchema } from "@/lib/validations/chat"
 import { NextResponse } from "next/server"
+
+export const GET = withErrorHandling(async function (req: Request) {
+    const url = new URL(req.url)
+    const q = url.searchParams.get("q")?.toLocaleLowerCase()
+
+    if (!q) return new NextResponse("Invalid query", { status: 400 })
+
+    await new Promise((resolve) => setTimeout(resolve, 750))
+
+    const results = await db.user.findMany({
+        where: {
+            OR: [
+                {
+                    name: {
+                        startsWith: q,
+                    },
+                },
+                {
+                    username: {
+                        startsWith: q.startsWith("@") ? q.replace("@", "") : q,
+                    },
+                },
+            ],
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+        select: USERS_SELECT,
+    })
+
+    return new NextResponse(JSON.stringify(results))
+})
 
 export const POST = withErrorHandling(async function (req: Request) {
     const session = await getAuthSession()
@@ -29,17 +62,13 @@ export const POST = withErrorHandling(async function (req: Request) {
             },
             include: {
                 users: {
-                    select: {
-                        id: true,
-                        name: true,
-                        username: true,
-                    },
+                    select: USERS_SELECT,
                 },
             },
         })
 
-        newChat.users.forEach((user) => {
-            pusherServer.trigger(user.id, "chat:new", newChat)
+        newChat.userIds.forEach((userId) => {
+            pusherServer.trigger(userId, "chat:new", newChat)
         })
 
         return new NextResponse(JSON.stringify(newChat))
@@ -74,17 +103,13 @@ export const POST = withErrorHandling(async function (req: Request) {
         },
         include: {
             users: {
-                select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                },
+                select: USERS_SELECT,
             },
         },
     })
 
-    newChat.users.forEach((user) => {
-        pusherServer.trigger(user.id, "chat:new", newChat)
+    newChat.userIds.forEach((userId) => {
+        pusherServer.trigger(userId, "chat:new", newChat)
     })
 
     return new NextResponse(JSON.stringify(newChat))

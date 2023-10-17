@@ -1,4 +1,5 @@
-import { ChatsSearch } from "@/components/chats-search"
+import { ChatsList } from "@/components/chats-list"
+import { USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 
@@ -11,12 +12,18 @@ export async function Chats() {
                 has: session?.user.id,
             },
         },
+        orderBy: {
+            createdAt: "desc",
+        },
         include: {
             users: {
-                select: {
-                    name: true,
-                    username: true,
-                    id: true,
+                select: USERS_SELECT,
+            },
+            messages: {
+                include: {
+                    seenBy: {
+                        select: USERS_SELECT,
+                    },
                 },
             },
         },
@@ -25,24 +32,13 @@ export async function Chats() {
     return (
         <aside
             className="sticky left-0 top-0 flex h-screen flex-col border-r 
-     border-secondary/75 bg-accent px-5 pb-5 pt-5 md:w-[var(--chats-width)]"
+     border-secondary/75 bg-accent px-4 pb-5 pt-5 md:w-[var(--chats-width)]"
         >
             <h2 className="text-3xl font-semibold">Chats</h2>
-            <ChatsSearch
+            <ChatsList
                 existingChats={existingChats}
                 session={session}
             />
-            {/* {users.length < 1 && (
-                <p className="mt-8 text-foreground/70">Nobody here yet.</p>
-            )}
-            {users
-                .filter((u) => u.id !== session?.user.id)
-                .map((user) => (
-                    <UserButton
-                        user={user}
-                        key={user.id}
-                    />
-                ))} */}
         </aside>
     )
 }

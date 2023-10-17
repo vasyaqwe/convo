@@ -18,3 +18,9 @@ export const nav: {
 ]
 
 export const MESSAGES_INFINITE_SCROLL_COUNT = 30
+
+export const USERS_SELECT = {
+    name: true,
+    username: true,
+    id: true,
+}

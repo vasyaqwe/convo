@@ -1,9 +1,9 @@
+import { USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
 import { messageSchema } from "@/lib/validations/message"
-import { User } from "@prisma/client"
 import { NextResponse } from "next/server"
 
 export const POST = withErrorHandling(async function (req: Request) {
@@ -41,18 +41,10 @@ export const POST = withErrorHandling(async function (req: Request) {
         },
         include: {
             seenBy: {
-                select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                },
+                select: USERS_SELECT,
             },
             sender: {
-                select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                },
+                select: USERS_SELECT,
             },
         },
     })
@@ -70,19 +62,10 @@ export const POST = withErrorHandling(async function (req: Request) {
             },
         },
         include: {
-            users: {
-                select: {
-                    id: true,
-                },
-            },
             messages: {
                 include: {
                     seenBy: {
-                        select: {
-                            id: true,
-                            name: true,
-                            username: true,
-                        },
+                        select: USERS_SELECT,
                     },
                 },
             },
@@ -93,8 +76,8 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     await pusherServer.trigger(chatId, "message:new", newMessage)
 
-    updatedChat.users.forEach((user) => {
-        pusherServer.trigger(user.id, "chat:update", {
+    updatedChat.userIds.forEach((userId) => {
+        pusherServer.trigger(userId, "chat:update", {
             id: chatId,
             messages: [lastMessage],
         })

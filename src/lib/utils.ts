@@ -47,7 +47,7 @@ export function formatDate(date: Date | string) {
 
     return formatter.format(dateObject)
 }
-export function reverseArray(arr: any[]) {
+export function reverseArray<T>(arr: T[]) {
     const reversed = arr.reverse()
     return reversed
 }

@@ -1,7 +1,7 @@
 import { Chat } from "@/components/chat"
 import { MessageForm } from "@/components/forms/message-form"
 import { ChatHeader } from "@/components/layout/chat-header"
-import { MESSAGES_INFINITE_SCROLL_COUNT } from "@/config"
+import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { addDisplaySender, reverseArray } from "@/lib/utils"
@@ -25,8 +25,12 @@ export default async function Page({ params: { chatId } }: PageProps) {
                     createdAt: "desc",
                 },
                 include: {
-                    sender: true,
-                    seenBy: true,
+                    sender: {
+                        select: USERS_SELECT,
+                    },
+                    seenBy: {
+                        select: USERS_SELECT,
+                    },
                 },
                 take: MESSAGES_INFINITE_SCROLL_COUNT,
             },
@@ -41,19 +45,12 @@ export default async function Page({ params: { chatId } }: PageProps) {
                 chat={chat}
                 user={session!.user}
             />
-            {chat.messages.length < 1 ? (
-                <p className="my-auto self-center text-2xl font-semibold">
-                    No history yet.
-                </p>
-            ) : (
-                <Chat
-                    initialMessages={addDisplaySender(
-                        reverseArray(chat.messages)
-                    )}
-                    session={session}
-                    chatId={chatId}
-                />
-            )}
+
+            <Chat
+                initialMessages={addDisplaySender(reverseArray(chat.messages))}
+                session={session}
+                chatId={chatId}
+            />
 
             <MessageForm chatId={chatId} />
         </div>

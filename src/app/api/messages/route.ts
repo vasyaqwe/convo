@@ -1,3 +1,4 @@
+import { USERS_SELECT } from "@/config"
 import { db } from "@/lib/db"
 import { addDisplaySender, reverseArray, withErrorHandling } from "@/lib/utils"
 import { messagesQuerySchema } from "@/lib/validations/message"
@@ -23,18 +24,10 @@ export const GET = withErrorHandling(async function (req: Request) {
         },
         include: {
             sender: {
-                select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                },
+                select: USERS_SELECT,
             },
             seenBy: {
-                select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                },
+                select: USERS_SELECT,
             },
         },
     })

@@ -1,5 +1,6 @@
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
 import { NextResponse } from "next/server"
 
@@ -25,11 +26,18 @@ export const DELETE = withErrorHandling(async function (
         return new NextResponse("Forbidden", { status: 403 })
     }
 
-    await db.chat.delete({
+    const deletedChat = await db.chat.delete({
         where: {
             id: chatId,
         },
     })
+
+    deletedChat.userIds.forEach((userId) =>
+        pusherServer.trigger(userId, "chat:delete", {
+            deletedChat,
+            removerId: session.user.id,
+        })
+    )
 
     return new NextResponse("OK")
 })
