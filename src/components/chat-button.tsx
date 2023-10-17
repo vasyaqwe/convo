@@ -35,7 +35,8 @@ export function ChatButton({
 
     const isSeen = !lastMessage
         ? false
-        : lastMessage.seenBy.some((u) => u.id === session?.user.id)
+        : lastMessage.seenBy.some((u) => u.id === session?.user.id) ||
+          lastMessageText === "Chat started"
 
     return (
         <Link
@@ -43,57 +44,35 @@ export function ChatButton({
             aria-current={pathname.includes(chat.id) ? "page" : undefined}
             href={`/chat/${chat.id}`}
             className={cn(
-                "mt-5 flex w-full items-center gap-2 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary aria-[current=page]:bg-secondary",
+                "mt-4 flex w-full items-center gap-2 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary aria-[current=page]:bg-secondary",
                 className
             )}
             {...props}
         >
             <UserAvatar user={user} />
-            <div
-                className={cn(
-                    "w-full",
-                    isSeen || lastMessageText === "Chat started"
-                        ? ""
-                        : "font-semibold"
-                )}
-            >
+            <div className={cn("w-full", isSeen ? "" : "font-semibold")}>
                 <div className="flex w-full items-center justify-between">
                     <p className="w-[calc(var(--chats-width)/2)] truncate overflow-ellipsis">
                         {user.name}
                     </p>
                     {lastMessage && (
-                        <small className="text-xs text-foreground/60">
-                            {formatDate(chat.lastMessageAt)}
+                        <small
+                            className="text-xs text-foreground/60"
+                            suppressHydrationWarning
+                        >
+                            {formatDate(lastMessage.createdAt)}
                         </small>
                     )}
                 </div>
                 <p
                     className={cn(
-                        "mt-1 text-sm",
-                        isSeen ? "" : "text-foreground/70"
+                        "mt-1 w-[calc(var(--chats-width)/1.6)] truncate overflow-ellipsis text-sm",
+                        isSeen ? "text-foreground/70" : ""
                     )}
                 >
                     {lastMessageText}
                 </p>
             </div>
         </Link>
-    )
-}
-
-export function ChatButtonSkeleton({
-    className,
-    ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-    return (
-        <div
-            className={cn("flex items-center gap-3", className)}
-            {...props}
-        >
-            <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
-            <div className="w-full">
-                <Skeleton className="h-2 w-full" />
-                <Skeleton className="mt-3 h-2 w-full" />
-            </div>
-        </div>
     )
 }

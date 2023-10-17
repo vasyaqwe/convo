@@ -56,9 +56,9 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                         : ""
                 )}
             >
-                <div>
+                <div className="group">
                     {message.displaySender && (
-                        <p>
+                        <p className={cn(isOwn ? "text-right" : "text-left")}>
                             {isOwn ? (
                                 <>
                                     {message.sender.name}{" "}
@@ -97,6 +97,17 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                     >
                         {message.body}
                     </p>
+                    {!message.displaySender && (
+                        <small
+                            suppressHydrationWarning
+                            className={cn(
+                                "pointer-events-none absolute top-2 text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100",
+                                isOwn ? "right-0" : "left-0"
+                            )}
+                        >
+                            {formatDate(message.createdAt)}
+                        </small>
+                    )}
                     {isLast && seenByList.length > 0 && (
                         <p
                             title={`Seen by ${seenByList}`}

@@ -43,7 +43,7 @@ export function UserButton({
         <button
             onClick={() => mutate(user.id)}
             className={cn(
-                "mt-5 flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
+                "mt-4 flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
                 className
             )}
             {...props}
@@ -65,8 +65,8 @@ export function UserButtonSkeleton({
         >
             <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
             <div className="w-full">
-                <Skeleton className="h-2 w-full" />
-                <Skeleton className="mt-3 h-2 w-full" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="mt-3 h-3 w-full" />
             </div>
         </div>
     )

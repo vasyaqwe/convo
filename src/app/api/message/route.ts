@@ -67,6 +67,11 @@ export const POST = withErrorHandling(async function (req: Request) {
                     seenBy: {
                         select: USERS_SELECT,
                     },
+                    sender: {
+                        select: {
+                            name: true,
+                        },
+                    },
                 },
             },
         },
@@ -80,6 +85,7 @@ export const POST = withErrorHandling(async function (req: Request) {
         pusherServer.trigger(userId, "chat:update", {
             id: chatId,
             messages: [lastMessage],
+            sendNotification: true,
         })
     })
 

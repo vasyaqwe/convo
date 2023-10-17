@@ -56,19 +56,55 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
     useEffect(() => {
         pusherClient.subscribe(session?.user.id)
 
-        const onUpdateChat = (newChat: ExtendedChat) => {
+        const onUpdateChat = (
+            updatedChat: ExtendedChat & { sendNotification: boolean }
+        ) => {
             setChats((prev) =>
                 prev.map((oldChat) => {
-                    if (oldChat.id === newChat.id) {
+                    if (oldChat.id === updatedChat.id) {
                         return {
                             ...oldChat,
-                            messages: newChat.messages,
+                            messages: updatedChat.messages,
                         }
                     }
 
                     return oldChat
                 })
             )
+            const newMessage = updatedChat.messages
+                ? updatedChat.messages[0]
+                : undefined
+
+            if (
+                "Notification" in window &&
+                newMessage &&
+                updatedChat.sendNotification
+            ) {
+                Notification.requestPermission().then(function (permission) {
+                    if (
+                        permission === "granted" &&
+                        newMessage.senderId !== session?.user.id &&
+                        !pathname.includes(newMessage.chatId)
+                    ) {
+                        const notification = new Notification(
+                            newMessage.sender.name ?? "",
+                            {
+                                body: newMessage.body ?? undefined,
+                                image: newMessage.image ?? undefined,
+                            }
+                        )
+
+                        notification.onclick = () => {
+                            router.push(`/chat/${newMessage.chatId}`)
+                            setTimeout(() => {
+                                document
+                                    .getElementById(newMessage.id)
+                                    ?.scrollIntoView()
+                            }, 100)
+                        }
+                    }
+                })
+            }
         }
 
         const onNewChat = (newChat: ExtendedChat) => {
@@ -105,6 +141,13 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         pusherClient.bind("chat:update", onUpdateChat)
         pusherClient.bind("chat:new", onNewChat)
         pusherClient.bind("chat:delete", onDeleteChat)
+
+        return () => {
+            pusherClient.unsubscribe(session?.user.id)
+            pusherClient.unbind("chat:update", onUpdateChat)
+            pusherClient.unbind("chat:new", onNewChat)
+            pusherClient.unbind("chat:delete", onDeleteChat)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname])
 
@@ -131,8 +174,10 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
                     </p>
                 ) : (
                     results?.map((user) => {
-                        const chat = existingChats.find((chat) =>
-                            chat.userIds.includes(session?.user.id)
+                        const chat = existingChats.find(
+                            (chat) =>
+                                chat.userIds.includes(session?.user.id) &&
+                                chat.userIds.includes(user.id)
                         )
 
                         if (chat) {
