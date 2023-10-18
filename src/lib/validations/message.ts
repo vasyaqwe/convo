@@ -1,7 +1,7 @@
 import * as z from "zod"
 
 export const messageSchema = z.object({
-    body: z.string().min(1, { message: "Required" }).optional(),
+    body: z.string().optional(),
     chatId: z.string(),
     image: z.string().optional(),
 })

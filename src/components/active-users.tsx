@@ -22,7 +22,7 @@ export function ActiveUsers() {
             members.each((member: Record<string, any>) =>
                 initialMembers.push(member.id)
             )
-            console.log(members)
+
             setMembers(initialMembers)
         })
 
