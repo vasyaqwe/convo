@@ -17,6 +17,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
 import { Loading } from "@/components/ui/loading"
+import { useActiveUsersStore } from "@/stores/use-active-users-store"
 
 type ChatHeaderProps = {
     user: User
@@ -24,6 +25,7 @@ type ChatHeaderProps = {
 }
 
 export function ChatHeader({ user, chat }: ChatHeaderProps) {
+    const { members } = useActiveUsersStore()
     const chatPartner = chat.users.find((u) => u.id !== user.id) as User
     // casting because I know better
 
@@ -45,11 +47,18 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
         }
     )
 
+    const isActive = members.includes(chatPartner.id ?? "")
+
     return (
         <header className="flex h-[var(--header-height)] items-center justify-between border-b border-secondary/75 p-4 ">
             <div className="flex items-center gap-3">
                 <UserAvatar user={chatPartner} />
-                <p>{chatPartner.name}</p>
+                <div>
+                    <p>{chatPartner.name}</p>
+                    <p className="text-sm text-foreground/75">
+                        {isActive ? "Online" : "Offline"}
+                    </p>
+                </div>
             </div>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
