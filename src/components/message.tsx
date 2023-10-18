@@ -3,7 +3,7 @@
 import { Icons } from "@/components/ui/icons"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
-import { cn, formatDate } from "@/lib/utils"
+import { cn, formatDateToTimestamp } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -16,7 +16,7 @@ type MessageProps = {
 }
 
 // eslint-disable-next-line react/display-name
-export const Message = forwardRef<HTMLDivElement, MessageProps>(
+const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, session, isLast }, ref) => {
         useQuery(
             ["see-message"],
@@ -66,7 +66,9 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         className="text-xs text-foreground/75"
                                         suppressHydrationWarning
                                     >
-                                        {formatDate(message.createdAt)}
+                                        {formatDateToTimestamp(
+                                            message.createdAt
+                                        )}
                                     </small>
                                 </>
                             ) : (
@@ -75,7 +77,9 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         className="text-xs text-foreground/75"
                                         suppressHydrationWarning
                                     >
-                                        {formatDate(message.createdAt)}
+                                        {formatDateToTimestamp(
+                                            message.createdAt
+                                        )}
                                     </small>{" "}
                                     {message.sender.name}
                                 </>
@@ -105,7 +109,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 isOwn ? "right-0" : "left-0"
                             )}
                         >
-                            {formatDate(message.createdAt)}
+                            {formatDateToTimestamp(message.createdAt)}
                         </small>
                     )}
                     {isLast && seenByList.length > 0 && (
@@ -133,3 +137,23 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
         )
     }
 )
+
+function MessageDatePill({
+    className,
+    children,
+    ...props
+}: React.ComponentProps<"p">) {
+    return (
+        <p
+            className={cn(
+                "sticky left-1/2 top-0 w-fit -translate-x-1/2 rounded-xl border border-primary/75 bg-secondary px-3 py-1.5 text-sm",
+                className
+            )}
+            {...props}
+        >
+            {children}
+        </p>
+    )
+}
+
+export { Message, MessageDatePill }

@@ -59,6 +59,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         const onUpdateChat = (
             updatedChat: ExtendedChat & { sendNotification: boolean }
         ) => {
+            console.log(updatedChat)
             setChats((prev) =>
                 prev.map((oldChat) => {
                     if (oldChat.id === updatedChat.id) {
@@ -84,7 +85,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
                     if (
                         permission === "granted" &&
                         newMessage.senderId !== session?.user.id &&
-                        !pathname.includes(newMessage.chatId)
+                        !pathname?.includes(newMessage.chatId)
                     ) {
                         const notification = new Notification(
                             newMessage.sender.name ?? "",
@@ -100,7 +101,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
                                 document
                                     .getElementById(newMessage.id)
                                     ?.scrollIntoView()
-                            }, 100)
+                            }, 200)
                         }
                     }
                 })
@@ -131,7 +132,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
 
             if (
                 removerId !== session?.user.id &&
-                pathname.includes(deletedChat.id)
+                pathname?.includes(deletedChat.id)
             ) {
                 toast.message("Chat your were in was deleted")
                 router.push("/")

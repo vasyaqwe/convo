@@ -54,7 +54,6 @@ export const POST = withErrorHandling(async function (req: Request) {
             id: chatId,
         },
         data: {
-            lastMessageAt: new Date(),
             messages: {
                 connect: {
                     id: newMessage.id,

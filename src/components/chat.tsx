@@ -1,15 +1,15 @@
 "use client"
 
-import { Message } from "@/components/message"
+import { Message, MessageDatePill } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
 import { pusherClient } from "@/lib/pusher"
-import { addDisplaySender, reverseArray } from "@/lib/utils"
+import { addDisplaySender, groupByDate, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 type ChatProps = {
     session: Session | null
@@ -137,26 +137,38 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                     No history yet.
                 </p>
             )}
-            {messages.map((message, idx) => {
+            {groupByDate(messages).map((message, idx) => {
                 if (idx === 3) {
                     return (
-                        <Message
-                            isLast={false}
-                            session={session}
-                            key={message.id}
-                            message={message}
-                            ref={ref}
-                        />
+                        <React.Fragment key={message.id}>
+                            {message.dateAbove && (
+                                <MessageDatePill>
+                                    {message.dateAbove}
+                                </MessageDatePill>
+                            )}
+                            <Message
+                                isLast={false}
+                                session={session}
+                                message={message}
+                                ref={ref}
+                            />
+                        </React.Fragment>
                     )
                 }
 
                 return (
-                    <Message
-                        isLast={idx === messages.length - 1}
-                        session={session}
-                        key={message.id}
-                        message={message}
-                    />
+                    <React.Fragment key={message.id}>
+                        {message.dateAbove && (
+                            <MessageDatePill>
+                                {message.dateAbove}
+                            </MessageDatePill>
+                        )}
+                        <Message
+                            isLast={idx === messages.length - 1}
+                            session={session}
+                            message={message}
+                        />
+                    </React.Fragment>
                 )
             })}
         </div>

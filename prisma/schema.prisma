@@ -28,7 +28,7 @@ model Account {
 
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
+  name          String
   email         String?
   emailVerified DateTime?
   username      String?   @unique
@@ -52,7 +52,6 @@ model Chat {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  lastMessageAt DateTime @default(now())
   name          String?
   isGroup       Boolean? @default(false)
 
