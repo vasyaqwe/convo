@@ -29,6 +29,7 @@ export const authOptions: NextAuthOptions = {
                 if (!credentials?.username || !credentials?.password) {
                     throw new Error("Invalid credentials")
                 }
+
                 const user = await db.user.findUnique({
                     where: { username: credentials.username },
                 })

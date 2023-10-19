@@ -59,7 +59,6 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         const onUpdateChat = (
             updatedChat: ExtendedChat & { sendNotification: boolean }
         ) => {
-            console.log(updatedChat)
             setChats((prev) =>
                 prev.map((oldChat) => {
                     if (oldChat.id === updatedChat.id) {

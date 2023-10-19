@@ -74,7 +74,7 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
                     alt="Discusst"
                     className="mx-auto max-w-[40px]"
                 />
-                <p className="bg-gradient-to-r from-accent to-white bg-clip-text text-4xl font-semibold text-transparent">
+                <p className="bg-gradient-to-r from-primary to-white bg-clip-text text-4xl font-semibold text-transparent">
                     {" "}
                     convo.
                 </p>

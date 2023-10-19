@@ -55,7 +55,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                 <UserAvatar user={chatPartner} />
                 <div>
                     <p>{chatPartner.name}</p>
-                    <p className="text-sm text-foreground/75">
+                    <p className="mt-0.5 text-sm text-foreground/75">
                         {isActive ? "Online" : "Offline"}
                     </p>
                 </div>

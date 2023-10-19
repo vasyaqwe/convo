@@ -22,6 +22,7 @@ export function UserAvatar({ user, ...props }: UserAvatarProps) {
                     src={user.image}
                     alt={user.name ?? "user's avatar"}
                     referrerPolicy="no-referrer"
+                    className="w-full rounded-full object-cover"
                 />
             ) : (
                 <AvatarFallback>

@@ -49,6 +49,10 @@ export function MessageForm({ chatId }: MessageFormProps) {
             onMutate: () => {
                 setBody("")
                 setImage(undefined)
+                document.documentElement.style.setProperty(
+                    "--message-form-image-height",
+                    `0px`
+                )
             },
             onSuccess: () => {
                 queryClient.invalidateQueries(["messages"])
@@ -95,7 +99,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 e.preventDefault()
                 mutate({ body, image })
             }}
-            className="h-[var(--message-form-height)] overflow-hidden border-t border-secondary/75 px-4"
+            className="h-[calc(var(--message-form-height)+var(--message-form-image-height))] overflow-hidden border-t border-secondary/75 px-4"
         >
             <div className="flex h-[var(--message-form-height)] items-center ">
                 <FileButton
@@ -125,14 +129,34 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 </Button>
             </div>
             {image && (
-                <Image
-                    style={{ marginBlock: `${IMAGE_MARGIN}px` }}
-                    className=" rounded-lg"
-                    src={image}
-                    alt={body ?? ""}
-                    width={IMAGE_SIZE}
-                    height={IMAGE_SIZE}
-                />
+                <div className="group relative w-fit">
+                    <Button
+                        onClick={() => {
+                            document.documentElement.style.setProperty(
+                                "--message-form-image-height",
+                                `0px`
+                            )
+                            setImage(undefined)
+                        }}
+                        size={"icon-sm"}
+                        className="absolute -right-1 -top-1 hidden group-hover:flex"
+                    >
+                        <Icons.X
+                            width={20}
+                            height={20}
+                        />
+                    </Button>
+                    <Image
+                        style={{ marginBlock: `${IMAGE_MARGIN}px` }}
+                        className=" rounded-lg"
+                        src={
+                            "https://utfs.io/f/e4a78433-5815-4b97-a604-c03d34141673-1zbfv.png"
+                        }
+                        alt={body ?? ""}
+                        width={IMAGE_SIZE}
+                        height={IMAGE_SIZE}
+                    />
+                </div>
             )}
         </form>
     )
