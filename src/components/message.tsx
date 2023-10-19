@@ -7,6 +7,7 @@ import { cn, formatDateToTimestamp } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
+import Image from "next/image"
 import { forwardRef } from "react"
 
 type MessageProps = {
@@ -86,7 +87,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             )}
                         </p>
                     )}
-                    <p
+                    <div
                         className={cn(
                             "mt-2 w-fit rounded-3xl  bg-primary px-3 py-2 text-sm",
                             isOwn
@@ -99,8 +100,16 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 : ""
                         )}
                     >
-                        {message.body}
-                    </p>
+                        {message.image && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                className="my-3 max-w-[320px] rounded-lg"
+                                src={message.image}
+                                alt={message.body ?? ""}
+                            />
+                        )}
+                        {message.body && <p> {message.body}</p>}
+                    </div>
                     {!message.displaySender && (
                         <small
                             suppressHydrationWarning

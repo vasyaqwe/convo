@@ -139,7 +139,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                             setImage(undefined)
                         }}
                         size={"icon-sm"}
-                        className="absolute -right-1 -top-1 hidden group-hover:flex"
+                        className="absolute -right-1 -top-3 hidden group-hover:flex"
                     >
                         <Icons.X
                             width={20}
@@ -147,11 +147,12 @@ export function MessageForm({ chatId }: MessageFormProps) {
                         />
                     </Button>
                     <Image
-                        style={{ marginBlock: `${IMAGE_MARGIN}px` }}
-                        className=" rounded-lg"
-                        src={
-                            "https://utfs.io/f/e4a78433-5815-4b97-a604-c03d34141673-1zbfv.png"
-                        }
+                        style={{
+                            marginBlock: `${IMAGE_MARGIN}px`,
+                            height: `${IMAGE_SIZE}px`,
+                        }}
+                        className=" rounded-lg object-cover object-top"
+                        src={image}
                         alt={body ?? ""}
                         width={IMAGE_SIZE}
                         height={IMAGE_SIZE}
