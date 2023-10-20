@@ -1,3 +1,4 @@
+import { Chats } from "@/components/layout/chats"
 import { getAuthSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
@@ -7,8 +8,9 @@ export default async function Home() {
     if (!session) redirect("/sign-in")
 
     return (
-        <div className="grid flex-1 place-content-center">
-            <h1 className="text-2xl font-semibold">
+        <div className="flex-1 md:grid md:place-content-center">
+            <Chats className="md:hidden" />
+            <h1 className="text-2xl font-semibold max-md:hidden">
                 Select a chat or create a new group
             </h1>
         </div>

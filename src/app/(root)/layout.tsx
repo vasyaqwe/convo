@@ -26,13 +26,13 @@ export default function RootLayout({
             <TanstackProvider>
                 <html
                     lang="en"
-                    className="dark [--avatar-size:45px] [--chats-width:320px] [--header-height:73px]
-               [--message-form-height:61px] [--sidebar-width:57px] [--message-form-image-height:0px]"
+                    className="dark [--chats-width:320px] [--header-height:73px] [--message-form-height:61px] [--message-form-image-height:0px]
+               [--sidebar-width:57px] [--avatar-size:40px] md:[--avatar-size:45px]"
                 >
                     <body className={cn("flex", inter.className)}>
                         <Sidebar />
                         <main className="flex flex-1">
-                            <Chats />
+                            <Chats className="max-md:hidden" />
                             {children}
                         </main>
                         <MobileNav />

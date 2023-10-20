@@ -7,6 +7,7 @@ import { Loading } from "@/components/ui/loading"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { useUploadThing } from "@/lib/uploadthing"
+import { cn } from "@/lib/utils"
 import { MessagePayload } from "@/lib/validations/message"
 import { ExtendedMessage } from "@/types"
 import {
@@ -18,14 +19,15 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-type MessageFormProps = {
-    chatId: string
-}
+type UserSettingsFormProps = React.ComponentProps<"form">
 
 const IMAGE_SIZE = 100
 const IMAGE_MARGIN = 12
 
-export function MessageForm({ chatId }: MessageFormProps) {
+export function UserSettingsForm({
+    className,
+    ...props
+}: UserSettingsFormProps) {
     const [body, setBody] = useState("")
     const [image, setImage] = useState<string | undefined>(undefined)
     const { startUpload, isUploading } = useUploadThing("imageUploader")
@@ -35,8 +37,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
     const { mutate } = useMutation(
         async ({ body, image }: Omit<MessagePayload, "chatId">) => {
-            const payload: MessagePayload = {
-                chatId,
+            const payload = {
                 body,
                 image,
             }
@@ -93,66 +94,17 @@ export function MessageForm({ chatId }: MessageFormProps) {
         }
     }
 
-    async function onImagePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
-        if (e.clipboardData && e.clipboardData.files[0]) {
-            const uploadedImage = await startUpload([e.clipboardData.files[0]])
-
-            if (uploadedImage) {
-                setImage(uploadedImage[0]?.url)
-
-                document.documentElement.style.setProperty(
-                    "--message-form-image-height",
-                    `${IMAGE_SIZE + IMAGE_MARGIN * 2}px`
-                )
-            }
-        }
-    }
-
     return (
         <form
+            className={cn(className)}
             onSubmit={(e) => {
                 e.preventDefault()
                 mutate({ body, image })
             }}
-            className="h-[calc(var(--message-form-height)+var(--message-form-image-height))] overflow-hidden border-t border-secondary px-4"
+            {...props}
         >
-            <div className="flex h-[var(--message-form-height)] items-center ">
-                <FileButton
-                    className="flex-shrink-0"
-                    disabled={isUploading || !!image}
-                    onChange={onImageChange}
-                    accept="image/*"
-                >
-                    {isUploading ? <Loading /> : <Icons.image />}
-                    <span className="sr-only">Attach image</span>
-                </FileButton>
-                <TextArea
-                    onPaste={onImagePaste}
-                    onKeyDown={onKeyDown}
-                    autoFocus
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    placeholder="Type a message"
-                    className="h-[var(--message-form-height)] w-full"
-                />
-
-                <Button
-                    className="flex-shrink-0"
-                    disabled={(body.length < 1 && !image) || isUploading}
-                    variant={"ghost"}
-                    size={"icon"}
-                >
-                    <Icons.send />
-                    <span className="sr-only">Send message</span>
-                </Button>
-            </div>
             {image && (
-                <div
-                    className="group relative w-fit rounded-lg border border-foreground/75"
-                    style={{
-                        marginBlock: `${IMAGE_MARGIN}px`,
-                    }}
-                >
+                <div className="group relative w-fit">
                     <Button
                         onClick={() => {
                             document.documentElement.style.setProperty(
@@ -171,6 +123,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                     </Button>
                     <Image
                         style={{
+                            marginBlock: `${IMAGE_MARGIN}px`,
                             height: `${IMAGE_SIZE}px`,
                         }}
                         className=" rounded-lg object-cover object-top"

@@ -32,7 +32,7 @@ model User {
   email         String    @unique @default("")
   emailVerified DateTime?
   username      String?   @unique
-  password      String?   @unique
+  password      String?
   image         String?
 
   createdAt DateTime @default(now())

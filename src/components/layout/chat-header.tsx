@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
 import { Loading } from "@/components/ui/loading"
 import { useActiveUsersStore } from "@/stores/use-active-users-store"
+import Link from "next/link"
 
 type ChatHeaderProps = {
     user: User
@@ -50,8 +51,18 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
     const isActive = members.includes(chatPartner.id ?? "")
 
     return (
-        <header className="flex h-[var(--header-height)] items-center justify-between border-b border-secondary/75 p-4 ">
+        <header className="flex h-[var(--header-height)] items-center justify-between border-b border-secondary p-4 ">
             <div className="flex items-center gap-3">
+                <Button
+                    asChild
+                    variant={"ghost"}
+                    size={"icon"}
+                    className="md:hidden"
+                >
+                    <Link href={"/"}>
+                        <Icons.chevronLeft />
+                    </Link>
+                </Button>
                 <UserAvatar user={chatPartner} />
                 <div>
                     <p>{chatPartner.name}</p>

@@ -152,7 +152,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
     }, [pathname])
 
     return (
-        <div className="mt-6">
+        <div className="mt-5 px-4">
             <Input
                 placeholder="Enter a name or @username..."
                 value={input}
