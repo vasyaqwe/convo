@@ -6,8 +6,9 @@ import { TanstackProvider } from "@/components/tanstack-provider"
 import SessionProvider from "@/components/session-provider"
 import { Sidebar } from "@/components/layout/sidebar"
 import { cn } from "@/lib/utils"
-import { MobileNav } from "@/components/layout/mobile-nav"
 import { Chats } from "@/components/layout/chats"
+import { getAuthSession } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -16,26 +17,29 @@ export const metadata: Metadata = {
     description: "convo is a modern messaging app. Built with Next.js 13.",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const session = await getAuthSession()
+
+    if (!session) redirect("/sign-in")
+
     return (
         <SessionProvider>
             <TanstackProvider>
                 <html
                     lang="en"
-                    className="dark [--chats-width:320px] [--header-height:73px] [--message-form-height:61px] [--message-form-image-height:0px]
-               [--sidebar-width:57px] [--avatar-size:40px] md:[--avatar-size:45px]"
+                    className="dark [--avatar-size:40px] [--chats-width:320px] [--header-height:73px] [--message-form-height:61px]
+               [--message-form-image-height:0px] [--sidebar-width:65px] md:[--avatar-size:45px]"
                 >
                     <body className={cn("flex", inter.className)}>
-                        <Sidebar />
+                        <Sidebar session={session} />
                         <main className="flex flex-1">
                             <Chats className="max-md:hidden" />
                             {children}
                         </main>
-                        <MobileNav />
                         <Toaster
                             theme="dark"
                             position={"top-center"}

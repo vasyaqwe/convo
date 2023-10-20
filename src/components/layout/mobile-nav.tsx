@@ -3,12 +3,14 @@
 import { UserSettingsForm } from "@/components/forms/user-settings-form"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/ui/icons"
+import { UserProfileDropdown } from "@/components/user-profile-dropdown"
+import { Session } from "next-auth"
 import { Drawer } from "vaul"
 
-export function MobileNav() {
+export function MobileNav({ session }: { session: Session }) {
     return (
-        <nav className="fixed bottom-0  w-full border-t border-secondary p-2 md:hidden">
-            <ul className="flex items-center justify-between ">
+        <nav className="fixed bottom-0 flex h-[var(--message-form-height)] w-full items-center justify-center border-t border-secondary bg-accent px-4 py-2 md:hidden">
+            <ul className="flex w-full items-center justify-between">
                 <li className="w-full">
                     <Button
                         title={"New Group"}
@@ -18,6 +20,10 @@ export function MobileNav() {
                         <span className="sr-only">New group</span>
                         <Icons.people />
                     </Button>
+                </li>
+
+                <li className="flex w-full justify-center">
+                    <UserProfileDropdown session={session} />
                 </li>
                 <li className="w-full">
                     <Drawer.Root shouldScaleBackground>
@@ -47,16 +53,6 @@ export function MobileNav() {
                             </Drawer.Content>
                         </Drawer.Portal>
                     </Drawer.Root>
-                </li>
-                <li className="w-full">
-                    <Button
-                        title={"Sign out"}
-                        variant={"ghost"}
-                        className={`w-full`}
-                    >
-                        <span className="sr-only">Sign out</span>
-                        <Icons.signOut />
-                    </Button>
                 </li>
             </ul>
         </nav>

@@ -11,16 +11,18 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Icons } from "@/components/ui/icons"
+import { UserProfileDropdown } from "@/components/user-profile-dropdown"
+import { Session } from "next-auth"
 
-export function Sidebar() {
+export function Sidebar({ session }: { session: Session }) {
     return (
         <aside
             className="sticky left-0 top-0 flex h-screen w-[var(--sidebar-width)] flex-col justify-between 
      border-r border-secondary px-2 pb-5 pt-5 max-md:hidden"
         >
-            <nav>
-                <ul className="flex flex-col items-start gap-2">
-                    <li className="w-full">
+            <nav className="h-full">
+                <ul className="flex h-full flex-col items-center gap-2">
+                    <li>
                         <Button
                             title="New Group"
                             size={"icon"}
@@ -30,7 +32,7 @@ export function Sidebar() {
                             <Icons.people />
                         </Button>
                     </li>
-                    <li className="w-full">
+                    <li>
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button
@@ -62,15 +64,12 @@ export function Sidebar() {
                             </DialogContent>
                         </Dialog>
                     </li>
-                    <li className="w-full">
-                        <Button
-                            title="Sign out"
-                            size={"icon"}
-                            variant={"ghost"}
-                        >
-                            <span className="sr-only">Sign out</span>
-                            <Icons.signOut />
-                        </Button>
+                    <li className="mt-auto">
+                        <UserProfileDropdown
+                            side="right"
+                            sideOffset={7}
+                            session={session}
+                        />
                     </li>
                 </ul>
             </nav>

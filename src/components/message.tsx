@@ -103,7 +103,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         {message.image && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                                className="my-3 max-w-[250px] rounded-lg md:max-w-[280px] lg:max-w-[320px]"
+                                className="my-3 max-w-[250px] rounded-xl md:max-w-[280px] lg:max-w-[320px]"
                                 src={message.image}
                                 alt={message.body ?? ""}
                             />

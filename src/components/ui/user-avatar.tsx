@@ -34,7 +34,7 @@ export function UserAvatar({ user, ...props }: UserAvatarProps) {
                     title={"Online"}
                     role="status"
                     className={cn(
-                        "absolute right-1 top-0 block h-3 w-3 rounded-full border border-white bg-green-500"
+                        "absolute right-0.5 top-0.5 block h-3 w-3 rounded-full border border-white bg-green-500"
                     )}
                 />
             )}

@@ -80,10 +80,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                         <Icons.moreVertical />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    align="end"
-                    className="px-3 pb-2"
-                >
+                <DropdownMenuContent align="end">
                     <DropdownMenuItem
                         disabled={isLoading}
                         className="!text-destructive"
