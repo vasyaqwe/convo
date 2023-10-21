@@ -1,7 +1,5 @@
 "use client"
 
-import { User } from "next-auth"
-
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -19,6 +17,7 @@ import { axiosInstance } from "@/config"
 import { Loading } from "@/components/ui/loading"
 import { useActiveUsersStore } from "@/stores/use-active-users-store"
 import Link from "next/link"
+import { User } from "@prisma/client"
 
 type ChatHeaderProps = {
     user: User
@@ -65,7 +64,12 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                 </Button>
                 <UserAvatar user={chatPartner} />
                 <div>
-                    <p>{chatPartner.name}</p>
+                    <p>
+                        {chatPartner.name}{" "}
+                        <span className="text-xs text-foreground/75">
+                            @{chatPartner.username}
+                        </span>
+                    </p>
                     <p className="mt-0.5 text-sm text-foreground/75">
                         {isActive ? "Online" : "Offline"}
                     </p>
