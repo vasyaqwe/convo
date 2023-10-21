@@ -154,9 +154,8 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname, isTabFocused])
-    console.log(chats)
+    }, [pathname, isTabFocused, router, session?.user.id])
+
     return (
         <div className="mt-5 px-4">
             <Input
