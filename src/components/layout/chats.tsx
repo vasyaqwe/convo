@@ -5,6 +5,9 @@ import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { cn } from "@/lib/utils"
 
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 export async function Chats({
     className,
     ...props
