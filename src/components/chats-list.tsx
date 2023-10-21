@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
+import useIsTabFocused from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
 import { ExtendedChat } from "@/types"
 import { User } from "@prisma/client"
@@ -25,6 +26,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
     const [input, setInput] = useState("")
     const debouncedInput = useDebounce<string>(input, 400)
 
+    const { isTabFocused } = useIsTabFocused()
     const router = useRouter()
     const pathname = usePathname()
 
@@ -81,27 +83,30 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
                 updatedChat.sendNotification
             ) {
                 Notification.requestPermission().then(function (permission) {
-                    if (
-                        permission === "granted" &&
-                        newMessage.senderId !== session?.user.id &&
-                        !pathname?.includes(newMessage.chatId)
-                    ) {
-                        const notification = new Notification(
-                            newMessage.sender.name ?? "",
-                            {
-                                body: newMessage.body ?? undefined,
-                                image: newMessage.image ?? undefined,
-                            }
-                        )
+                    if (pathname?.includes(newMessage.chatId) && isTabFocused)
+                        return
 
-                        notification.onclick = () => {
-                            router.push(`/chat/${newMessage.chatId}`)
-                            setTimeout(() => {
-                                document
-                                    .getElementById(newMessage.id)
-                                    ?.scrollIntoView()
-                            }, 200)
+                    if (
+                        permission !== "granted" ||
+                        newMessage.senderId === session?.user.id
+                    )
+                        return
+
+                    const notification = new Notification(
+                        newMessage.sender.name,
+                        {
+                            body: newMessage.body ?? undefined,
+                            image: newMessage.image ?? undefined,
                         }
+                    )
+
+                    notification.onclick = () => {
+                        router.push(`/chat/${newMessage.chatId}`)
+                        setTimeout(() => {
+                            document
+                                .getElementById(newMessage.id)
+                                ?.scrollIntoView()
+                        }, 200)
                     }
                 })
             }
@@ -149,7 +154,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname])
+    }, [pathname, isTabFocused])
 
     return (
         <div className="mt-5 px-4">

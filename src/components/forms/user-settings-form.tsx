@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { FileButton } from "@/components/ui/file-button"
 import { Icons } from "@/components/ui/icons"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Loading } from "@/components/ui/loading"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
@@ -103,6 +105,8 @@ export function UserSettingsForm({
             }}
             {...props}
         >
+            <Label>Name</Label>
+            {/* <Input value={user} /> */}
             {image && (
                 <div className="group relative w-fit">
                     <Button
