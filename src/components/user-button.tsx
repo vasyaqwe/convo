@@ -9,7 +9,6 @@ import { ChatPayload } from "@/lib/validations/chat"
 import { UserType } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { useTransition } from "react"
 
 type UserButtonProps = {
     user: UserType
@@ -23,7 +22,6 @@ export function UserButton({
     ...props
 }: UserButtonProps) {
     const router = useRouter()
-    const [_isPending, startTransition] = useTransition()
 
     const { mutate } = useMutation(
         async (userId: string) => {
@@ -35,11 +33,7 @@ export function UserButton({
         },
         {
             onSuccess: (chat) => {
-                startTransition(() => {
-                    router.refresh()
-                    router.push(`/chat/${chat.id}`)
-                })
-
+                router.push(`/chat/${chat.id}`)
                 onSelect()
             },
         }

@@ -18,7 +18,6 @@ import { Loading } from "@/components/ui/loading"
 import { useActiveUsersStore } from "@/stores/use-active-users-store"
 import Link from "next/link"
 import { User } from "next-auth"
-import { useTransition } from "react"
 
 type ChatHeaderProps = {
     user: User
@@ -30,7 +29,6 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
     const chatPartner = chat.users.find((u) => u.id !== user.id) as UserType
 
     const router = useRouter()
-    const [_isPending, startTransition] = useTransition()
 
     const { isLoading, mutate: onDelete } = useMutation(
         async () => {
@@ -39,10 +37,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
         {
             onSuccess: () => {
                 toast.success("Chat deleted")
-                startTransition(() => {
-                    router.refresh()
-                    router.push("/")
-                })
+                router.push("/")
             },
             onError: () => {
                 toast.error("Something went wrong")

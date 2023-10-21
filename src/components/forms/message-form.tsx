@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-query"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 type MessageFormProps = {
@@ -33,7 +33,6 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
     const queryClient = useQueryClient()
     const router = useRouter()
-    const [_isPending, startTransition] = useTransition()
 
     const { mutate } = useMutation(
         async ({ body, image }: Omit<MessagePayload, "chatId">) => {
@@ -59,6 +58,15 @@ export function MessageForm({ chatId }: MessageFormProps) {
             onSuccess: () => {
                 queryClient.invalidateQueries(["messages"])
                 queryClient.invalidateQueries(["chats-search"])
+
+                const data = queryClient.getQueryData<
+                    InfiniteData<ExtendedMessage>
+                >(["messages"])
+
+                //if first message
+                if (data?.pages.flatMap((page) => page).length === 1 || !data) {
+                    router.refresh()
+                }
             },
             onError: () => {
                 return toast.error("Something went wrong")
@@ -110,9 +118,6 @@ export function MessageForm({ chatId }: MessageFormProps) {
             onSubmit={(e) => {
                 e.preventDefault()
                 mutate({ body, image })
-                startTransition(() => {
-                    router.refresh()
-                })
             }}
             className="h-[calc(var(--message-form-height)+var(--message-form-image-height))] overflow-hidden border-t border-secondary px-4"
         >
