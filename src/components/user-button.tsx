@@ -34,6 +34,7 @@ export function UserButton({
         {
             onSuccess: (chat) => {
                 router.push(`/chat/${chat.id}`)
+                router.refresh()
                 onSelect()
             },
         }
