@@ -61,7 +61,6 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         const onUpdateChat = (
             updatedChat: ExtendedChat & { sendNotification: boolean }
         ) => {
-            router.refresh()
             setChats((prev) =>
                 prev.map((oldChat) => {
                     if (oldChat.id === updatedChat.id) {
@@ -114,7 +113,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
 
         const onNewChat = (newChat: ExtendedChat) => {
-            router.refresh()
+            console.log("NEWCHAT", newChat)
             setChats((prev) => {
                 if (prev.some((oldChat) => oldChat.id === newChat.id))
                     return prev
@@ -130,7 +129,6 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
             deletedChat: ExtendedChat
             removerId: User
         }) => {
-            router.refresh()
             setChats((prev) => {
                 return [
                     ...prev.filter((oldChat) => oldChat.id !== deletedChat.id),
@@ -157,7 +155,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname, isTabFocused, router, session?.user.id])
+    }, [pathname, isTabFocused])
 
     return (
         <div className="mt-5 px-4">

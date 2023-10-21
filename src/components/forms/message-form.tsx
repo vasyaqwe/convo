@@ -8,7 +8,12 @@ import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { useUploadThing } from "@/lib/uploadthing"
 import { MessagePayload } from "@/lib/validations/message"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { ExtendedMessage } from "@/types"
+import {
+    InfiniteData,
+    useMutation,
+    useQueryClient,
+} from "@tanstack/react-query"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -54,7 +59,14 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 queryClient.invalidateQueries(["messages"])
                 queryClient.invalidateQueries(["chats-search"])
 
-                router.refresh()
+                const data = queryClient.getQueryData<
+                    InfiniteData<ExtendedMessage>
+                >(["messages"])
+
+                //if first message
+                if (data?.pages.flatMap((page) => page).length === 1 || !data) {
+                    router.refresh()
+                }
             },
             onError: () => {
                 return toast.error("Something went wrong")
