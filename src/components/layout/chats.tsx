@@ -1,18 +1,43 @@
-"use client"
-
 import { ActiveUsers } from "@/components/active-users"
 import { ChatsList } from "@/components/chats-list"
 import { USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { cn } from "@/lib/utils"
-import { useSession } from "next-auth/react"
 
-export function Chats({ className, ...props }: React.ComponentProps<"aside">) {
-    // const session = await getAuthSession()
-    const { data: session } = useSession()
+export async function Chats({
+    className,
+    ...props
+}: React.ComponentProps<"aside">) {
+    const session = await getAuthSession()
 
-    const existingChats: any = []
+    const existingChats = session
+        ? await db.chat.findMany({
+              where: {
+                  userIds: {
+                      has: session.user.id,
+                  },
+              },
+              orderBy: {
+                  createdAt: "desc",
+              },
+              include: {
+                  users: {
+                      select: USERS_SELECT,
+                  },
+                  messages: {
+                      include: {
+                          seenBy: {
+                              select: USERS_SELECT,
+                          },
+                          sender: {
+                              select: USERS_SELECT,
+                          },
+                      },
+                  },
+              },
+          })
+        : []
 
     return (
         <aside
