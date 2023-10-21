@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
-export const revalidate = true
 
 export async function Chats({
     className,
