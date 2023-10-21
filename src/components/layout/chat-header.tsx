@@ -39,8 +39,10 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
         {
             onSuccess: () => {
                 toast.success("Chat deleted")
-                router.push("/")
-                startTransition(() => router.refresh())
+                startTransition(() => {
+                    router.refresh()
+                    router.push("/")
+                })
             },
             onError: () => {
                 toast.error("Something went wrong")
