@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-query"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 type MessageFormProps = {
@@ -33,6 +33,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
     const queryClient = useQueryClient()
     const router = useRouter()
+    const [_isPending, startTransition] = useTransition()
 
     const { mutate } = useMutation(
         async ({ body, image }: Omit<MessagePayload, "chatId">) => {
@@ -59,7 +60,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 queryClient.invalidateQueries(["messages"])
                 queryClient.invalidateQueries(["chats-search"])
 
-                router.refresh()
+                startTransition(() => {
+                    router.refresh()
+                })
             },
             onError: () => {
                 return toast.error("Something went wrong")
