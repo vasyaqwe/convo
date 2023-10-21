@@ -9,12 +9,15 @@ export default async function Home() {
     if (!session) redirect("/sign-in")
 
     return (
-        <div className="flex-1 md:grid md:place-content-center">
-            <Chats className="md:hidden" />
-            <h1 className="text-2xl font-semibold max-md:hidden">
-                Select a chat or create a new group
-            </h1>
-            <MobileNav session={session} />
-        </div>
+        <>
+            <Chats className="max-md:hidden" />
+            <div className="flex-1 md:grid md:place-content-center">
+                <Chats className="md:hidden" />
+                <h1 className="text-2xl font-semibold max-md:hidden">
+                    Select a chat or create a new group
+                </h1>
+                <MobileNav session={session} />
+            </div>
+        </>
     )
 }

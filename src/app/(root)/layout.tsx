@@ -36,10 +36,7 @@ export default async function RootLayout({
                 >
                     <body className={cn("flex", inter.className)}>
                         <Sidebar session={session} />
-                        <main className="flex flex-1">
-                            <Chats className="max-md:hidden" />
-                            {children}
-                        </main>
+                        <main className="flex flex-1">{children}</main>
                         <Toaster
                             theme="dark"
                             position={"top-center"}

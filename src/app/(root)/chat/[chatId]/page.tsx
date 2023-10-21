@@ -1,6 +1,7 @@
 import { Chat } from "@/components/chat"
 import { MessageForm } from "@/components/forms/message-form"
 import { ChatHeader } from "@/components/layout/chat-header"
+import { Chats } from "@/components/layout/chats"
 import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
@@ -43,19 +44,24 @@ export default async function Page({ params: { chatId } }: PageProps) {
     if (!chat) notFound()
 
     return (
-        <div className="flex flex-1 flex-col bg-accent">
-            <ChatHeader
-                chat={chat}
-                user={session!.user}
-            />
+        <>
+            <Chats className="max-md:hidden" />
+            <div className="flex flex-1 flex-col bg-accent">
+                <ChatHeader
+                    chat={chat}
+                    user={session!.user}
+                />
 
-            <Chat
-                initialMessages={addDisplaySender(reverseArray(chat.messages))}
-                session={session}
-                chatId={chatId}
-            />
+                <Chat
+                    initialMessages={addDisplaySender(
+                        reverseArray(chat.messages)
+                    )}
+                    session={session}
+                    chatId={chatId}
+                />
 
-            <MessageForm chatId={chatId} />
-        </div>
+                <MessageForm chatId={chatId} />
+            </div>
+        </>
     )
 }
