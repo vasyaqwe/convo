@@ -7,7 +7,6 @@ import { cn, formatDateToTimestamp } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
-import Image from "next/image"
 import { forwardRef } from "react"
 
 type MessageProps = {
