@@ -113,12 +113,14 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
 
         const onNewChat = (newChat: ExtendedChat) => {
+            console.log("NEWCHAT", newChat)
             setChats((prev) => {
                 if (prev.some((oldChat) => oldChat.id === newChat.id))
                     return prev
 
                 return [newChat, ...prev]
             })
+            router.refresh()
         }
 
         const onDeleteChat = ({
@@ -141,6 +143,8 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
                 toast.message("Chat your were in was deleted")
                 router.push("/")
             }
+
+            router.refresh()
         }
 
         pusherClient.bind("chat:update", onUpdateChat)
@@ -155,6 +159,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname, isTabFocused])
+    console.log("CHATS", chats)
 
     return (
         <div className="mt-5 px-4">
