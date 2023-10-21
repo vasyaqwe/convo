@@ -59,14 +59,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 queryClient.invalidateQueries(["messages"])
                 queryClient.invalidateQueries(["chats-search"])
 
-                const data = queryClient.getQueryData<
-                    InfiniteData<ExtendedMessage>
-                >(["messages"])
-
-                //if first message
-                if (data?.pages.flatMap((page) => page).length === 1 || !data) {
-                    router.refresh()
-                }
+                router.refresh()
             },
             onError: () => {
                 return toast.error("Something went wrong")
