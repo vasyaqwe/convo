@@ -155,9 +155,12 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname, isTabFocused])
-    console.log(chats)
+
     return (
-        <div className="mt-5 px-4">
+        <div
+            className="mt-5 px-4"
+            key={"chats-list"}
+        >
             <Input
                 placeholder="Enter a name or @username..."
                 value={input}

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
+export const revalidate = true
 
 export async function Chats({
     className,
@@ -54,7 +55,6 @@ export async function Chats({
                 <h2 className="text-3xl font-semibold">Chats</h2>
             </header>
             <ChatsList
-                key={"chats-list"}
                 existingChats={existingChats}
                 session={session}
             />
