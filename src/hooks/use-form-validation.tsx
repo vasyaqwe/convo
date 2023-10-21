@@ -25,7 +25,7 @@ export const useFormValidation = <TFormData,>({
                 (result: Record<string, string>, e: ZodIssueBase) => {
                     const key = e.path[0]
                     const message = e.message
-                    if (message) {
+                    if (message && key) {
                         result[key] = message
                     }
                     return result

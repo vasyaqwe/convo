@@ -6,7 +6,7 @@ export const chatSchema = z
             .string()
             .min(1, { message: "Required" })
             .max(24, {
-                message: "Username must not contain more than 24 character(s)",
+                message: "Name must not contain more than 24 character(s)",
             })
             .optional(),
         userId: z.string(),

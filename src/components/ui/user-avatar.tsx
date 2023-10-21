@@ -7,9 +7,16 @@ import { User } from "next-auth"
 import { useActiveUsersStore } from "@/stores/use-active-users-store"
 import { cn } from "@/lib/utils"
 
-type UserAvatarProps = { user: User } & AvatarProps
+type UserAvatarProps = {
+    user: User
+    showActiveIndicator?: boolean
+} & AvatarProps
 
-export function UserAvatar({ user, ...props }: UserAvatarProps) {
+export function UserAvatar({
+    user,
+    showActiveIndicator = false,
+    ...props
+}: UserAvatarProps) {
     const { members } = useActiveUsersStore()
     const isActive = members.includes(user.id ?? "")
 
@@ -29,7 +36,7 @@ export function UserAvatar({ user, ...props }: UserAvatarProps) {
                     {user.name ? user.name[0] : "U"}
                 </AvatarFallback>
             )}
-            {isActive && (
+            {isActive && showActiveIndicator && (
                 <span
                     title={"Online"}
                     role="status"

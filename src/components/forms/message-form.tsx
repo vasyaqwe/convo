@@ -17,6 +17,7 @@ import {
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 
 type MessageFormProps = {
     chatId: string
@@ -65,6 +66,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 if (data?.pages.flatMap((page) => page).length === 1 || !data) {
                     router.refresh()
                 }
+            },
+            onError: () => {
+                return toast.error("Something went wrong")
             },
         }
     )

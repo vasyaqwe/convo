@@ -82,15 +82,13 @@ export function formatDate(
         return "Today"
     } else if (dateObject.toDateString() === yesterday.toDateString()) {
         return "Yesterday"
-    } else if (dateObject <= beforeYesterday) {
+    } else {
         const formattedDate = new Intl.DateTimeFormat("en-US", {
             month,
             day: "numeric",
         }).format(dateObject)
 
         return formattedDate
-    } else {
-        return "Invalid date"
     }
 }
 

@@ -5,7 +5,6 @@ import { Toaster } from "sonner"
 import { TanstackProvider } from "@/components/tanstack-provider"
 import SessionProvider from "@/components/session-provider"
 import { cn } from "@/lib/utils"
-import { MobileNav } from "@/components/layout/mobile-nav"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -36,7 +35,6 @@ export default function RootLayout({
                             />
                             {children}
                         </main>
-                        <MobileNav />
                     </body>
                 </html>
             </TanstackProvider>

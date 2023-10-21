@@ -1,11 +1,11 @@
 "use client"
 
+import { UserSettingsForm } from "@/components/forms/user-settings-form"
 import { Button } from "../ui/button"
 import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -13,8 +13,11 @@ import {
 import { Icons } from "@/components/ui/icons"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
 import { Session } from "next-auth"
+import { useState } from "react"
 
 export function Sidebar({ session }: { session: Session }) {
+    const [dialogOpen, setDialogOpen] = useState(false)
+
     return (
         <aside
             className="sticky left-0 top-0 flex h-screen w-[var(--sidebar-width)] flex-col justify-between 
@@ -33,7 +36,10 @@ export function Sidebar({ session }: { session: Session }) {
                         </Button>
                     </li>
                     <li>
-                        <Dialog>
+                        <Dialog
+                            onOpenChange={setDialogOpen}
+                            open={dialogOpen}
+                        >
                             <DialogTrigger asChild>
                                 <Button
                                     title="Settings"
@@ -61,11 +67,16 @@ export function Sidebar({ session }: { session: Session }) {
                                         </p>
                                     </DialogDescription>
                                 </DialogHeader>
+                                <UserSettingsForm
+                                    closeDialog={() => setDialogOpen(false)}
+                                    session={session}
+                                />
                             </DialogContent>
                         </Dialog>
                     </li>
                     <li className="mt-auto">
                         <UserProfileDropdown
+                            align="end"
                             side="right"
                             sideOffset={7}
                             session={session}

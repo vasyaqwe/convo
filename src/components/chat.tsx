@@ -122,7 +122,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
             pusherClient.unbind("message:update", onUpdateMessage)
         }
     }, [chatId])
-
+    console.log(groupByDate(messages))
     return (
         <div
             ref={wrapperRef}

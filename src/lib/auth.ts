@@ -93,10 +93,10 @@ export const authOptions: NextAuthOptions = {
             }
 
             return {
-                id: token.id,
-                name: token.name,
-                email: token.email,
-                picture: token.picture,
+                id: dbUser.id,
+                name: dbUser.name,
+                email: dbUser.email,
+                picture: dbUser.image,
                 username: dbUser.username,
             }
         },

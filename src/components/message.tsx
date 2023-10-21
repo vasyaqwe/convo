@@ -158,7 +158,7 @@ function MessageDatePill({
     return (
         <p
             className={cn(
-                "sticky left-1/2 top-0 z-[2] w-fit -translate-x-1/2 rounded-xl border border-primary/75 bg-secondary px-3 py-1.5 text-sm",
+                "sticky left-1/2 top-0 z-[2] w-fit min-w-[120px] -translate-x-1/2 rounded-xl border border-primary/75 bg-secondary px-3 py-1.5 text-center text-sm",
                 className
             )}
             {...props}
