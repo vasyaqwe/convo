@@ -114,6 +114,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
 
         const onNewChat = (newChat: ExtendedChat) => {
+            router.refresh()
             setChats((prev) => {
                 if (prev.some((oldChat) => oldChat.id === newChat.id))
                     return prev
