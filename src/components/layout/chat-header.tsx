@@ -10,7 +10,7 @@ import { UserAvatar } from "@/components/ui/user-avatar"
 import { ExtendedChat, UserType } from "@/types"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
@@ -28,6 +28,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
     const { members } = useActiveUsersStore()
     const chatPartner = chat.users.find((u) => u.id !== user.id) as UserType
 
+    const queryClient = useQueryClient()
     const router = useRouter()
 
     const { isLoading, mutate: onDelete } = useMutation(
@@ -38,7 +39,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
             onSuccess: () => {
                 toast.success("Chat deleted")
                 router.push("/")
-                router.refresh()
+                queryClient.invalidateQueries(["chats"])
             },
             onError: () => {
                 toast.error("Something went wrong")

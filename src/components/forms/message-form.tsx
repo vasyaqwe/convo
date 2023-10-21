@@ -58,6 +58,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
             onSuccess: () => {
                 queryClient.invalidateQueries(["messages"])
                 queryClient.invalidateQueries(["users-search"])
+                queryClient.invalidateQueries(["chats"])
 
                 const data = queryClient.getQueryData<
                     InfiniteData<ExtendedMessage>
