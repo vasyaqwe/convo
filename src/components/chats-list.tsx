@@ -16,12 +16,17 @@ import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
 type ChatsListProps = {
-    existingChats: ExtendedChat[]
     session: Session | null
 }
 
-export function ChatsList({ existingChats, session }: ChatsListProps) {
-    const [chats, setChats] = useState(existingChats)
+export function ChatsList({ session }: ChatsListProps) {
+    const { data, isLoading } = useQuery(["chats"], async () => {
+        const { data } = await axiosInstance.get(`/chat`)
+
+        return data as ExtendedChat[]
+    })
+
+    const [chats, setChats] = useState(data ?? [])
 
     const [input, setInput] = useState("")
     const debouncedInput = useDebounce<string>(input, 400)
@@ -30,16 +35,20 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
     const router = useRouter()
     const pathname = usePathname()
 
+    useEffect(() => {
+        if (data) setChats(data)
+    }, [data])
+
     const {
         data: results,
         refetch,
         isFetching,
     } = useQuery(
-        ["chats-search"],
+        ["users-search"],
         async () => {
             if (!input) return []
 
-            const { data } = await axiosInstance.get(`/chat?q=${input}`)
+            const { data } = await axiosInstance.get(`/users-search?q=${input}`)
 
             return (data as User[]).filter(
                 (user) => user.id !== session?.user.id
@@ -180,7 +189,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
                     </p>
                 ) : (
                     results?.map((user) => {
-                        const chat = existingChats.find(
+                        const chat = chats?.find(
                             (chat) =>
                                 chat.userIds.includes(session?.user.id) &&
                                 chat.userIds.includes(user.id)
@@ -207,6 +216,15 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
                         )
                     })
                 )
+            ) : isLoading ? (
+                Array(5)
+                    .fill("")
+                    .map((_item, idx) => (
+                        <UserButtonSkeleton
+                            className="mt-5"
+                            key={idx}
+                        />
+                    ))
             ) : chats.length < 1 ? (
                 <p className="mt-6 text-sm text-foreground/80">
                     Nothing here yet.

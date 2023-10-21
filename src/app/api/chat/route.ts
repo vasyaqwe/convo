@@ -7,37 +7,28 @@ import { chatSchema } from "@/lib/validations/chat"
 import { NextResponse } from "next/server"
 
 export const GET = withErrorHandling(async function (req: Request) {
-    const url = new URL(req.url)
-    const q = url.searchParams.get("q")?.toLowerCase()
+    const session = await getAuthSession()
 
-    if (!q) return new NextResponse("Invalid query", { status: 400 })
+    if (!session) {
+        return new NextResponse("Unauthorized", {
+            status: 401,
+        })
+    }
 
-    await new Promise((resolve) => setTimeout(resolve, 750))
-
-    const results = await db.user.findMany({
+    const chats = await db.chat.findMany({
         where: {
-            OR: [
-                {
-                    name: {
-                        startsWith: q,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    username: {
-                        startsWith: q.startsWith("@") ? q.replace("@", "") : q,
-                        mode: "insensitive",
-                    },
-                },
-            ],
+            userIds: {
+                has: session.user.id,
+            },
         },
-        orderBy: {
-            createdAt: "desc",
+        include: {
+            users: {
+                select: USERS_SELECT,
+            },
         },
-        select: USERS_SELECT,
     })
 
-    return new NextResponse(JSON.stringify(results))
+    return new NextResponse(JSON.stringify(chats))
 })
 
 export const POST = withErrorHandling(async function (req: Request) {
