@@ -7,7 +7,7 @@ import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import useIsTabFocused from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
-import { ExtendedChat } from "@/types"
+import { ExtendedChat, ExtendedMessage } from "@/types"
 import { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -63,6 +63,7 @@ export function ChatsList({ session }: ChatsListProps) {
         refetch()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedInput])
+    console.log(chats[0])
 
     useEffect(() => {
         pusherClient.subscribe(session?.user.id)
@@ -70,6 +71,10 @@ export function ChatsList({ session }: ChatsListProps) {
         const onUpdateChat = (
             updatedChat: ExtendedChat & { sendNotification: boolean }
         ) => {
+            const newMessage = updatedChat.messages
+                ? updatedChat.messages[0]
+                : undefined
+
             setChats((prev) =>
                 prev.map((oldChat) => {
                     if (oldChat.id === updatedChat.id) {
@@ -82,9 +87,6 @@ export function ChatsList({ session }: ChatsListProps) {
                     return oldChat
                 })
             )
-            const newMessage = updatedChat.messages
-                ? updatedChat.messages[0]
-                : undefined
 
             if (
                 "Notification" in window &&
@@ -163,7 +165,7 @@ export function ChatsList({ session }: ChatsListProps) {
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname, isTabFocused])
+    }, [pathname, isTabFocused, chats])
 
     return (
         <div className="mt-5 px-4">

@@ -14,7 +14,7 @@ type UserAvatarProps = {
 
 export function UserAvatar({
     user,
-    showActiveIndicator = false,
+    showActiveIndicator = true,
     ...props
 }: UserAvatarProps) {
     const { members } = useActiveUsersStore()

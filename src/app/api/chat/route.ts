@@ -25,6 +25,16 @@ export const GET = withErrorHandling(async function (req: Request) {
             users: {
                 select: USERS_SELECT,
             },
+            messages: {
+                include: {
+                    seenBy: {
+                        select: USERS_SELECT,
+                    },
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
         },
     })
 

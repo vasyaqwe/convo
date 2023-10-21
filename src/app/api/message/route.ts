@@ -72,6 +72,10 @@ export const POST = withErrorHandling(async function (req: Request) {
                         },
                     },
                 },
+                take: 1,
+                orderBy: {
+                    createdAt: "desc",
+                },
             },
         },
     })
