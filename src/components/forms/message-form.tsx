@@ -59,10 +59,6 @@ export function MessageForm({ chatId }: MessageFormProps) {
             onSuccess: () => {
                 queryClient.invalidateQueries(["messages"])
                 queryClient.invalidateQueries(["chats-search"])
-
-                startTransition(() => {
-                    router.refresh()
-                })
             },
             onError: () => {
                 return toast.error("Something went wrong")
@@ -114,6 +110,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
             onSubmit={(e) => {
                 e.preventDefault()
                 mutate({ body, image })
+                startTransition(() => {
+                    router.refresh()
+                })
             }}
             className="h-[calc(var(--message-form-height)+var(--message-form-image-height))] overflow-hidden border-t border-secondary px-4"
         >
