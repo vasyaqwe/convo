@@ -7,7 +7,7 @@ import {
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/ui/user-avatar"
-import { ExtendedChat } from "@/types"
+import { ExtendedChat, UserType } from "@/types"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
 import { useMutation } from "@tanstack/react-query"
@@ -17,7 +17,7 @@ import { axiosInstance } from "@/config"
 import { Loading } from "@/components/ui/loading"
 import { useActiveUsersStore } from "@/stores/use-active-users-store"
 import Link from "next/link"
-import { User } from "@prisma/client"
+import { User } from "next-auth"
 
 type ChatHeaderProps = {
     user: User
@@ -26,7 +26,7 @@ type ChatHeaderProps = {
 
 export function ChatHeader({ user, chat }: ChatHeaderProps) {
     const { members } = useActiveUsersStore()
-    const chatPartner = chat.users.find((u) => u.id !== user.id) as User
+    const chatPartner = chat.users.find((u) => u.id !== user.id) as UserType
     // casting because I know better
 
     const router = useRouter()
