@@ -36,7 +36,7 @@ export function UserButton({
         {
             onSuccess: (chat) => {
                 router.push(`/chat/${chat.id}`)
-                startTransition(() => router.refresh())
+
                 onSelect()
             },
         }
@@ -44,7 +44,10 @@ export function UserButton({
 
     return (
         <button
-            onClick={() => mutate(user.id)}
+            onClick={() => {
+                mutate(user.id)
+                startTransition(() => router.refresh())
+            }}
             className={cn(
                 "mt-4 flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
                 className
