@@ -113,7 +113,6 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
 
         const onNewChat = (newChat: ExtendedChat) => {
-            console.log("new", newChat)
             setChats((prev) => {
                 if (prev.some((oldChat) => oldChat.id === newChat.id))
                     return prev
