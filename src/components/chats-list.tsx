@@ -113,6 +113,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
 
         const onNewChat = (newChat: ExtendedChat) => {
+            console.log("new", newChat)
             setChats((prev) => {
                 if (prev.some((oldChat) => oldChat.id === newChat.id))
                     return prev
@@ -155,7 +156,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname, isTabFocused])
-    console.log("render")
+    console.log(chats)
     return (
         <div className="mt-5 px-4">
             <Input

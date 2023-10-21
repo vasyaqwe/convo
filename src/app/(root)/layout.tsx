@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     description: "convo is a modern messaging app. Built with Next.js 13.",
 }
 
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 export default async function RootLayout({
     children,
 }: {
