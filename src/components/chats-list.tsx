@@ -129,6 +129,7 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
             deletedChat: ExtendedChat
             removerId: User
         }) => {
+            router.refresh()
             setChats((prev) => {
                 return [
                     ...prev.filter((oldChat) => oldChat.id !== deletedChat.id),
@@ -154,7 +155,8 @@ export function ChatsList({ existingChats, session }: ChatsListProps) {
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
-    }, [pathname, isTabFocused, router, session?.user.id])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pathname, isTabFocused])
 
     return (
         <div className="mt-5 px-4">
