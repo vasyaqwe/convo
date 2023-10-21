@@ -54,6 +54,7 @@ export async function Chats({
                 <h2 className="text-3xl font-semibold">Chats</h2>
             </header>
             <ChatsList
+                key={"chats-list"}
                 existingChats={existingChats}
                 session={session}
             />
