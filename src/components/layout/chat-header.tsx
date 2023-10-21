@@ -27,7 +27,6 @@ type ChatHeaderProps = {
 export function ChatHeader({ user, chat }: ChatHeaderProps) {
     const { members } = useActiveUsersStore()
     const chatPartner = chat.users.find((u) => u.id !== user.id) as UserType
-    // casting because I know better
 
     const router = useRouter()
 
