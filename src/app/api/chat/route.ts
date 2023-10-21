@@ -109,7 +109,7 @@ export const POST = withErrorHandling(async function (req: Request) {
             },
         },
     })
-
+    console.log(newChat)
     newChat.userIds.forEach((userId) => {
         pusherServer.trigger(userId, "chat:new", newChat)
     })
