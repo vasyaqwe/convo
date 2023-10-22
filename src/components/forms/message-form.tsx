@@ -34,14 +34,13 @@ export function MessageForm({ chatId }: MessageFormProps) {
     const queryClient = useQueryClient()
     const router = useRouter()
 
-    const { mutate } = useMutation(
+    const { mutate, isLoading } = useMutation(
         async ({ body, image }: Omit<MessagePayload, "chatId">) => {
             const payload: MessagePayload = {
                 chatId,
                 body,
                 image,
             }
-
             const { data } = await axiosInstance.post("/message", payload)
 
             return data
@@ -76,10 +75,10 @@ export function MessageForm({ chatId }: MessageFormProps) {
     )
 
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-        if (e.key === "Enter" && !e.shiftKey) {
+        if (e.key === "Enter" && !e.shiftKey && !isUploading && !isLoading) {
             e.preventDefault()
             if (body.length > 0) {
-                mutate({ body })
+                mutate({ body, image })
             }
         }
     }
@@ -144,7 +143,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
                 <Button
                     className="flex-shrink-0"
-                    disabled={(body.length < 1 && !image) || isUploading}
+                    disabled={
+                        (body.length < 1 && !image) || isUploading || isLoading
+                    }
                     variant={"ghost"}
                     size={"icon"}
                 >
