@@ -63,7 +63,6 @@ export function ChatsList({ session }: ChatsListProps) {
         refetch()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedInput])
-    console.log(chats[0])
 
     useEffect(() => {
         pusherClient.subscribe(session?.user.id)
@@ -94,12 +93,10 @@ export function ChatsList({ session }: ChatsListProps) {
                 updatedChat.sendNotification
             ) {
                 Notification.requestPermission().then(function (permission) {
-                    if (pathname?.includes(newMessage.chatId) && isTabFocused)
-                        return
-
                     if (
-                        permission !== "granted" ||
-                        newMessage.senderId === session?.user.id
+                        (pathname?.includes(newMessage.chatId) &&
+                            isTabFocused) ||
+                        permission !== "granted"
                     )
                         return
 
@@ -164,8 +161,7 @@ export function ChatsList({ session }: ChatsListProps) {
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname, isTabFocused, chats])
+    }, [isTabFocused, pathname, router, session?.user.id])
 
     return (
         <div className="mt-5 px-4">

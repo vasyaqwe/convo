@@ -47,8 +47,6 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
         }
     )
 
-    const isActive = members.includes(chatPartner.id ?? "")
-
     return (
         <header className="flex h-[var(--header-height)] items-center justify-between border-b border-secondary p-4 ">
             <div className="flex items-center gap-3">
@@ -64,14 +62,9 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                 </Button>
                 <UserAvatar user={chatPartner} />
                 <div>
-                    <p>
-                        {chatPartner.name}{" "}
-                        <span className="text-xs text-foreground/75">
-                            @{chatPartner.username}
-                        </span>
-                    </p>
-                    <p className="mt-0.5 text-sm text-foreground/75">
-                        {isActive ? "Online" : "Offline"}
+                    <p>{chatPartner.name} </p>
+                    <p className="text-sm text-foreground/75 md:mt-0.5">
+                        @{chatPartner.username}
                     </p>
                 </div>
             </div>

@@ -145,7 +145,10 @@ export function UserSettingsForm({
                 Image
             </Label>
             <div className="mt-2 flex items-center gap-4">
-                <div className="relative">
+                <label
+                    htmlFor="image"
+                    className="relative"
+                >
                     {isUploading && (
                         <div className="absolute inset-0 z-10 grid place-content-center bg-black/75">
                             <Loading />
@@ -166,8 +169,9 @@ export function UserSettingsForm({
                             user={session.user}
                         />
                     )}
-                </div>
+                </label>
                 <Input
+                    id={"image"}
                     disabled={isUploading}
                     type="file"
                     onChange={onImageChange}
