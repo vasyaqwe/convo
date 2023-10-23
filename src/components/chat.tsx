@@ -137,7 +137,7 @@ export function Chat({ session, chatId }: ChatProps) {
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
             )}
 
-            {true ? (
+            {isLoading ? (
                 <MessageSkeleton className="mt-5" />
             ) : messages.length < 1 ? (
                 <p className="my-auto self-center text-2xl font-semibold">
