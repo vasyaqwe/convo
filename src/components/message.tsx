@@ -1,6 +1,7 @@
 "use client"
 
 import { Icons } from "@/components/ui/icons"
+import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { cn, formatDateToTimestamp } from "@/lib/utils"
@@ -172,4 +173,98 @@ function MessageDatePill({
     )
 }
 
-export { Message, MessageDatePill }
+function MessageSkeleton({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+    return (
+        <div
+            role="status"
+            className={cn("relative flex flex-col gap-5")}
+            {...props}
+        >
+            <div
+                className={cn("relative ml-auto flex w-full flex-col gap-5")}
+                style={{ direction: "rtl" }}
+            >
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full flex-shrink-0">
+                        <Skeleton className="mt-2 h-10 w-[80%] rounded-full rounded-tr-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-10 w-[80%] rounded-full rounded-tr-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-10 w-[50%] rounded-full rounded-tr-none lg:w-1/6" />
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full flex-shrink-0">
+                        <Skeleton className="mt-2 h-6 w-[80%] rounded-full rounded-tr-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-6 w-[50%] rounded-full rounded-tr-none lg:w-1/6" />
+                    </div>
+                </div>
+            </div>
+            <div className={cn("relative flex flex-col gap-5")}>
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full">
+                        <Skeleton className="mt-2 h-6 w-[80%] rounded-full rounded-tl-none lg:w-1/5" />
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full">
+                        <Skeleton className="mt-2 h-10 w-[80%] rounded-full rounded-tl-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-12 w-[50%] rounded-full rounded-tl-none lg:w-1/6" />
+                        <Skeleton className="mt-5 h-7 w-[70%] rounded-full rounded-tl-none lg:w-1/4" />
+                        <Skeleton className="mt-5 h-6 w-[40%] rounded-full rounded-tl-none lg:w-1/6" />
+                    </div>
+                </div>
+            </div>
+
+            <div
+                className={cn("relative ml-auto flex w-full flex-col gap-5")}
+                style={{ direction: "rtl" }}
+            >
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full flex-shrink-0">
+                        <Skeleton className="mt-2 h-10 w-[80%] rounded-full rounded-tr-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-10 w-[80%] rounded-full rounded-tr-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-10 w-[50%] rounded-full rounded-tr-none lg:w-1/6" />
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full flex-shrink-0">
+                        <Skeleton className="mt-2 h-6 w-[80%] rounded-full rounded-tr-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-6 w-[50%] rounded-full rounded-tr-none lg:w-1/6" />
+                    </div>
+                </div>
+            </div>
+
+            <div className={cn("relative flex flex-col gap-5")}>
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full">
+                        <Skeleton className="mt-2 h-8 w-[80%] rounded-full rounded-tl-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-10 w-[50%] rounded-full rounded-tl-none lg:w-1/6" />
+                        <Skeleton className="mt-5 h-6 w-[70%] rounded-full rounded-tl-none lg:w-1/4" />
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-[var(--message-gap)] [--message-gap:10px]">
+                    <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+                    <div className="w-full">
+                        <Skeleton className="mt-2 h-6 w-[80%] rounded-full rounded-tl-none lg:w-1/5" />
+                        <Skeleton className="mt-5 h-7 w-[50%] rounded-full rounded-tl-none lg:w-1/6" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export { Message, MessageDatePill, MessageSkeleton }

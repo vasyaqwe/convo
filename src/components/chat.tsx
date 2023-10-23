@@ -1,6 +1,6 @@
 "use client"
 
-import { Message, MessageDatePill } from "@/components/message"
+import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
@@ -136,13 +136,33 @@ export function Chat({ session, chatId }: ChatProps) {
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
             )}
-            {messages.length < 1 && (
+
+            {true ? (
+                <MessageSkeleton className="mt-5" />
+            ) : messages.length < 1 ? (
                 <p className="my-auto self-center text-2xl font-semibold">
                     No history yet.
                 </p>
-            )}
-            {groupByDate(messages).map((message, idx) => {
-                if (idx === 3) {
+            ) : (
+                groupByDate(messages).map((message, idx) => {
+                    if (idx === 3) {
+                        return (
+                            <React.Fragment key={message.id}>
+                                {message.dateAbove && (
+                                    <MessageDatePill>
+                                        {message.dateAbove}
+                                    </MessageDatePill>
+                                )}
+                                <Message
+                                    isLast={messages.length === 4}
+                                    session={session}
+                                    message={message}
+                                    ref={ref}
+                                />
+                            </React.Fragment>
+                        )
+                    }
+
                     return (
                         <React.Fragment key={message.id}>
                             {message.dateAbove && (
@@ -151,30 +171,14 @@ export function Chat({ session, chatId }: ChatProps) {
                                 </MessageDatePill>
                             )}
                             <Message
-                                isLast={messages.length === 4}
+                                isLast={idx === messages.length - 1}
                                 session={session}
                                 message={message}
-                                ref={ref}
                             />
                         </React.Fragment>
                     )
-                }
-
-                return (
-                    <React.Fragment key={message.id}>
-                        {message.dateAbove && (
-                            <MessageDatePill>
-                                {message.dateAbove}
-                            </MessageDatePill>
-                        )}
-                        <Message
-                            isLast={idx === messages.length - 1}
-                            session={session}
-                            message={message}
-                        />
-                    </React.Fragment>
-                )
-            })}
+                })
+            )}
         </div>
     )
 }
