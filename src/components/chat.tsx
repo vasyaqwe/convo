@@ -126,7 +126,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
     return (
         <div
             ref={wrapperRef}
-            className="relative flex h-[calc(100vh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height))] 
+            className="relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height))] 
             flex-col overflow-y-auto px-4 py-[var(--chat-padding-block)] [--chat-padding-block:25px]"
         >
             {isFetchingNextPage && (

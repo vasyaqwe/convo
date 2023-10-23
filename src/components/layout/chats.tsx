@@ -13,7 +13,7 @@ export function Chats({
     return (
         <aside
             className={cn(
-                "sticky left-0 top-0 flex h-screen flex-col border-r border-secondary bg-accent pb-5  md:w-[var(--chats-width)]",
+                "sticky left-0 top-0 flex h-[100svh] flex-col border-r border-secondary bg-accent pb-5 md:w-[var(--chats-width)]",
                 className
             )}
             {...props}

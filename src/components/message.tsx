@@ -94,8 +94,8 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 : "rounded-tl-none",
                             !message.displaySender
                                 ? isOwn
-                                    ? "mr-[calc(var(--avatar-size)+var(--message-gap))]"
-                                    : "ml-[calc(var(--avatar-size)+var(--message-gap))]"
+                                    ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
+                                    : "md:ml-[calc(var(--avatar-size)+var(--message-gap))]"
                                 : ""
                         )}
                     >
@@ -112,7 +112,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             <small
                                 suppressHydrationWarning
                                 className={cn(
-                                    "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100",
+                                    "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
                                     isOwn
                                         ? "left-[calc(100%+var(--message-gap))]"
                                         : "right-[calc(100%+var(--message-gap))]"
@@ -143,7 +143,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         </p>
                     )}
                 </div>
-                {message.displaySender && <UserAvatar user={message.sender} />}
+                {message.displaySender && (
+                    <UserAvatar
+                        className="max-md:hidden"
+                        user={message.sender}
+                    />
+                )}
             </div>
         )
     }
