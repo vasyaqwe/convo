@@ -7,7 +7,7 @@ import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import useIsTabFocused from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
-import { ExtendedChat, ExtendedMessage } from "@/types"
+import { ExtendedChat } from "@/types"
 import { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -162,7 +162,7 @@ export function ChatsList({ session }: ChatsListProps) {
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isTabFocused, pathname])
+    }, [])
 
     return (
         <div className="mt-5 px-4">
