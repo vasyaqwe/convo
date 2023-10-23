@@ -29,24 +29,22 @@ export function withErrorHandling(
         }
     }
 }
-
 export function formatDateToTimestamp(date: Date | string) {
     let dateObject: Date
-    let dateInYourTimezone = new Date(date)
 
-    const dateStringInCorrectTimezone = dateInYourTimezone.toLocaleString()
-
-    if (typeof dateStringInCorrectTimezone === "string") {
-        dateObject = new Date(dateStringInCorrectTimezone)
+    if (typeof date === "string") {
+        dateObject = new Date(date)
     } else {
-        dateObject = dateStringInCorrectTimezone
+        dateObject = date
     }
 
-    return dateObject.toLocaleTimeString("en-US", {
+    const formattedDate = dateObject.toLocaleTimeString(undefined, {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
     })
+
+    return formattedDate
 }
 
 export function formatDate(
