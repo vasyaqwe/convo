@@ -4,13 +4,11 @@ import { Message, MessageDatePill } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
-import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
 import { addDisplaySender, groupByDate, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
-import { useRouter } from "next/navigation"
 import React, { useEffect, useRef, useState } from "react"
 
 type ChatProps = {
@@ -22,24 +20,23 @@ type ChatProps = {
 export function Chat({ session, chatId, initialMessages }: ChatProps) {
     const queryKey = ["messages"]
 
-    const { isLoading, hasNextPage, isFetchingNextPage, data, fetchNextPage } =
-        useInfiniteQuery(
+    const { fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, data } =
+        useInfiniteQuery({
             queryKey,
-            async ({ pageParam = 1 }) => {
+            queryFn: async ({ pageParam = 1 }) => {
                 const query = `/messages?limit=${MESSAGES_INFINITE_SCROLL_COUNT}&page=${pageParam}&chatId=${chatId}`
 
                 const { data } = await axiosInstance.get(query)
 
                 return data as ExtendedMessage[]
             },
-            {
-                refetchOnWindowFocus: false,
-                refetchOnReconnect: false,
-                getNextPageParam: (lastPage, allPages) => {
-                    return lastPage.length ? allPages.length + 1 : undefined
-                },
-            }
-        )
+            initialPageParam: 1,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            getNextPageParam: (lastPage, allPages) => {
+                return lastPage.length ? allPages.length + 1 : undefined
+            },
+        })
 
     const wrapperRef = useRef<HTMLDivElement>(null)
 

@@ -21,7 +21,8 @@ import { useFormValidation } from "@/hooks/use-form-validation"
 type SignUpFormProps = React.ComponentProps<"div">
 
 export function SignUpForm({ className, ...rest }: SignUpFormProps) {
-    const { isLoading, mutate: login } = useMutation(() => signIn("google"), {
+    const { isPending, mutate: login } = useMutation({
+        mutationFn: () => signIn("google"),
         onError: () => {
             toast.error("An unknown error occured")
         },
@@ -33,28 +34,26 @@ export function SignUpForm({ className, ...rest }: SignUpFormProps) {
         password: "",
     })
 
-    const { mutate: onSubmit, isLoading: signUpLoading } = useMutation(
-        async () => {
+    const { mutate: onSubmit, isPending: signUpLoading } = useMutation({
+        mutationFn: async () => {
             const { data } = await axiosInstance.patch("/sign-up", formData)
 
             return data as string
         },
-        {
-            onError: (error) => {
-                if (error instanceof AxiosError) {
-                    return toast.error(error.response?.data)
-                }
+        onError: (error) => {
+            if (error instanceof AxiosError) {
+                return toast.error(error.response?.data)
+            }
 
-                toast.error("Something went wrong.")
-            },
-            onSuccess: () => {
-                signIn("credentials", {
-                    username: formData.username,
-                    password: formData.password,
-                })
-            },
-        }
-    )
+            toast.error("Something went wrong.")
+        },
+        onSuccess: () => {
+            signIn("credentials", {
+                username: formData.username,
+                password: formData.password,
+            })
+        },
+    })
 
     function onChange(e: React.ChangeEvent<HTMLInputElement>) {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -141,12 +140,12 @@ export function SignUpForm({ className, ...rest }: SignUpFormProps) {
                 </Button>
             </form>
             <Button
-                disabled={isLoading}
+                disabled={isPending}
                 className=" w-full bg-white text-black hover:bg-white/90"
                 onClick={() => login()}
             >
-                {!isLoading && <Icons.google />}
-                {isLoading ? <Loading /> : "Sign up with Google"}
+                {!isPending && <Icons.google />}
+                {isPending ? <Loading /> : "Sign up with Google"}
             </Button>
             <p className="!mt-6 text-center text-muted-foreground">
                 Already have an account?{" "}

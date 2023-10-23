@@ -19,20 +19,17 @@ type MessageProps = {
 // eslint-disable-next-line react/display-name
 const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, session, isLast }, ref) => {
-        useQuery(
-            ["see-message"],
-            async () => {
+        useQuery({
+            queryKey: ["see-message"],
+            queryFn: async () => {
                 const { data } = await axiosInstance.patch(
                     `/message/${message.id}`
                 )
 
                 return data
             },
-            {
-                enabled:
-                    isLast && !message.seenByIds.includes(session?.user.id),
-            }
-        )
+            enabled: isLast && !message.seenByIds.includes(session?.user.id),
+        })
 
         const isOwn = session?.user.id === message.senderId
 

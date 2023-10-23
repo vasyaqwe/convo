@@ -29,22 +29,20 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
     const queryClient = useQueryClient()
     const router = useRouter()
 
-    const { isLoading, mutate: onDelete } = useMutation(
-        async () => {
+    const { isPending, mutate: onDelete } = useMutation({
+        mutationFn: async () => {
             await axiosInstance.delete(`/chat/${chat.id}`)
         },
-        {
-            onSuccess: () => {
-                toast.success("Chat deleted")
-                router.push("/")
-                queryClient.invalidateQueries(["chats"])
-                queryClient.invalidateQueries(["messages"])
-            },
-            onError: () => {
-                toast.error("Something went wrong")
-            },
-        }
-    )
+        onSuccess: () => {
+            toast.success("Chat deleted")
+            router.push("/")
+            queryClient.invalidateQueries({ queryKey: ["chats"] })
+            queryClient.invalidateQueries({ queryKey: ["messages"] })
+        },
+        onError: () => {
+            toast.error("Something went wrong")
+        },
+    })
 
     return (
         <header className="flex h-[var(--header-height)] items-center justify-between border-b border-secondary p-4 ">
@@ -78,14 +76,14 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                        disabled={isLoading}
+                        disabled={isPending}
                         className="!text-destructive"
                         onSelect={(e) => {
                             e.preventDefault()
                             onDelete()
                         }}
                     >
-                        {isLoading ? (
+                        {isPending ? (
                             <Loading className="mr-2" />
                         ) : (
                             <Icons.trash className="mr-2" />

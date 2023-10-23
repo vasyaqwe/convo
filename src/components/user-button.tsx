@@ -24,22 +24,20 @@ export function UserButton({
     const queryClient = useQueryClient()
     const router = useRouter()
 
-    const { mutate } = useMutation(
-        async (userId: string) => {
+    const { mutate } = useMutation({
+        mutationFn: async (userId: string) => {
             const payload: ChatPayload = { userId }
 
             const { data } = await axiosInstance.post("/chat", payload)
 
             return data as Chat
         },
-        {
-            onSuccess: (chat) => {
-                router.push(`/chat/${chat.id}`)
-                queryClient.invalidateQueries(["chats"])
-                onSelect()
-            },
-        }
-    )
+        onSuccess: (chat) => {
+            router.push(`/chat/${chat.id}`)
+            queryClient.invalidateQueries({ queryKey: ["chats"] })
+            onSelect()
+        },
+    })
 
     return (
         <button

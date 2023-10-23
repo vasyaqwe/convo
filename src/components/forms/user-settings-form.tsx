@@ -9,7 +9,6 @@ import { axiosInstance } from "@/config"
 import { useFormValidation } from "@/hooks/use-form-validation"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
-import { MessagePayload } from "@/lib/validations/message"
 import { SettingsPayload, settingsSchema } from "@/lib/validations/settings"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
@@ -42,32 +41,30 @@ export function UserSettingsForm({
     const router = useRouter()
     const queryClient = useQueryClient()
 
-    const { mutate: onSubmit, isLoading } = useMutation(
-        async () => {
+    const { mutate: onSubmit, isPending } = useMutation({
+        mutationFn: async () => {
             const { data } = await axiosInstance.patch("/settings", formData)
 
             return data
         },
-        {
-            onSuccess: () => {
-                router.refresh()
-                closeDialog()
-                toast.success("Settings saved")
-                queryClient.invalidateQueries(["messages"])
-            },
-            onError: (err) => {
-                if (err instanceof AxiosError) {
-                    if (err.response?.status === 409) {
-                        return toast.error(
-                            "This username is already taken by someone"
-                        )
-                    }
+        onSuccess: () => {
+            router.refresh()
+            closeDialog()
+            toast.success("Settings saved")
+            queryClient.invalidateQueries({ queryKey: ["messages"] })
+        },
+        onError: (err) => {
+            if (err instanceof AxiosError) {
+                if (err.response?.status === 409) {
+                    return toast.error(
+                        "This username is already taken by someone"
+                    )
                 }
+            }
 
-                return toast.error("Something went wrong")
-            },
-        }
-    )
+            return toast.error("Something went wrong")
+        },
+    })
 
     const { safeOnSubmit, errors } = useFormValidation({
         onSubmit: () => onSubmit(),
@@ -180,9 +177,9 @@ export function UserSettingsForm({
 
             <Button
                 className="mt-9 w-full"
-                disabled={isLoading}
+                disabled={isPending}
             >
-                {isLoading ? <Loading /> : "Save"}
+                {isPending ? <Loading /> : "Save"}
             </Button>
         </form>
     )

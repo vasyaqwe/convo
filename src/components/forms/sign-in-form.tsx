@@ -24,7 +24,8 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
 
     const [signInLoading, setSignInLoading] = useState(false)
 
-    const { isLoading, mutate: login } = useMutation(() => signIn("google"), {
+    const { isPending, mutate: login } = useMutation({
+        mutationFn: () => signIn("google"),
         onError: () => {
             toast.error("An unknown error occured")
         },
@@ -126,12 +127,12 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
                 </Button>
             </form>
             <Button
-                disabled={isLoading}
+                disabled={isPending}
                 className=" w-full bg-white text-black hover:bg-white/90"
                 onClick={() => login()}
             >
-                {!isLoading && <Icons.google />}
-                {isLoading ? <Loading /> : "Sign in with Google"}
+                {!isPending && <Icons.google />}
+                {isPending ? <Loading /> : "Sign in with Google"}
             </Button>
             <p className="!mt-6 text-center text-muted-foreground">
                 Don't have an account yet?{" "}

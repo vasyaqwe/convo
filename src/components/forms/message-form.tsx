@@ -27,8 +27,8 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
     const queryClient = useQueryClient()
 
-    const { mutate, isLoading } = useMutation(
-        async ({ body, image }: Omit<MessagePayload, "chatId">) => {
+    const { mutate, isPending } = useMutation({
+        mutationFn: async ({ body, image }: Omit<MessagePayload, "chatId">) => {
             const payload: MessagePayload = {
                 chatId,
                 body,
@@ -38,28 +38,26 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
             return data
         },
-        {
-            onMutate: () => {
-                setBody("")
-                setImage(undefined)
-                document.documentElement.style.setProperty(
-                    "--message-form-image-height",
-                    `0px`
-                )
-            },
-            onSuccess: () => {
-                queryClient.invalidateQueries(["messages"])
-                queryClient.invalidateQueries(["users-search"])
-                queryClient.invalidateQueries(["chats"])
-            },
-            onError: () => {
-                return toast.error("Something went wrong")
-            },
-        }
-    )
+        onMutate: () => {
+            setBody("")
+            setImage(undefined)
+            document.documentElement.style.setProperty(
+                "--message-form-image-height",
+                `0px`
+            )
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["messages"] })
+            queryClient.invalidateQueries({ queryKey: ["users-search"] })
+            queryClient.invalidateQueries({ queryKey: ["chats"] })
+        },
+        onError: () => {
+            return toast.error("Something went wrong")
+        },
+    })
 
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-        if (e.key === "Enter" && !e.shiftKey && !isUploading && !isLoading) {
+        if (e.key === "Enter" && !e.shiftKey && !isUploading && !isPending) {
             e.preventDefault()
             if (body.length > 0) {
                 mutate({ body, image })
@@ -128,7 +126,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 <Button
                     className="flex-shrink-0"
                     disabled={
-                        (body.length < 1 && !image) || isUploading || isLoading
+                        (body.length < 1 && !image) || isUploading || isPending
                     }
                     variant={"ghost"}
                     size={"icon"}

@@ -19,10 +19,13 @@ type ChatsListProps = {
 }
 
 export function ChatsList({ session }: ChatsListProps) {
-    const { data, isLoading } = useQuery(["chats"], async () => {
-        const { data } = await axiosInstance.get(`/chat`)
+    const { data, isLoading } = useQuery({
+        queryKey: ["chats"],
+        queryFn: async () => {
+            const { data } = await axiosInstance.get(`/chat`)
 
-        return data as ExtendedChat[]
+            return data as ExtendedChat[]
+        },
     })
 
     const [chats, setChats] = useState(data ?? [])
@@ -46,19 +49,17 @@ export function ChatsList({ session }: ChatsListProps) {
         data: results,
         refetch,
         isFetching,
-    } = useQuery(
-        ["users-search"],
-        async () => {
+    } = useQuery({
+        queryKey: ["users-search"],
+        queryFn: async () => {
             if (!input) return []
 
             const { data } = await axiosInstance.get(`/users-search?q=${input}`)
 
             return (data as User[]).filter((user) => user.id !== currentUserId)
         },
-        {
-            enabled: false,
-        }
-    )
+        enabled: false,
+    })
 
     useEffect(() => {
         refetch()
@@ -115,7 +116,7 @@ export function ChatsList({ session }: ChatsListProps) {
             ) {
                 toast.message("Chat your were in was deleted")
                 router.push("/")
-                queryClient.invalidateQueries(["messages"])
+                queryClient.invalidateQueries({ queryKey: ["messages"] })
             }
         }
 
