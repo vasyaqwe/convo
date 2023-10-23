@@ -9,7 +9,7 @@ import useIsTabFocused from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
 import { ExtendedChat } from "@/types"
 import { User } from "@prisma/client"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect, useMemo } from "react"
@@ -34,6 +34,7 @@ export function ChatsList({ session }: ChatsListProps) {
     const { isTabFocused } = useIsTabFocused()
     const router = useRouter()
     const pathname = usePathname()
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (data) setChats(data)
@@ -154,6 +155,7 @@ export function ChatsList({ session }: ChatsListProps) {
             ) {
                 toast.message("Chat your were in was deleted")
                 router.push("/")
+                queryClient.invalidateQueries(["messages"])
             }
         }
 
@@ -167,7 +169,7 @@ export function ChatsList({ session }: ChatsListProps) {
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
-    }, [isTabFocused, currentUserId, router, pathname])
+    }, [isTabFocused, currentUserId, router, pathname, queryClient])
 
     return (
         <div className="mt-5 px-4">

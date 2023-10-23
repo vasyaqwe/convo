@@ -38,6 +38,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                 toast.success("Chat deleted")
                 router.push("/")
                 queryClient.invalidateQueries(["chats"])
+                queryClient.invalidateQueries(["messages"])
             },
             onError: () => {
                 toast.error("Something went wrong")
