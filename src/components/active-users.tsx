@@ -6,9 +6,10 @@ import { Channel, Members } from "pusher-js"
 import { useEffect, useState } from "react"
 
 export function ActiveUsers() {
-    const { setMembers, addMember, removeMember } = useActiveUsersStore()
+    const { setMembers, addMember, removeMember, members } =
+        useActiveUsersStore()
     const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
-
+    console.log(members)
     useEffect(() => {
         let channel = activeChannel
 
@@ -19,9 +20,10 @@ export function ActiveUsers() {
 
         channel.bind("pusher:subscription_succeeded", (members: Members) => {
             const initialMembers: string[] = []
-            members.each((member: Record<string, any>) =>
-                initialMembers.push(member.id)
-            )
+            members.each((member: Record<string, any>) => {
+                if (!initialMembers.includes(member.id))
+                    initialMembers.push(member.id)
+            })
 
             setMembers(initialMembers)
         })

@@ -5,7 +5,7 @@ import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
 import { pusherClient } from "@/lib/pusher"
-import { addDisplaySender, groupByDate, reverseArray } from "@/lib/utils"
+import { addDisplaySender, groupByDate } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -52,9 +52,7 @@ export function Chat({ session, chatId }: ChatProps) {
 
     useEffect(() => {
         if (data?.pages) {
-            const reversedPages = reverseArray(
-                data.pages.filter((page) => page.length !== 0)
-            )
+            const reversedPages = data.pages.filter((page) => page.length !== 0)
             const messages = reversedPages?.flatMap((page) => page)
 
             if (messages) {

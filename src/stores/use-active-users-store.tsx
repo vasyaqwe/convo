@@ -7,9 +7,13 @@ type StoreState = {
     setMembers: (ids: string[]) => void
 }
 
-export const useActiveUsersStore = create<StoreState>()((set) => ({
+export const useActiveUsersStore = create<StoreState>()((set, get) => ({
     members: [],
-    addMember: (id) => set((state) => ({ members: [...state.members, id] })),
+    addMember: (id) => {
+        if (!get().members.includes(id)) {
+            set((state) => ({ members: [...state.members, id] }))
+        }
+    },
     removeMember: (id) =>
         set((state) => ({
             members: state.members.filter((memberId) => memberId !== id),
