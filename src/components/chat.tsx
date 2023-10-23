@@ -19,26 +19,33 @@ type ChatProps = {
 export function Chat({ session, chatId }: ChatProps) {
     const queryKey = ["messages"]
 
-    const { isLoading, hasNextPage, isFetchingNextPage, data, fetchNextPage } =
-        useInfiniteQuery(
-            queryKey,
-            async ({ pageParam = 1 }) => {
-                const query = `/messages?limit=${MESSAGES_INFINITE_SCROLL_COUNT}&page=${pageParam}&chatId=${chatId}`
+    const {
+        isLoading,
+        hasNextPage,
+        isFetchingNextPage,
+        isFetched,
+        data,
+        fetchNextPage,
+    } = useInfiniteQuery(
+        queryKey,
+        async ({ pageParam = 1 }) => {
+            const query = `/messages?limit=${MESSAGES_INFINITE_SCROLL_COUNT}&page=${pageParam}&chatId=${chatId}`
 
-                const { data } = await axiosInstance.get(query)
+            const { data } = await axiosInstance.get(query)
 
-                return data as ExtendedMessage[]
+            return data as ExtendedMessage[]
+        },
+        {
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            getNextPageParam: (lastPage, allPages) => {
+                return lastPage.length ? allPages.length + 1 : undefined
             },
-            {
-                refetchOnWindowFocus: false,
-                refetchOnReconnect: false,
-                getNextPageParam: (lastPage, allPages) => {
-                    return lastPage.length ? allPages.length + 1 : undefined
-                },
-            }
-        )
+        }
+    )
 
     const wrapperRef = useRef<HTMLDivElement>(null)
+
     const [messages, setMessages] = useState<ExtendedMessage[]>(
         data?.pages?.flatMap((page) => page) ?? []
     )
@@ -50,7 +57,7 @@ export function Chat({ session, chatId }: ChatProps) {
             )
             const messages = reversedPages?.flatMap((page) => page)
 
-            if (messages && messages[0]?.chatId === chatId) {
+            if (messages) {
                 setMessages(messages)
                 if (
                     // data.pages.length > 1 &&
@@ -139,7 +146,7 @@ export function Chat({ session, chatId }: ChatProps) {
 
             {isLoading ? (
                 <MessageSkeleton className="mt-5" />
-            ) : messages.length < 1 ? (
+            ) : messages.length < 1 && isFetched ? (
                 <p className="my-auto self-center text-2xl font-semibold">
                     No history yet.
                 </p>

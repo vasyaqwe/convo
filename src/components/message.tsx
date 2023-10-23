@@ -59,6 +59,15 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             >
                 <div className="group">
                     {message.displaySender && (
+                        <UserAvatar
+                            className={cn(
+                                "mb-0.5 md:hidden",
+                                isOwn ? "ml-auto" : "mr-auto"
+                            )}
+                            user={message.sender}
+                        />
+                    )}
+                    {message.displaySender && (
                         <p className={cn(isOwn ? "text-right" : "text-left")}>
                             {isOwn ? (
                                 <>

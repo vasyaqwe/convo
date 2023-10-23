@@ -22,7 +22,9 @@ export default async function Page({ params: { chatId } }: PageProps) {
     const chat = await db.chat.findFirst({
         where: { id: chatId },
         include: {
-            users: true,
+            users: {
+                select: USERS_SELECT,
+            },
         },
     })
 
