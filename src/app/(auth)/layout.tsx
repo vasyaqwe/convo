@@ -5,6 +5,7 @@ import { Toaster } from "sonner"
 import { TanstackProvider } from "@/components/tanstack-provider"
 import SessionProvider from "@/components/session-provider"
 import { cn } from "@/lib/utils"
+import Head from "next/head"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,6 +26,12 @@ export default function RootLayout({
                     lang="en"
                     className="dark"
                 >
+                    <Head>
+                        <meta
+                            name="viewport"
+                            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+                        />
+                    </Head>
                     <body className={cn("", inter.className)}>
                         <main>
                             <Toaster
