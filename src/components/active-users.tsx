@@ -6,10 +6,9 @@ import { Channel, Members } from "pusher-js"
 import { useEffect, useState } from "react"
 
 export function ActiveUsers() {
-    const { setMembers, addMember, removeMember, members } =
-        useActiveUsersStore()
+    const { setMembers, addMember, removeMember } = useActiveUsersStore()
     const [activeChannel, setActiveChannel] = useState<Channel | null>(null)
-    console.log(members)
+
     useEffect(() => {
         let channel = activeChannel
 

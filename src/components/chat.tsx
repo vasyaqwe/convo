@@ -5,10 +5,11 @@ import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
 import { pusherClient } from "@/lib/pusher"
-import { addDisplaySender, groupByDate } from "@/lib/utils"
+import { addDisplaySender, groupByDate, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
+import { usePathname } from "next/navigation"
 import React, { useEffect, useRef, useState } from "react"
 
 type ChatProps = {
@@ -45,6 +46,7 @@ export function Chat({ session, chatId }: ChatProps) {
     )
 
     const wrapperRef = useRef<HTMLDivElement>(null)
+    const pathname = usePathname()
 
     const [messages, setMessages] = useState<ExtendedMessage[]>(
         data?.pages?.flatMap((page) => page) ?? []
@@ -52,10 +54,12 @@ export function Chat({ session, chatId }: ChatProps) {
 
     useEffect(() => {
         if (data?.pages) {
-            const reversedPages = data.pages.filter((page) => page.length !== 0)
+            const reversedPages = reverseArray(
+                data.pages.filter((page) => page.length !== 0)
+            )
             const messages = reversedPages?.flatMap((page) => page)
 
-            if (messages) {
+            if (messages && messages[0]?.chatId === chatId) {
                 setMessages(messages)
                 if (
                     // data.pages.length > 1 &&
@@ -89,9 +93,11 @@ export function Chat({ session, chatId }: ChatProps) {
     useEffect(() => {
         const wrapper = wrapperRef.current
         if (wrapper) {
-            wrapper.scrollTop = wrapper.scrollHeight
+            setTimeout(() => {
+                wrapper.scrollTop = wrapper.scrollHeight
+            }, 500)
         }
-    }, [isLoading])
+    }, [isLoading, pathname])
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
