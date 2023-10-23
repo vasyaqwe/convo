@@ -147,7 +147,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                                 </MessageDatePill>
                             )}
                             <Message
-                                isLast={false}
+                                isLast={messages.length === 4}
                                 session={session}
                                 message={message}
                                 ref={ref}
