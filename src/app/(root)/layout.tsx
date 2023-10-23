@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Chats } from "@/components/layout/chats"
 import { getAuthSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { ActiveUsers } from "@/components/active-users"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -59,6 +60,7 @@ export default async function RootLayout({
                             richColors
                             style={{ font: "inherit" }}
                         />
+                        <ActiveUsers />
                     </body>
                 </html>
             </TanstackProvider>

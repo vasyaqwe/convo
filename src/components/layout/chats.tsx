@@ -1,6 +1,5 @@
 "use client"
 
-import { ActiveUsers } from "@/components/active-users"
 import { ChatsList } from "@/components/chats-list"
 import { cn } from "@/lib/utils"
 import { Session } from "next-auth"
@@ -22,7 +21,6 @@ export function Chats({
                 <h2 className="text-3xl font-semibold">Chats</h2>
             </header>
             <ChatsList session={session} />
-            <ActiveUsers />
         </aside>
     )
 }

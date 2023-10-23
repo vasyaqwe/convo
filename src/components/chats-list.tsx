@@ -74,6 +74,8 @@ export function ChatsList({ session }: ChatsListProps) {
 
         pusherClient.subscribe(currentUserId)
 
+        const notifiedMessages = new Set()
+
         const onUpdateChat = (
             updatedChat: ExtendedChat & { sendNotification: boolean }
         ) => {
@@ -97,8 +99,11 @@ export function ChatsList({ session }: ChatsListProps) {
             if (
                 "Notification" in window &&
                 newMessage &&
-                updatedChat.sendNotification
+                updatedChat.sendNotification &&
+                !notifiedMessages.has(newMessage.id)
             ) {
+                notifiedMessages.add(newMessage.id)
+
                 Notification.requestPermission().then(function (permission) {
                     if (
                         (pathname?.includes(newMessage.chatId) &&
