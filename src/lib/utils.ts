@@ -39,13 +39,11 @@ export function formatDateToTimestamp(date: Date | string) {
         dateObject = date
     }
 
-    const formatter = new Intl.DateTimeFormat(undefined, {
+    return dateObject.toLocaleTimeString(undefined, {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
     })
-
-    return formatter.format(dateObject)
 }
 
 export function formatDate(
@@ -70,25 +68,21 @@ export function formatDate(
 
     if (dateObject.toDateString() === now.toDateString()) {
         if (formatTodayToTimestamp) {
-            const formatter = new Intl.DateTimeFormat(undefined, {
+            return dateObject.toLocaleTimeString(undefined, {
                 hour: "numeric",
                 minute: "2-digit",
                 hour12: true,
             })
-
-            return formatter.format(dateObject)
         }
 
         return "Today"
     } else if (dateObject.toDateString() === yesterday.toDateString()) {
         return "Yesterday"
     } else {
-        const formattedDate = new Intl.DateTimeFormat("en-US", {
+        return dateObject.toLocaleTimeString(undefined, {
             month,
             day: "numeric",
-        }).format(dateObject)
-
-        return formattedDate
+        })
     }
 }
 

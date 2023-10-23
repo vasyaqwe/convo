@@ -129,7 +129,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             className={cn(
                                 "mt-4 text-right text-xs font-light text-foreground/60",
                                 !message.displaySender
-                                    ? "mr-[calc(var(--avatar-size)+var(--message-gap))]"
+                                    ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
                                     : ""
                             )}
                         >
