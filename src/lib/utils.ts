@@ -44,7 +44,7 @@ export function formatDateToTimestamp(date: Date | string) {
         hour12: true,
     })
 
-    return formattedDate
+    return `${date} | ${dateObject} | ${formattedDate}`
 }
 
 export function formatDate(
