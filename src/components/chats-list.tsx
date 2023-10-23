@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
-import useIsTabFocused from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
 import { ExtendedChat } from "@/types"
 import { User } from "@prisma/client"
@@ -31,7 +30,6 @@ export function ChatsList({ session }: ChatsListProps) {
     const [input, setInput] = useState("")
     const debouncedInput = useDebounce<string>(input, 400)
 
-    const { isTabFocused } = useIsTabFocused()
     const router = useRouter()
     const pathname = usePathname()
     const queryClient = useQueryClient()
@@ -74,15 +72,7 @@ export function ChatsList({ session }: ChatsListProps) {
 
         pusherClient.subscribe(currentUserId)
 
-        const notifiedMessages = new Set()
-
-        const onUpdateChat = (
-            updatedChat: ExtendedChat & { sendNotification: boolean }
-        ) => {
-            const newMessage = updatedChat.messages
-                ? updatedChat.messages[0]
-                : undefined
-
+        function onUpdateChat(updatedChat: ExtendedChat) {
             setChats((prev) =>
                 prev.map((oldChat) => {
                     if (oldChat.id === updatedChat.id) {
@@ -95,44 +85,9 @@ export function ChatsList({ session }: ChatsListProps) {
                     return oldChat
                 })
             )
-
-            if (
-                "Notification" in window &&
-                newMessage &&
-                updatedChat.sendNotification &&
-                !notifiedMessages.has(newMessage.id)
-            ) {
-                notifiedMessages.add(newMessage.id)
-
-                Notification.requestPermission().then(function (permission) {
-                    if (
-                        (pathname?.includes(newMessage.chatId) &&
-                            isTabFocused) ||
-                        permission !== "granted"
-                    )
-                        return
-
-                    const notification = new Notification(
-                        newMessage.sender.name,
-                        {
-                            body: newMessage.body ?? undefined,
-                            image: newMessage.image ?? undefined,
-                        }
-                    )
-
-                    notification.onclick = () => {
-                        router.push(`/chat/${newMessage.chatId}`)
-                        setTimeout(() => {
-                            document
-                                .getElementById(newMessage.id)
-                                ?.scrollIntoView()
-                        }, 200)
-                    }
-                })
-            }
         }
 
-        const onNewChat = (newChat: ExtendedChat) => {
+        function onNewChat(newChat: ExtendedChat) {
             setChats((prev) => {
                 if (prev.some((oldChat) => oldChat.id === newChat.id))
                     return prev
@@ -141,13 +96,13 @@ export function ChatsList({ session }: ChatsListProps) {
             })
         }
 
-        const onDeleteChat = ({
+        function onDeleteChat({
             deletedChat,
             removerId,
         }: {
             deletedChat: ExtendedChat
             removerId: User
-        }) => {
+        }) {
             setChats((prev) => {
                 return [
                     ...prev.filter((oldChat) => oldChat.id !== deletedChat.id),
@@ -174,7 +129,7 @@ export function ChatsList({ session }: ChatsListProps) {
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
-    }, [isTabFocused, currentUserId, router, pathname, queryClient])
+    }, [currentUserId, queryClient, pathname, router])
 
     return (
         <div className="mt-5 px-4">

@@ -84,15 +84,22 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     await pusherServer.trigger(chatId, "message:new", newMessage)
 
-    updatedChat.userIds
-        .filter((userId) => userId !== newMessage.senderId)
-        .forEach((userId) => {
-            pusherServer.trigger(userId, "chat:update", {
-                id: chatId,
-                messages: [lastMessage],
-                sendNotification: true,
-            })
+    updatedChat.userIds.forEach((userId) => {
+        pusherServer.trigger(userId, "chat:update", {
+            id: chatId,
+            messages: [lastMessage],
         })
+    })
+
+    const chatPartnerId = updatedChat.userIds.find(
+        (userId) => userId !== lastMessage?.senderId
+    )
+
+    await pusherServer.trigger(
+        chatPartnerId ?? "",
+        "chat:new-message",
+        lastMessage
+    )
 
     return new NextResponse(JSON.stringify(newMessage))
 })

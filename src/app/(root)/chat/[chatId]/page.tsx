@@ -4,6 +4,7 @@ import { ChatHeader } from "@/components/layout/chat-header"
 import { USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { addDisplaySender, reverseArray } from "@/lib/utils"
 import { notFound } from "next/navigation"
 
 type PageProps = {
@@ -21,6 +22,16 @@ export default async function Page({ params: { chatId } }: PageProps) {
             users: {
                 select: USERS_SELECT,
             },
+            messages: {
+                include: {
+                    sender: {
+                        select: USERS_SELECT,
+                    },
+                    seenBy: {
+                        select: USERS_SELECT,
+                    },
+                },
+            },
         },
     })
 
@@ -34,6 +45,7 @@ export default async function Page({ params: { chatId } }: PageProps) {
             />
 
             <Chat
+                initialMessages={addDisplaySender(reverseArray(chat.messages))}
                 session={session}
                 chatId={chatId}
             />

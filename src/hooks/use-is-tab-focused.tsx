@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
-const useIsTabFocused = () => {
+export function useIsTabFocused() {
     const [isTabFocused, setIsTabFocused] = useState(true)
 
     const onVisibilityChange = useCallback(() => {
@@ -18,5 +18,3 @@ const useIsTabFocused = () => {
 
     return { isTabFocused }
 }
-
-export default useIsTabFocused

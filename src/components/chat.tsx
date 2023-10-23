@@ -1,56 +1,49 @@
 "use client"
 
-import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
+import { Message, MessageDatePill } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
+import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
 import { addDisplaySender, groupByDate, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
-import { usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 import React, { useEffect, useRef, useState } from "react"
 
 type ChatProps = {
     session: Session | null
     chatId: string
+    initialMessages: ExtendedMessage[]
 }
 
-export function Chat({ session, chatId }: ChatProps) {
+export function Chat({ session, chatId, initialMessages }: ChatProps) {
     const queryKey = ["messages"]
 
-    const {
-        isLoading,
-        hasNextPage,
-        isFetchingNextPage,
-        isFetched,
-        data,
-        fetchNextPage,
-    } = useInfiniteQuery(
-        queryKey,
-        async ({ pageParam = 1 }) => {
-            const query = `/messages?limit=${MESSAGES_INFINITE_SCROLL_COUNT}&page=${pageParam}&chatId=${chatId}`
+    const { isLoading, hasNextPage, isFetchingNextPage, data, fetchNextPage } =
+        useInfiniteQuery(
+            queryKey,
+            async ({ pageParam = 1 }) => {
+                const query = `/messages?limit=${MESSAGES_INFINITE_SCROLL_COUNT}&page=${pageParam}&chatId=${chatId}`
 
-            const { data } = await axiosInstance.get(query)
+                const { data } = await axiosInstance.get(query)
 
-            return data as ExtendedMessage[]
-        },
-        {
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
-            getNextPageParam: (lastPage, allPages) => {
-                return lastPage.length ? allPages.length + 1 : undefined
+                return data as ExtendedMessage[]
             },
-        }
-    )
+            {
+                refetchOnWindowFocus: false,
+                refetchOnReconnect: false,
+                getNextPageParam: (lastPage, allPages) => {
+                    return lastPage.length ? allPages.length + 1 : undefined
+                },
+            }
+        )
 
     const wrapperRef = useRef<HTMLDivElement>(null)
-    const pathname = usePathname()
 
-    const [messages, setMessages] = useState<ExtendedMessage[]>(
-        data?.pages?.flatMap((page) => page) ?? []
-    )
+    const [messages, setMessages] = useState<ExtendedMessage[]>(initialMessages)
 
     useEffect(() => {
         if (data?.pages) {
@@ -62,7 +55,7 @@ export function Chat({ session, chatId }: ChatProps) {
             if (messages && messages[0]?.chatId === chatId) {
                 setMessages(messages)
                 if (
-                    // data.pages.length > 1 &&
+                    data.pages.length > 1 &&
                     wrapperRef.current &&
                     wrapperRef.current.scrollTop < 1
                 ) {
@@ -93,11 +86,9 @@ export function Chat({ session, chatId }: ChatProps) {
     useEffect(() => {
         const wrapper = wrapperRef.current
         if (wrapper) {
-            setTimeout(() => {
-                wrapper.scrollTop = wrapper.scrollHeight
-            }, 500)
+            wrapper.scrollTop = wrapper.scrollHeight
         }
-    }, [isLoading, pathname])
+    }, [isLoading])
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
@@ -136,7 +127,7 @@ export function Chat({ session, chatId }: ChatProps) {
             pusherClient.unbind("message:new", onNewMessage)
             pusherClient.unbind("message:update", onUpdateMessage)
         }
-    }, [chatId])
+    }, [chatId, session?.user.id])
 
     return (
         <div
@@ -148,9 +139,7 @@ export function Chat({ session, chatId }: ChatProps) {
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
             )}
 
-            {isLoading ? (
-                <MessageSkeleton className="mt-5" />
-            ) : messages.length < 1 && isFetched ? (
+            {messages.length < 1 ? (
                 <p className="my-auto self-center text-2xl font-semibold">
                     No history yet.
                 </p>
