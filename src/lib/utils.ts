@@ -39,7 +39,7 @@ export function formatDateToTimestamp(date: Date | string) {
         dateObject = date
     }
 
-    return dateObject.toLocaleTimeString(undefined, {
+    return dateObject.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
@@ -68,7 +68,7 @@ export function formatDate(
 
     if (dateObject.toDateString() === now.toDateString()) {
         if (formatTodayToTimestamp) {
-            return dateObject.toLocaleTimeString(undefined, {
+            return dateObject.toLocaleTimeString("en-US", {
                 hour: "numeric",
                 minute: "2-digit",
                 hour12: true,
@@ -79,7 +79,7 @@ export function formatDate(
     } else if (dateObject.toDateString() === yesterday.toDateString()) {
         return "Yesterday"
     } else {
-        return dateObject.toLocaleTimeString(undefined, {
+        return dateObject.toLocaleTimeString("en-US", {
             month,
             day: "numeric",
         })

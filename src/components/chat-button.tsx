@@ -37,6 +37,7 @@ export function ChatButton({
         : lastMessage.seenBy.some((u) => u.id === session?.user.id) ||
           lastMessageText === "Chat started"
 
+    console.log(lastMessage?.createdAt)
     return (
         <Link
             onClick={onSelect}
