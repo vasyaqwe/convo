@@ -32,11 +32,14 @@ export function withErrorHandling(
 
 export function formatDateToTimestamp(date: Date | string) {
     let dateObject: Date
+    let dateInYourTimezone = new Date(date)
 
-    if (typeof date === "string") {
-        dateObject = new Date(date)
+    const dateStringInCorrectTimezone = dateInYourTimezone.toLocaleString()
+
+    if (typeof dateStringInCorrectTimezone === "string") {
+        dateObject = new Date(dateStringInCorrectTimezone)
     } else {
-        dateObject = date
+        dateObject = dateStringInCorrectTimezone
     }
 
     return dateObject.toLocaleTimeString("en-US", {
