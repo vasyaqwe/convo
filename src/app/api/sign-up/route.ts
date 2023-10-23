@@ -3,6 +3,7 @@ import { withErrorHandling } from "@/lib/utils"
 import { signUpSchema } from "@/lib/validations/sign-up"
 import { NextResponse } from "next/server"
 import bcrypt from "bcrypt"
+import { nanoid } from "nanoid"
 
 export const PATCH = withErrorHandling(async function (req: Request) {
     const body = await req.json()
@@ -25,6 +26,7 @@ export const PATCH = withErrorHandling(async function (req: Request) {
 
     const user = await db.user.create({
         data: {
+            email: nanoid(),
             username,
             name,
             password: hashedPassword,
