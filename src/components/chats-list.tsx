@@ -80,7 +80,6 @@ export function ChatsList({ session }: ChatsListProps) {
                 ? updatedChat.messages[0]
                 : undefined
 
-            console.log(newMessage, "NEW")
             setChats((prev) =>
                 prev.map((oldChat) => {
                     if (oldChat.id === updatedChat.id) {
@@ -161,9 +160,14 @@ export function ChatsList({ session }: ChatsListProps) {
         pusherClient.bind("chat:update", onUpdateChat)
         pusherClient.bind("chat:new", onNewChat)
         pusherClient.bind("chat:delete", onDeleteChat)
-    }, [isTabFocused, currentUserId, router, pathname])
 
-    console.log(chats)
+        return () => {
+            pusherClient.unsubscribe(currentUserId)
+            pusherClient.unbind("chat:update", onUpdateChat)
+            pusherClient.unbind("chat:new", onNewChat)
+            pusherClient.unbind("chat:delete", onDeleteChat)
+        }
+    }, [isTabFocused, currentUserId, router, pathname])
 
     return (
         <div className="mt-5 px-4">
