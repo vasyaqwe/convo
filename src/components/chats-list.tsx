@@ -12,7 +12,7 @@ import { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { toast } from "sonner"
 
 type ChatsListProps = {
@@ -39,6 +39,10 @@ export function ChatsList({ session }: ChatsListProps) {
         if (data) setChats(data)
     }, [data])
 
+    const currentUserId = useMemo(() => {
+        return session?.user?.id
+    }, [session?.user?.id])
+
     const {
         data: results,
         refetch,
@@ -50,9 +54,7 @@ export function ChatsList({ session }: ChatsListProps) {
 
             const { data } = await axiosInstance.get(`/users-search?q=${input}`)
 
-            return (data as User[]).filter(
-                (user) => user.id !== session?.user.id
-            )
+            return (data as User[]).filter((user) => user.id !== currentUserId)
         },
         {
             enabled: false,
@@ -65,7 +67,11 @@ export function ChatsList({ session }: ChatsListProps) {
     }, [debouncedInput])
 
     useEffect(() => {
-        pusherClient.subscribe(session?.user.id)
+        if (!currentUserId) {
+            return
+        }
+
+        pusherClient.subscribe(currentUserId)
 
         const onUpdateChat = (
             updatedChat: ExtendedChat & { sendNotification: boolean }
@@ -144,7 +150,7 @@ export function ChatsList({ session }: ChatsListProps) {
             })
 
             if (
-                removerId !== session?.user.id &&
+                removerId !== currentUserId &&
                 pathname?.includes(deletedChat.id)
             ) {
                 toast.message("Chat your were in was deleted")
@@ -157,13 +163,13 @@ export function ChatsList({ session }: ChatsListProps) {
         pusherClient.bind("chat:delete", onDeleteChat)
 
         return () => {
-            pusherClient.unsubscribe(session?.user.id)
+            pusherClient.unsubscribe(currentUserId)
             pusherClient.unbind("chat:update", onUpdateChat)
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isTabFocused, pathname])
+    }, [isTabFocused, currentUserId, router, pathname])
+
     console.log(chats)
 
     return (
@@ -191,7 +197,7 @@ export function ChatsList({ session }: ChatsListProps) {
                     results?.map((user) => {
                         const chat = chats?.find(
                             (chat) =>
-                                chat.userIds.includes(session?.user.id) &&
+                                chat.userIds.includes(currentUserId) &&
                                 chat.userIds.includes(user.id)
                         )
 
@@ -231,9 +237,7 @@ export function ChatsList({ session }: ChatsListProps) {
                 </p>
             ) : (
                 chats.map((chat) => {
-                    const user = chat.users.find(
-                        (u) => u.id !== session?.user.id
-                    )
+                    const user = chat.users.find((u) => u.id !== currentUserId)
 
                     if (user) {
                         return (
