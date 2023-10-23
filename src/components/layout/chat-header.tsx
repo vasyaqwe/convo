@@ -15,17 +15,15 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
 import { Loading } from "@/components/ui/loading"
-import { useActiveUsersStore } from "@/stores/use-active-users-store"
 import Link from "next/link"
 import { User } from "next-auth"
 
 type ChatHeaderProps = {
     user: User
-    chat: ExtendedChat
+    chat: Omit<ExtendedChat, "messages">
 }
 
 export function ChatHeader({ user, chat }: ChatHeaderProps) {
-    const { members } = useActiveUsersStore()
     const chatPartner = chat.users.find((u) => u.id !== user.id) as UserType
 
     const queryClient = useQueryClient()

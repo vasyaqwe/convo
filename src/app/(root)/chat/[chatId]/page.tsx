@@ -23,20 +23,6 @@ export default async function Page({ params: { chatId } }: PageProps) {
         where: { id: chatId },
         include: {
             users: true,
-            messages: {
-                orderBy: {
-                    createdAt: "desc",
-                },
-                include: {
-                    sender: {
-                        select: USERS_SELECT,
-                    },
-                    seenBy: {
-                        select: USERS_SELECT,
-                    },
-                },
-                take: MESSAGES_INFINITE_SCROLL_COUNT,
-            },
         },
     })
 
@@ -50,7 +36,6 @@ export default async function Page({ params: { chatId } }: PageProps) {
             />
 
             <Chat
-                initialMessages={addDisplaySender(reverseArray(chat.messages))}
                 session={session}
                 chatId={chatId}
             />

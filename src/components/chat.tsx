@@ -14,16 +14,12 @@ import React, { useEffect, useRef, useState } from "react"
 type ChatProps = {
     session: Session | null
     chatId: string
-    initialMessages: ExtendedMessage[]
 }
 
-export function Chat({ session, chatId, initialMessages }: ChatProps) {
-    const wrapperRef = useRef<HTMLDivElement>(null)
-    const [messages, setMessages] = useState<ExtendedMessage[]>(initialMessages)
-
+export function Chat({ session, chatId }: ChatProps) {
     const queryKey = ["messages"]
 
-    const { isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    const { isLoading, hasNextPage, isFetchingNextPage, data, fetchNextPage } =
         useInfiniteQuery(
             queryKey,
             async ({ pageParam = 1 }) => {
@@ -34,29 +30,6 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                 return data as ExtendedMessage[]
             },
             {
-                onSuccess: ({ pages }) => {
-                    const reversedPages = reverseArray(
-                        pages.filter((page) => page.length !== 0)
-                    )
-                    const messages = reversedPages?.flatMap((page) => page)
-
-                    if (messages && messages[0]?.chatId === chatId) {
-                        setMessages(messages)
-                        if (
-                            pages.length > 1 &&
-                            wrapperRef.current &&
-                            wrapperRef.current.scrollTop < 1
-                        ) {
-                            const prevPage = pages[pages.length - 2]
-                            if (prevPage && prevPage[0]) {
-                                const prevPageFirstMessage =
-                                    document.getElementById(prevPage[0].id)
-
-                                prevPageFirstMessage?.scrollIntoView()
-                            }
-                        }
-                    }
-                },
                 refetchOnWindowFocus: false,
                 refetchOnReconnect: false,
                 getNextPageParam: (lastPage, allPages) => {
@@ -64,6 +37,38 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                 },
             }
         )
+
+    const wrapperRef = useRef<HTMLDivElement>(null)
+    const [messages, setMessages] = useState<ExtendedMessage[]>(
+        data?.pages?.flatMap((page) => page) ?? []
+    )
+
+    useEffect(() => {
+        if (data?.pages) {
+            const reversedPages = reverseArray(
+                data.pages.filter((page) => page.length !== 0)
+            )
+            const messages = reversedPages?.flatMap((page) => page)
+
+            if (messages && messages[0]?.chatId === chatId) {
+                setMessages(messages)
+                if (
+                    // data.pages.length > 1 &&
+                    wrapperRef.current &&
+                    wrapperRef.current.scrollTop < 1
+                ) {
+                    const prevPage = data.pages[data.pages.length - 2]
+                    if (prevPage && prevPage[0]) {
+                        const prevPageFirstMessage = document.getElementById(
+                            prevPage[0].id
+                        )
+
+                        prevPageFirstMessage?.scrollIntoView()
+                    }
+                }
+            }
+        }
+    }, [data, chatId])
 
     const { ref, entry } = useIntersection({
         threshold: 0,
