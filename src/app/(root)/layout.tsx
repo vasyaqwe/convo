@@ -15,6 +15,8 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
     title: "convo.",
     description: "convo is a modern messaging app. Built with Next.js 13.",
+    viewport:
+        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
 }
 
 export default async function RootLayout({
