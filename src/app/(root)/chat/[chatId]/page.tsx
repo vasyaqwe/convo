@@ -50,7 +50,7 @@ export default async function Page({ params: { chatId } }: PageProps) {
             />
 
             <Chat
-                initialMessages={addDisplaySender(reverseArray(chat.messages))}
+                initialMessages={reverseArray(chat.messages)}
                 session={session}
                 chatId={chatId}
             />

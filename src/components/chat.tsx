@@ -42,7 +42,6 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
 
                     if (messages && messages[0]?.chatId === chatId) {
                         setMessages(messages)
-
                         if (
                             pages.length > 1 &&
                             wrapperRef.current &&
