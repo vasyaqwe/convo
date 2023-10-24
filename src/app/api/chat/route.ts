@@ -52,30 +52,7 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     const body = await req.json()
 
-    const { isGroup, userId, name, members } = chatSchema.parse(body)
-
-    if (isGroup) {
-        const newChat = await db.chat.create({
-            data: {
-                name,
-                isGroup,
-                users: {
-                    connect: [...members!, { id: session.user.id }],
-                },
-            },
-            include: {
-                users: {
-                    select: USERS_SELECT,
-                },
-            },
-        })
-
-        newChat.userIds.forEach(async (userId) => {
-            await pusherServer.trigger(userId, "chat:new", newChat)
-        })
-
-        return new NextResponse(JSON.stringify(newChat))
-    }
+    const { userId } = chatSchema.parse(body)
 
     const existingChat = await db.chat.findFirst({
         where: {
@@ -111,9 +88,9 @@ export const POST = withErrorHandling(async function (req: Request) {
         },
     })
 
-    newChat.userIds.forEach((userId) => {
-        pusherServer.trigger(userId, "chat:new", newChat)
-    })
+    for (const userId of newChat.userIds) {
+        await pusherServer.trigger(userId, "chat:new", newChat)
+    }
 
     return new NextResponse(JSON.stringify(newChat))
 })
