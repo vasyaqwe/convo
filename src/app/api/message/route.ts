@@ -84,8 +84,8 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     await pusherServer.trigger(chatId, "message:new", newMessage)
 
-    await updatedChat.userIds.forEach((userId) => {
-        pusherServer.trigger(userId, "chat:update", {
+    updatedChat.userIds.forEach(async (userId) => {
+        await pusherServer.trigger(userId, "chat:update", {
             id: chatId,
             messages: [lastMessage],
         })
