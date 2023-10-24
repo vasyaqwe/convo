@@ -61,7 +61,6 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                         const prevPageFirstMessage = document.getElementById(
                             prevPage[0].id
                         )
-
                         prevPageFirstMessage?.scrollIntoView()
                     }
                 }

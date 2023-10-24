@@ -31,6 +31,9 @@ export default async function Page({ params: { chatId } }: PageProps) {
                         select: USERS_SELECT,
                     },
                 },
+                orderBy: {
+                    createdAt: "desc",
+                },
             },
         },
     })

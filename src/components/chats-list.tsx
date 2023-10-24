@@ -11,7 +11,7 @@ import { User } from "@prisma/client"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
 type ChatsListProps = {
@@ -41,9 +41,7 @@ export function ChatsList({ session }: ChatsListProps) {
         if (data) setChats(data)
     }, [data])
 
-    const currentUserId = useMemo(() => {
-        return session?.user?.id
-    }, [session?.user?.id])
+    const currentUserId = session?.user?.id
 
     const {
         data: results,
