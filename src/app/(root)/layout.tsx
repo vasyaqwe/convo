@@ -5,7 +5,7 @@ import { Toaster } from "sonner"
 import { TanstackProvider } from "@/components/tanstack-provider"
 import SessionProvider from "@/components/session-provider"
 import { Sidebar } from "@/components/layout/sidebar"
-import { cn } from "@/lib/utils"
+import { cn, isPwa } from "@/lib/utils"
 import { Chats } from "@/components/layout/chats"
 import { getAuthSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     description: "convo is a modern messaging app. Built with Next.js 13.",
     viewport:
         "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
-    themeColor: "#fff",
+    themeColor: "#000",
     manifest: "/manifest.json",
     icons: {
         apple: "/apple-touch-icon.png",
@@ -42,8 +42,9 @@ export default async function RootLayout({
             <TanstackProvider>
                 <html
                     lang="en"
-                    className="dark [--avatar-size:40px] [--chats-width:320px] [--header-height:73px] [--message-form-height:61px]
-               [--message-form-image-height:0px] [--sidebar-width:65px] md:[--avatar-size:45px]"
+                    className={cn(
+                        "dark [--avatar-size:40px] [--chats-width:320px] [--header-height:73px] [--message-form-image-height:0px] [--sidebar-width:65px] [--message-form-height:61px] md:[--avatar-size:45px]"
+                    )}
                 >
                     <body className={cn("flex", inter.className)}>
                         <Sidebar session={session} />

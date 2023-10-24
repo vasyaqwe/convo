@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: "convo is a modern messaging app. Built with Next.js 13.",
     viewport:
         "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
-    themeColor: "#fff",
+    themeColor: "#000",
     manifest: "/manifest.json",
     icons: {
         apple: "/apple-touch-icon.png",
