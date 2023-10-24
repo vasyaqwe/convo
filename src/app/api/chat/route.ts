@@ -70,8 +70,8 @@ export const POST = withErrorHandling(async function (req: Request) {
             },
         })
 
-        newChat.userIds.forEach((userId) => {
-            pusherServer.trigger(userId, "chat:new", newChat)
+        newChat.userIds.forEach(async (userId) => {
+            await pusherServer.trigger(userId, "chat:new", newChat)
         })
 
         return new NextResponse(JSON.stringify(newChat))
@@ -111,8 +111,8 @@ export const POST = withErrorHandling(async function (req: Request) {
         },
     })
 
-    newChat.userIds.forEach((userId) => {
-        pusherServer.trigger(userId, "chat:new", newChat)
+    newChat.userIds.forEach(async (userId) => {
+        await pusherServer.trigger(userId, "chat:new", newChat)
     })
 
     return new NextResponse(JSON.stringify(newChat))
