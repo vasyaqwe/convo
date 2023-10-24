@@ -21,10 +21,29 @@ export const PATCH = withErrorHandling(async function (
         where: {
             id: messageId,
         },
+        select: {
+            id: true,
+            chatId: true,
+        },
     })
 
     if (!message) {
         return new NextResponse("Invalid message id", { status: 400 })
+    }
+
+    const chat = await db.chat.findFirst({
+        where: {
+            id: message?.chatId,
+        },
+        select: {
+            userIds: true,
+        },
+    })
+
+    if (!chat?.userIds.includes(session.user.id)) {
+        return new NextResponse("To see message, must be one of chat users", {
+            status: 400,
+        })
     }
 
     const updatedMessage = await db.message.update({

@@ -32,12 +32,11 @@ export const DELETE = withErrorHandling(async function (
         },
     })
 
-    deletedChat.userIds.forEach(
-        async (userId) =>
-            await pusherServer.trigger(userId, "chat:delete", {
-                deletedChat,
-                removerId: session.user.id,
-            })
+    deletedChat.userIds.forEach((userId) =>
+        pusherServer.trigger(userId, "chat:delete", {
+            deletedChat,
+            removerId: session.user.id,
+        })
     )
 
     return new NextResponse("OK")
