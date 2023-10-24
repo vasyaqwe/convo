@@ -8,7 +8,7 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { pusherClient } from "@/lib/pusher"
 import { ExtendedChat } from "@/types"
 import { User } from "@prisma/client"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -35,7 +35,6 @@ export function ChatsList({ session }: ChatsListProps) {
 
     const router = useRouter()
     const pathname = usePathname()
-    const queryClient = useQueryClient()
 
     useEffect(() => {
         if (data) setChats(data)
@@ -114,7 +113,6 @@ export function ChatsList({ session }: ChatsListProps) {
             ) {
                 toast.message("Chat your were in was deleted")
                 router.push("/")
-                queryClient.invalidateQueries({ queryKey: ["messages"] })
             }
         }
 
@@ -128,7 +126,7 @@ export function ChatsList({ session }: ChatsListProps) {
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
-    }, [currentUserId, queryClient, pathname, router])
+    }, [currentUserId, pathname, router])
 
     return (
         <div className="mt-5 px-4">
