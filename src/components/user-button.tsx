@@ -45,7 +45,7 @@ export function UserButton({
                 mutate(user.id)
             }}
             className={cn(
-                "mt-4 flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
+                "mt-3 flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
                 className
             )}
             {...props}

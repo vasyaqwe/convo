@@ -91,15 +91,5 @@ export const POST = withErrorHandling(async function (req: Request) {
         })
     })
 
-    const chatPartnerId = updatedChat.userIds.find(
-        (userId) => userId !== lastMessage?.senderId
-    )
-
-    await pusherServer.trigger(
-        chatPartnerId ?? "",
-        "chat:new-message",
-        lastMessage
-    )
-
     return new NextResponse(JSON.stringify(newMessage))
 })

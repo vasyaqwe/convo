@@ -132,11 +132,13 @@ export function ChatsList({ session }: ChatsListProps) {
 
     return (
         <div className="mt-5 px-4">
-            <Input
-                placeholder="Enter a name or @username..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-            />
+            <div className="relative">
+                <Input
+                    placeholder="Enter a name or @username..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                />
+            </div>
             {input.length > 0 ? (
                 isFetching ? (
                     Array(5)

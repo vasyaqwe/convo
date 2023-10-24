@@ -130,9 +130,3 @@ export function groupByDate<T extends Record<string, any>>(arr: T[]) {
         return item
     }) as (T & { dateAbove: string | undefined })[]
 }
-export function isPwa() {
-    return ["fullscreen", "standalone", "minimal-ui"].some(
-        (displayMode) =>
-            window.matchMedia("(display-mode: " + displayMode + ")").matches
-    )
-}

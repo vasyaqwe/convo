@@ -8,6 +8,8 @@ import { cn, formatDateToTimestamp } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
+import Image from "next/image"
+import Link from "next/link"
 import { forwardRef } from "react"
 
 type MessageProps = {
@@ -95,7 +97,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     )}
                     <div
                         className={cn(
-                            "relative mt-2 w-fit rounded-3xl bg-primary px-3 py-2 text-sm",
+                            "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
                             isOwn
                                 ? "ml-auto rounded-tr-none"
                                 : "rounded-tl-none",
@@ -107,14 +109,25 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         )}
                     >
                         {message.image && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                className="my-3 max-w-[250px] rounded-xl md:max-w-[280px] lg:max-w-[320px]"
-                                src={message.image}
-                                alt={message.body ?? ""}
-                            />
+                            <Link
+                                href={message.image}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="relative block h-40 w-40 rounded-2xl"
+                            >
+                                <Image
+                                    src={message.image}
+                                    alt={message.body ?? ""}
+                                    fill
+                                    className="rounded-2xl object-cover"
+                                />
+                            </Link>
                         )}
-                        {message.body && <p> {message.body}</p>}
+                        {message.body && (
+                            <p className={cn(message.image ? "mt-2" : "")}>
+                                {message.body}
+                            </p>
+                        )}
                         {!message.displaySender && (
                             <small
                                 suppressHydrationWarning

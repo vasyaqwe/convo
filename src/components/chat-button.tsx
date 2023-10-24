@@ -43,7 +43,7 @@ export function ChatButton({
             aria-current={pathname?.includes(chat.id) ? "page" : undefined}
             href={`/chat/${chat.id}`}
             className={cn(
-                "mt-4 flex w-full items-center gap-2 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary aria-[current=page]:bg-secondary",
+                "mt-3 flex w-full items-center gap-2 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary aria-[current=page]:bg-secondary",
                 className
             )}
             {...props}
