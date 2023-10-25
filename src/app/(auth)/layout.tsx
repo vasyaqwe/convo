@@ -5,20 +5,11 @@ import { Toaster } from "sonner"
 import { TanstackProvider } from "@/components/tanstack-provider"
 import SessionProvider from "@/components/session-provider"
 import { cn } from "@/lib/utils"
+import { metadataConfig } from "@/config"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-    title: "convo.",
-    description: "convo is a modern messaging app. Built with Next.js 13.",
-    viewport:
-        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
-    themeColor: "#000",
-    manifest: "/manifest.json",
-    icons: {
-        apple: "/apple-touch-icon.png",
-    },
-}
+export const metadata: Metadata = metadataConfig
 
 export default function RootLayout({
     children,

@@ -13,3 +13,15 @@ export const USERS_SELECT: Prisma.UserSelect = {
     id: true,
     image: true,
 }
+
+export const metadataConfig = {
+    title: "convo.",
+    description: "convo is a modern messaging app. Built with Next.js 13.",
+    viewport:
+        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+    themeColor: "#000",
+    manifest: "/manifest.json",
+    icons: {
+        apple: "/apple-touch-icon.png",
+    },
+}

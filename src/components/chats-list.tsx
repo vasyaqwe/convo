@@ -64,22 +64,23 @@ export function ChatsList({ session }: ChatsListProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedInput])
 
-    useEffect(() => {
-        const messages = chats.flatMap((chat) => chat.messages).filter(Boolean)
-        if (messages.length === 0) return
+    //dynamically change favicon, not working for some reason...
+    // useEffect(() => {
+    //     const messages = chats.flatMap((chat) => chat.messages).filter(Boolean)
+    //     if (messages.length === 0) return
 
-        const favicon =
-            document.querySelector<HTMLAnchorElement>("link[rel='icon']")
+    //     const favicon =
+    //         document.querySelector<HTMLAnchorElement>("link[rel='icon']")
 
-        if (!favicon) return
+    //     if (!favicon) return
 
-        if (messages.every((m) => m?.seenByIds.includes(session?.user.id))) {
-            favicon.href = "/favicon.ico"
-        } else {
-            favicon.href = "/favicon-indicator.ico"
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chats])
+    //     if (messages.every((m) => m?.seenByIds.includes(session?.user.id))) {
+    //         favicon.href = "/favicon.ico"
+    //     } else {
+    //         favicon.href = "/favicon-indicator.ico"
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [chats])
 
     useEffect(() => {
         if (!currentUserId) {
