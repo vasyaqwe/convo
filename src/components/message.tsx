@@ -66,35 +66,29 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             user={message.sender}
                         />
                     )}
-                    {message.displaySender && (
-                        <p className={cn(isOwn ? "text-right" : "text-left")}>
-                            {isOwn ? (
-                                <>
-                                    {message.sender.name}{" "}
-                                    <small
-                                        className="text-xs text-foreground/75"
-                                        suppressHydrationWarning
-                                    >
-                                        {formatDateToTimestamp(
-                                            message.createdAt
-                                        )}
-                                    </small>
-                                </>
-                            ) : (
-                                <>
-                                    <small
-                                        className="text-xs text-foreground/75"
-                                        suppressHydrationWarning
-                                    >
-                                        {formatDateToTimestamp(
-                                            message.createdAt
-                                        )}
-                                    </small>{" "}
-                                    {message.sender.name}
-                                </>
-                            )}
-                        </p>
-                    )}
+                    <p className={cn(isOwn ? "text-right" : "text-left")}>
+                        {isOwn ? (
+                            <>
+                                {message.sender.name}{" "}
+                                <small
+                                    className="text-xs text-foreground/75"
+                                    suppressHydrationWarning
+                                >
+                                    {formatDateToTimestamp(message.createdAt)}
+                                </small>
+                            </>
+                        ) : (
+                            <>
+                                <small
+                                    className="text-xs text-foreground/75"
+                                    suppressHydrationWarning
+                                >
+                                    {formatDateToTimestamp(message.createdAt)}
+                                </small>{" "}
+                                {message.sender.name}
+                            </>
+                        )}
+                    </p>
                     <div
                         className={cn(
                             "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
