@@ -4,7 +4,7 @@ import { Icons } from "@/components/ui/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
-import { cn, formatDateToTimestamp } from "@/lib/utils"
+import { cn, formatDate, formatDateToTimestamp } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -56,6 +56,8 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         : ""
                 )}
             >
+                {formatDate("2023-10-25T09:39:32.689Z", "short")} hello this is
+                the date
                 <div className="group">
                     {message.displaySender && (
                         <UserAvatar
@@ -66,29 +68,35 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             user={message.sender}
                         />
                     )}
-                    <p className={cn(isOwn ? "text-right" : "text-left")}>
-                        {isOwn ? (
-                            <>
-                                {message.sender.name}{" "}
-                                <small
-                                    className="text-xs text-foreground/75"
-                                    suppressHydrationWarning
-                                >
-                                    {formatDateToTimestamp(message.createdAt)}
-                                </small>
-                            </>
-                        ) : (
-                            <>
-                                <small
-                                    className="text-xs text-foreground/75"
-                                    suppressHydrationWarning
-                                >
-                                    {formatDateToTimestamp(message.createdAt)}
-                                </small>{" "}
-                                {message.sender.name}
-                            </>
-                        )}
-                    </p>
+                    {message.displaySender && (
+                        <p className={cn(isOwn ? "text-right" : "text-left")}>
+                            {isOwn ? (
+                                <>
+                                    {message.sender.name}{" "}
+                                    <small
+                                        className="text-xs text-foreground/75"
+                                        suppressHydrationWarning
+                                    >
+                                        {formatDateToTimestamp(
+                                            message.createdAt
+                                        )}
+                                    </small>
+                                </>
+                            ) : (
+                                <>
+                                    <small
+                                        className="text-xs text-foreground/75"
+                                        suppressHydrationWarning
+                                    >
+                                        {formatDateToTimestamp(
+                                            message.createdAt
+                                        )}
+                                    </small>{" "}
+                                    {message.sender.name}
+                                </>
+                            )}
+                        </p>
+                    )}
                     <div
                         className={cn(
                             "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
