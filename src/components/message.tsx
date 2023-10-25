@@ -56,8 +56,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         : ""
                 )}
             >
-                {formatDate("2023-10-25T09:39:32.689Z", "short")} hello this is
-                the date
                 <div className="group">
                     {message.displaySender && (
                         <UserAvatar
@@ -73,10 +71,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             {isOwn ? (
                                 <>
                                     {message.sender.name}{" "}
-                                    <small
-                                        className="text-xs text-foreground/75"
-                                        suppressHydrationWarning
-                                    >
+                                    <small className="text-xs text-foreground/75">
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
@@ -84,10 +79,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 </>
                             ) : (
                                 <>
-                                    <small
-                                        className="text-xs text-foreground/75"
-                                        suppressHydrationWarning
-                                    >
+                                    <small className="text-xs text-foreground/75">
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
@@ -132,7 +124,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         )}
                         {!message.displaySender && (
                             <small
-                                suppressHydrationWarning
                                 className={cn(
                                     "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
                                     isOwn
