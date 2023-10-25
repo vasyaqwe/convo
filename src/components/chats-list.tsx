@@ -1,6 +1,7 @@
 "use client"
 
 import { ChatButton } from "@/components/chat-button"
+import { Icons } from "@/components/ui/icons"
 import { Input } from "@/components/ui/input"
 import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
@@ -129,88 +130,100 @@ export function ChatsList({ session }: ChatsListProps) {
     }, [currentUserId, pathname, router])
 
     return (
-        <div className="mt-5 px-4">
-            <div className="relative">
+        <div className="mt-5 overflow-hidden px-1.5">
+            <div className="relative mt-1 px-3">
+                <Icons.search
+                    className="absolute left-5 top-[49%] -translate-y-1/2 text-muted-foreground"
+                    width={19}
+                    height={19}
+                />
                 <Input
                     placeholder="Enter a name or @username..."
                     value={input}
+                    className="pl-8"
                     onChange={(e) => setInput(e.target.value)}
                 />
             </div>
-            {input.length > 0 ? (
-                isFetching ? (
-                    Array(5)
+            <div className="mt-5 h-full overflow-y-auto px-3">
+                {input.length > 0 ? (
+                    isFetching ? (
+                        Array(15)
+                            .fill("")
+                            .map((_item, idx) => (
+                                <UserButtonSkeleton
+                                    className="mt-5 first:mt-0"
+                                    key={idx}
+                                />
+                            ))
+                    ) : (results?.length ?? 0) < 1 ? (
+                        <p className="text-sm text-foreground/80">
+                            No results found.
+                        </p>
+                    ) : (
+                        results?.map((user) => {
+                            const chat = chats?.find(
+                                (chat) =>
+                                    chat.userIds.includes(currentUserId) &&
+                                    chat.userIds.includes(user.id)
+                            )
+
+                            if (chat) {
+                                return (
+                                    <ChatButton
+                                        className="mt-3 first:mt-0"
+                                        onSelect={() => setInput("")}
+                                        session={session}
+                                        chat={chat}
+                                        key={user.id}
+                                        user={user}
+                                    />
+                                )
+                            }
+
+                            return (
+                                <UserButton
+                                    onSelect={() => setInput("")}
+                                    key={user.id}
+                                    user={user}
+                                />
+                            )
+                        })
+                    )
+                ) : isLoading ? (
+                    Array(15)
                         .fill("")
                         .map((_item, idx) => (
                             <UserButtonSkeleton
-                                className="mt-5"
+                                className="mt-5 first:mt-0"
                                 key={idx}
                             />
                         ))
-                ) : (results?.length ?? 0) < 1 ? (
-                    <p className="mt-5 text-sm text-foreground/80">
-                        No results found.
+                ) : chats.length < 1 ? (
+                    <p className="mt-6 text-sm text-foreground/80">
+                        Nothing here yet.
                     </p>
                 ) : (
-                    results?.map((user) => {
-                        const chat = chats?.find(
-                            (chat) =>
-                                chat.userIds.includes(currentUserId) &&
-                                chat.userIds.includes(user.id)
+                    chats.map((chat) => {
+                        const user = chat.users.find(
+                            (u) => u.id !== currentUserId
                         )
 
-                        if (chat) {
+                        if (user) {
                             return (
                                 <ChatButton
-                                    onSelect={() => setInput("")}
+                                    className="mt-3 first:mt-0"
                                     session={session}
                                     chat={chat}
-                                    key={user.id}
+                                    key={chat.id}
                                     user={user}
                                 />
                             )
                         }
 
-                        return (
-                            <UserButton
-                                onSelect={() => setInput("")}
-                                key={user.id}
-                                user={user}
-                            />
-                        )
+                        return null
                     })
-                )
-            ) : isLoading ? (
-                Array(5)
-                    .fill("")
-                    .map((_item, idx) => (
-                        <UserButtonSkeleton
-                            className="mt-5"
-                            key={idx}
-                        />
-                    ))
-            ) : chats.length < 1 ? (
-                <p className="mt-6 text-sm text-foreground/80">
-                    Nothing here yet.
-                </p>
-            ) : (
-                chats.map((chat) => {
-                    const user = chat.users.find((u) => u.id !== currentUserId)
-
-                    if (user) {
-                        return (
-                            <ChatButton
-                                session={session}
-                                chat={chat}
-                                key={chat.id}
-                                user={user}
-                            />
-                        )
-                    }
-
-                    return null
-                })
-            )}
+                )}
+            </div>
         </div>
     )
 }

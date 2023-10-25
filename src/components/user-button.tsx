@@ -67,8 +67,11 @@ export function UserButtonSkeleton({
         >
             <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
             <div className="w-full">
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="mt-3 h-3 w-full" />
+                <div className="flex items-center gap-10">
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="ml-auto h-3 w-[40px]" />
+                </div>
+                <Skeleton className="mt-3 h-3 w-[70%]" />
             </div>
         </div>
     )

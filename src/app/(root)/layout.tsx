@@ -10,6 +10,7 @@ import { Chats } from "@/components/layout/chats"
 import { getAuthSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { ActiveUsers } from "@/components/active-users"
+import { Notifications } from "@/components/notifications"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -62,6 +63,7 @@ export default async function RootLayout({
                             style={{ font: "inherit" }}
                         />
                         <ActiveUsers />
+                        <Notifications session={session} />
                     </body>
                 </html>
             </TanstackProvider>

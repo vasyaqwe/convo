@@ -91,5 +91,10 @@ export const POST = withErrorHandling(async function (req: Request) {
         messages: [lastMessage],
     })
 
+    await pusherServer.trigger(partnerId!, "chat:new-message", {
+        chatId,
+        newMessage,
+    })
+
     return new NextResponse(JSON.stringify(newMessage))
 })

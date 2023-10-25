@@ -17,7 +17,7 @@ export function Chats({
             )}
             {...props}
         >
-            <header className="flex h-[var(--header-height)] items-center border-b border-secondary px-4 ">
+            <header className="flex h-[var(--header-height)] flex-shrink-0 items-center border-b border-secondary px-4 ">
                 <h2 className="text-3xl font-semibold">Chats</h2>
             </header>
             <ChatsList session={session} />

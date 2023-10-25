@@ -75,3 +75,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+* {
+  scrollbar-color: hsl(var(--primary)) hsl(var(--secondary));
+}
+
+*::-webkit-scrollbar {
+  width: 0.35rem;
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 100vmax;
+  background-color: hsl(var(--secondary));
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 100vmax;
+  background-color: hsl(var(--primary));
+}
