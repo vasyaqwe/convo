@@ -65,6 +65,23 @@ export function ChatsList({ session }: ChatsListProps) {
     }, [debouncedInput])
 
     useEffect(() => {
+        const messages = chats.flatMap((chat) => chat.messages).filter(Boolean)
+        if (messages.length === 0) return
+
+        const favicon =
+            document.querySelector<HTMLAnchorElement>("link[rel='icon']")
+
+        if (!favicon) return
+
+        if (messages.every((m) => m?.seenByIds.includes(session?.user.id))) {
+            favicon.href = "/favicon.ico"
+        } else {
+            favicon.href = "/favicon-indicator.ico"
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chats])
+
+    useEffect(() => {
         if (!currentUserId) {
             return
         }
@@ -130,8 +147,8 @@ export function ChatsList({ session }: ChatsListProps) {
     }, [currentUserId, pathname, router])
 
     return (
-        <div className="mt-5 overflow-hidden px-1.5">
-            <div className="relative mt-1 px-3">
+        <div className="mt-3 overflow-hidden px-1.5">
+            <div className="relative mt-2 px-3">
                 <Icons.search
                     className="absolute left-5 top-[49%] -translate-y-1/2 text-muted-foreground"
                     width={19}
