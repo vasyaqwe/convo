@@ -11,6 +11,9 @@ import { Session } from "next-auth"
 import Image from "next/image"
 import Link from "next/link"
 import { forwardRef } from "react"
+import dynamic from "next/dynamic"
+
+const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
 type MessageProps = {
     message: ExtendedMessage
@@ -71,25 +74,19 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             {isOwn ? (
                                 <>
                                     {message.sender.name}{" "}
-                                    <small
-                                        className="text-xs text-foreground/75"
-                                        suppressHydrationWarning
-                                    >
+                                    <Date className="text-xs text-foreground/75">
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
-                                    </small>
+                                    </Date>
                                 </>
                             ) : (
                                 <>
-                                    <small
-                                        className="text-xs text-foreground/75"
-                                        suppressHydrationWarning
-                                    >
+                                    <Date className="text-xs text-foreground/75">
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
-                                    </small>{" "}
+                                    </Date>{" "}
                                     {message.sender.name}
                                 </>
                             )}
@@ -129,8 +126,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             </p>
                         )}
                         {!message.displaySender && (
-                            <small
-                                suppressHydrationWarning
+                            <Date
                                 className={cn(
                                     "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
                                     isOwn
@@ -139,7 +135,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 )}
                             >
                                 {formatDateToTimestamp(message.createdAt)}
-                            </small>
+                            </Date>
                         )}
                     </div>
 

@@ -6,6 +6,9 @@ import { ExtendedChat, UserType } from "@/types"
 import { cn, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { Session } from "next-auth"
+import dynamic from "next/dynamic"
+
+const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
 type ChatButtonProps = {
     user: UserType
@@ -58,12 +61,9 @@ export function ChatButton({
                         {user.name}
                     </p>
                     {lastMessage && (
-                        <small
-                            className="flex-shrink-0 text-xs text-foreground/60"
-                            suppressHydrationWarning
-                        >
+                        <Date className="flex-shrink-0 text-xs text-foreground/60">
                             {formatDate(lastMessage.createdAt, "short")}
-                        </small>
+                        </Date>
                     )}
                 </div>
                 <p
