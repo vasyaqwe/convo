@@ -140,15 +140,15 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                     No history yet.
                 </p>
             ) : (
-                messages.map((message, idx) => {
+                groupByDate(messages).map((message, idx) => {
                     if (idx === 3) {
                         return (
                             <React.Fragment key={message.id}>
-                                {/* {message.dateAbove && (
+                                {message.dateAbove && (
                                     <MessageDatePill>
                                         {message.dateAbove}
                                     </MessageDatePill>
-                                )} */}
+                                )}
                                 <Message
                                     isLast={messages.length === 4}
                                     session={session}
@@ -161,11 +161,11 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
 
                     return (
                         <React.Fragment key={message.id}>
-                            {/* {message.dateAbove && (
+                            {message.dateAbove && (
                                 <MessageDatePill>
                                     {message.dateAbove}
                                 </MessageDatePill>
-                            )} */}
+                            )}
                             <Message
                                 isLast={idx === messages.length - 1}
                                 session={session}

@@ -97,24 +97,7 @@ export function addDisplaySender(messages: ExtendedMessage[]) {
     let prevSenderId: string | null = null
     let prevMessageTimestamp: number | null = null
 
-    const newMessages = [...messages].map((message) => {
-        if (message.senderId === prevSenderId) {
-            const currentTimestamp = new Date(message.createdAt).getTime()
-            const timeDiff = currentTimestamp - prevMessageTimestamp!
-            if (timeDiff < 5 * 60 * 1000) {
-                // 5 minutes in milliseconds
-                message.displaySender = false
-            } else {
-                message.displaySender = true
-            }
-            prevMessageTimestamp = currentTimestamp // Update timestamp
-        } else {
-            prevSenderId = message.senderId
-            prevMessageTimestamp = new Date(message.createdAt).getTime()
-            message.displaySender = true
-        }
-        return message
-    })
+    const newMessages = [...messages]
 
     return newMessages
 }
