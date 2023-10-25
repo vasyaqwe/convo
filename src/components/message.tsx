@@ -4,7 +4,7 @@ import { Icons } from "@/components/ui/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
-import { cn, formatDate, formatDateToTimestamp } from "@/lib/utils"
+import { cn, formatDateToTimestamp } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -71,7 +71,10 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             {isOwn ? (
                                 <>
                                     {message.sender.name}{" "}
-                                    <small className="text-xs text-foreground/75">
+                                    <small
+                                        className="text-xs text-foreground/75"
+                                        suppressHydrationWarning
+                                    >
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
@@ -79,7 +82,10 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 </>
                             ) : (
                                 <>
-                                    <small className="text-xs text-foreground/75">
+                                    <small
+                                        className="text-xs text-foreground/75"
+                                        suppressHydrationWarning
+                                    >
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
@@ -124,6 +130,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         )}
                         {!message.displaySender && (
                             <small
+                                suppressHydrationWarning
                                 className={cn(
                                     "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
                                     isOwn
