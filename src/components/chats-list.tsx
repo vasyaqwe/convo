@@ -147,7 +147,7 @@ export function ChatsList({ session }: ChatsListProps) {
             <div className="mt-5 h-full overflow-y-auto px-3">
                 {input.length > 0 ? (
                     isFetching ? (
-                        Array(15)
+                        Array(10)
                             .fill("")
                             .map((_item, idx) => (
                                 <UserButtonSkeleton
@@ -190,7 +190,7 @@ export function ChatsList({ session }: ChatsListProps) {
                         })
                     )
                 ) : isLoading ? (
-                    Array(15)
+                    Array(10)
                         .fill("")
                         .map((_item, idx) => (
                             <UserButtonSkeleton
