@@ -56,15 +56,17 @@ export function MessageForm({ chatId }: MessageFormProps) {
     })
 
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-        if (
-            e.key === "Enter" &&
-            !e.shiftKey &&
-            !isUploading &&
-            !isPending &&
-            (body.length > 0 || image)
-        ) {
+        if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
-            mutate({ body, image })
+            if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !isUploading &&
+                !isPending &&
+                (body.length > 0 || image)
+            ) {
+                mutate({ body, image })
+            }
         }
     }
 
