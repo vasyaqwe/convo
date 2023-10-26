@@ -68,5 +68,6 @@ export const DELETE = withErrorHandling(async function (
             removerId: session.user.id,
         })
     }
+
     return new NextResponse("OK")
 })

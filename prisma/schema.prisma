@@ -55,8 +55,7 @@ model Chat {
   name      String?
   isGroup   Boolean? @default(false)
 
-  messageIds String[]  @db.ObjectId
-  messages   Message[]
+  messages Message[]
 
   userIds String[] @db.ObjectId
   users   User[]   @relation(fields: [userIds], references: [id])

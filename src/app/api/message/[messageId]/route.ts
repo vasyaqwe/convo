@@ -1,4 +1,4 @@
-import { USERS_SELECT } from "@/config"
+import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
@@ -79,4 +79,74 @@ export const PATCH = withErrorHandling(async function (
     )
 
     return new NextResponse(JSON.stringify(updatedMessage))
+})
+
+export const DELETE = withErrorHandling(async function (
+    _req: Request,
+    { params: { messageId } }
+) {
+    const session = await getAuthSession()
+
+    if (!session) {
+        return new NextResponse("Unauthorized", {
+            status: 401,
+        })
+    }
+
+    const message = await db.message.findFirst({
+        where: {
+            id: messageId,
+        },
+        select: {
+            id: true,
+            senderId: true,
+            chatId: true,
+        },
+    })
+
+    if (!message) {
+        return new NextResponse("Invalid message id", { status: 400 })
+    }
+
+    if (message.senderId !== session.user.id) {
+        return new NextResponse("Forbidden", { status: 403 })
+    }
+
+    await db.message.delete({
+        where: {
+            id: messageId,
+        },
+    })
+
+    const updatedChat = await db.chat.findFirst({
+        where: {
+            id: message.chatId,
+        },
+        include: {
+            messages: {
+                include: {
+                    seenBy: {
+                        select: USERS_SELECT,
+                    },
+                    sender: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+                take: MESSAGES_INFINITE_SCROLL_COUNT,
+            },
+        },
+    })
+
+    for (const userId of updatedChat?.userIds ?? []) {
+        await pusherServer.trigger(userId, "chat:update", {
+            id: message.chatId,
+            messages: updatedChat?.messages,
+        })
+    }
+
+    await pusherServer.trigger(message.chatId, "message:delete", messageId)
+
+    return new NextResponse("OK")
 })

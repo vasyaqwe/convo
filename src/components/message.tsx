@@ -6,12 +6,20 @@ import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { cn, formatDateToTimestamp } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import Image from "next/image"
 import Link from "next/link"
+import {
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuTrigger,
+} from "@/components/ui/context-menu"
 import { forwardRef } from "react"
 import dynamic from "next/dynamic"
+import { Loading } from "@/components/ui/loading"
+import { toast } from "sonner"
 
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
@@ -34,6 +42,22 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 return data
             },
             enabled: isLast && !message.seenByIds.includes(session?.user.id),
+        })
+
+        const queryClient = useQueryClient()
+
+        const { isPending, mutate: onDelete } = useMutation({
+            mutationFn: async () => {
+                await axiosInstance.delete(`/message/${message.id}`)
+            },
+            onSuccess: () => {
+                toast.success("Message deleted")
+                queryClient.invalidateQueries({ queryKey: ["chats"] })
+                queryClient.invalidateQueries({ queryKey: ["messages"] })
+            },
+            onError: () => {
+                toast.error("Something went wrong")
+            },
         })
 
         const isOwn = session?.user.id === message.senderId
@@ -92,52 +116,81 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             )}
                         </p>
                     )}
-                    <div
-                        className={cn(
-                            "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
-                            isOwn
-                                ? "ml-auto rounded-tr-none"
-                                : "rounded-tl-none",
-                            !message.displaySender
-                                ? isOwn
-                                    ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
-                                    : "md:ml-[calc(var(--avatar-size)+var(--message-gap))]"
-                                : ""
-                        )}
-                    >
-                        {message.image && (
-                            <Link
-                                href={message.image}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="relative block h-40 w-40 rounded-2xl"
-                            >
-                                <Image
-                                    src={message.image}
-                                    alt={message.body ?? ""}
-                                    fill
-                                    className="rounded-2xl object-cover"
-                                />
-                            </Link>
-                        )}
-                        {message.body && (
-                            <p className={cn(message.image ? "mt-2" : "")}>
-                                {message.body}
-                            </p>
-                        )}
-                        {!message.displaySender && (
-                            <Date
+                    <ContextMenu>
+                        <ContextMenuTrigger
+                            disabled={message.senderId !== session?.user.id}
+                        >
+                            <div
                                 className={cn(
-                                    "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
+                                    "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
                                     isOwn
-                                        ? "left-[calc(100%+var(--message-gap))]"
-                                        : "right-[calc(100%+var(--message-gap))]"
+                                        ? "ml-auto rounded-tr-none"
+                                        : "rounded-tl-none",
+                                    !message.displaySender
+                                        ? isOwn
+                                            ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
+                                            : "md:ml-[calc(var(--avatar-size)+var(--message-gap))]"
+                                        : ""
                                 )}
                             >
-                                {formatDateToTimestamp(message.createdAt)}
-                            </Date>
-                        )}
-                    </div>
+                                {message.image && (
+                                    <Link
+                                        href={message.image}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="relative block h-40 w-40 rounded-2xl"
+                                    >
+                                        <Image
+                                            src={message.image}
+                                            alt={message.body ?? ""}
+                                            fill
+                                            className="rounded-2xl object-cover"
+                                        />
+                                    </Link>
+                                )}
+                                {message.body && (
+                                    <p
+                                        className={cn(
+                                            message.image ? "mt-2" : ""
+                                        )}
+                                    >
+                                        {message.body}
+                                    </p>
+                                )}
+                                {!message.displaySender && (
+                                    <Date
+                                        className={cn(
+                                            "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
+                                            isOwn
+                                                ? "left-[calc(100%+var(--message-gap))]"
+                                                : "right-[calc(100%+var(--message-gap))]"
+                                        )}
+                                    >
+                                        {formatDateToTimestamp(
+                                            message.createdAt
+                                        )}
+                                    </Date>
+                                )}
+                            </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                            <ContextMenuItem
+                                disabled={isPending}
+                                className="!text-destructive"
+                                onSelect={(e) => {
+                                    e.preventDefault()
+                                    onDelete()
+                                }}
+                            >
+                                {isPending ? (
+                                    <Loading className="mr-2" />
+                                ) : (
+                                    <Icons.trash className="mr-2" />
+                                )}{" "}
+                                Delete message
+                            </ContextMenuItem>
+                        </ContextMenuContent>
+                    </ContextMenu>
 
                     {isLast && seenByList.length > 0 && (
                         <p

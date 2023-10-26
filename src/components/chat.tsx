@@ -115,13 +115,21 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
             setMessages((prev) => addDisplaySender(prev))
         }
 
+        function onDeleteMessage(deletedMessageId: string) {
+            setMessages((prev) =>
+                prev.filter((message) => message.id !== deletedMessageId)
+            )
+        }
+
         pusherClient.bind("message:new", onNewMessage)
         pusherClient.bind("message:update", onUpdateMessage)
+        pusherClient.bind("message:delete", onDeleteMessage)
 
         return () => {
             pusherClient.unsubscribe(chatId)
             pusherClient.unbind("message:new", onNewMessage)
             pusherClient.unbind("message:update", onUpdateMessage)
+            pusherClient.unbind("message:delete", onDeleteMessage)
         }
     }, [chatId, session?.user.id])
 

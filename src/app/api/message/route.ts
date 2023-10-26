@@ -60,27 +60,7 @@ export const POST = withErrorHandling(async function (req: Request) {
                 },
             },
         },
-        include: {
-            messages: {
-                include: {
-                    seenBy: {
-                        select: USERS_SELECT,
-                    },
-                    sender: {
-                        select: {
-                            name: true,
-                        },
-                    },
-                },
-                take: 1,
-                orderBy: {
-                    createdAt: "desc",
-                },
-            },
-        },
     })
-
-    const lastMessage = updatedChat.messages[updatedChat.messages.length - 1]
 
     await pusherServer.trigger(chatId, "message:new", newMessage)
 
@@ -88,7 +68,7 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     await pusherServer.trigger(partnerId!, "chat:update", {
         id: chatId,
-        messages: [lastMessage],
+        messages: [newMessage],
     })
 
     await pusherServer.trigger(partnerId!, "chat:new-message", {
