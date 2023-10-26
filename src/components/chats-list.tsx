@@ -17,29 +17,17 @@ import { toast } from "sonner"
 
 type ChatsListProps = {
     session: Session | null
+    initialChats: ExtendedChat[]
 }
 
-export function ChatsList({ session }: ChatsListProps) {
-    const { data, isLoading } = useQuery({
-        queryKey: ["chats"],
-        queryFn: async () => {
-            const { data } = await axiosInstance.get(`/chat`)
-
-            return data as ExtendedChat[]
-        },
-    })
-
-    const [chats, setChats] = useState(data ?? [])
+export function ChatsList({ session, initialChats }: ChatsListProps) {
+    const [chats, setChats] = useState(initialChats)
 
     const [input, setInput] = useState("")
     const debouncedInput = useDebounce<string>(input, 400)
 
     const router = useRouter()
     const pathname = usePathname()
-
-    useEffect(() => {
-        if (data) setChats(data)
-    }, [data])
 
     const currentUserId = session?.user?.id
 
@@ -207,15 +195,6 @@ export function ChatsList({ session }: ChatsListProps) {
                             )
                         })
                     )
-                ) : isLoading ? (
-                    Array(10)
-                        .fill("")
-                        .map((_item, idx) => (
-                            <UserButtonSkeleton
-                                className="mt-5 first:mt-0"
-                                key={idx}
-                            />
-                        ))
                 ) : chats.length < 1 ? (
                     <p className="mt-6 text-sm text-foreground/80">
                         Nothing here yet.

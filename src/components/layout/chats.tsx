@@ -1,14 +1,40 @@
-"use client"
-
 import { ChatsList } from "@/components/chats-list"
+import { USERS_SELECT } from "@/config"
+import { db } from "@/lib/db"
 import { cn } from "@/lib/utils"
 import { Session } from "next-auth"
 
-export function Chats({
+export async function Chats({
     className,
     session,
     ...props
 }: React.ComponentProps<"aside"> & { session: Session }) {
+    const chats = await db.chat.findMany({
+        where: {
+            userIds: {
+                has: session.user.id,
+            },
+        },
+        include: {
+            users: {
+                select: USERS_SELECT,
+            },
+            messages: {
+                include: {
+                    seenBy: {
+                        select: USERS_SELECT,
+                    },
+                    sender: {
+                        select: USERS_SELECT,
+                    },
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    })
+
     return (
         <aside
             className={cn(
@@ -20,7 +46,10 @@ export function Chats({
             <header className="flex h-[var(--header-height)] flex-shrink-0 items-center border-b border-secondary px-4 ">
                 <h2 className="text-3xl font-semibold">Chats</h2>
             </header>
-            <ChatsList session={session} />
+            <ChatsList
+                session={session}
+                initialChats={chats}
+            />
         </aside>
     )
 }

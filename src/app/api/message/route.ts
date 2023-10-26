@@ -66,10 +66,12 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     const partnerId = updatedChat.userIds.find((id) => id !== session.user.id)
 
-    await pusherServer.trigger(partnerId!, "chat:update", {
-        id: chatId,
-        messages: [newMessage],
-    })
+    for (const userId of updatedChat.userIds) {
+        await pusherServer.trigger(userId, "chat:update", {
+            id: chatId,
+            messages: [newMessage],
+        })
+    }
 
     await pusherServer.trigger(partnerId!, "chat:new-message", {
         chatId,

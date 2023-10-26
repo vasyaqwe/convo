@@ -49,7 +49,6 @@ export function MessageForm({ chatId }: MessageFormProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["messages"] })
             queryClient.invalidateQueries({ queryKey: ["users-search"] })
-            queryClient.invalidateQueries({ queryKey: ["chats"] })
         },
         onError: () => {
             return toast.error("Something went wrong")
