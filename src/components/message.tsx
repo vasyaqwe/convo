@@ -122,7 +122,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         >
                             <div
                                 className={cn(
-                                    "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
+                                    "relative max-md:select-none mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
                                     isOwn
                                         ? "ml-auto rounded-tr-none"
                                         : "rounded-tl-none",
