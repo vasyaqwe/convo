@@ -122,7 +122,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         >
                             <div
                                 className={cn(
-                                    "relative max-md:select-none mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
+                                    "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm max-md:select-none",
                                     isOwn
                                         ? "ml-auto rounded-tr-none"
                                         : "rounded-tl-none",
@@ -151,6 +151,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 {message.body && (
                                     <p
                                         className={cn(
+                                            "break-all",
                                             message.image ? "mt-2" : ""
                                         )}
                                     >
