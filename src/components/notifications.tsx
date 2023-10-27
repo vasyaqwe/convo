@@ -17,6 +17,20 @@ export function Notifications({ session }: NotificationsProps) {
     const router = useRouter()
     const { isTabFocused } = useIsTabFocused()
 
+    function sendNewMessageNotification(newMessage: ExtendedMessage) {
+        const notification = new Notification(newMessage.sender.name, {
+            body: newMessage.body ?? undefined,
+            image: newMessage.image ?? undefined,
+        })
+
+        notification.onclick = () => {
+            router.push(`/chat/${newMessage.chatId}`)
+            setTimeout(() => {
+                document.getElementById(newMessage.id)?.scrollIntoView()
+            }, 200)
+        }
+    }
+
     useEffect(() => {
         if (!currentUserId) {
             return
@@ -31,31 +45,18 @@ export function Notifications({ session }: NotificationsProps) {
             chatId: string
             newMessage: ExtendedMessage
         }) {
-            if ("Notification" in window) {
-                Notification.requestPermission().then(function (permission) {
-                    if (
-                        (pathname?.includes(chatId) && isTabFocused) ||
-                        permission !== "granted"
-                    )
-                        return
+            if ("Notification" in window && navigator.serviceWorker) {
+                navigator.permissions
+                    .query({ name: "notifications" })
+                    .then((permission) => {
+                        if (
+                            (pathname?.includes(chatId) && isTabFocused) ||
+                            permission.state !== "granted"
+                        )
+                            return
 
-                    const notification = new Notification(
-                        newMessage.sender.name,
-                        {
-                            body: newMessage.body ?? undefined,
-                            image: newMessage.image ?? undefined,
-                        }
-                    )
-
-                    notification.onclick = () => {
-                        router.push(`/chat/${newMessage.chatId}`)
-                        setTimeout(() => {
-                            document
-                                .getElementById(newMessage.id)
-                                ?.scrollIntoView()
-                        }, 200)
-                    }
-                })
+                        sendNewMessageNotification(newMessage)
+                    })
             }
         }
 
@@ -65,6 +66,7 @@ export function Notifications({ session }: NotificationsProps) {
             pusherClient.unsubscribe(currentUserId)
             pusherClient.unbind("chat:new-message", onNewMessage)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUserId, isTabFocused, pathname, router])
 
     return null
