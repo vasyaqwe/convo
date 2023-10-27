@@ -119,6 +119,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                     <span className="sr-only">Attach image</span>
                 </FileButton>
                 <TextArea
+                    maxLength={1000}
                     onPaste={onImagePaste}
                     onKeyDown={onKeyDown}
                     autoFocus

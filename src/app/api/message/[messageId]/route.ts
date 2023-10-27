@@ -1,4 +1,4 @@
-import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
+import { USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
@@ -134,7 +134,10 @@ export const DELETE = withErrorHandling(async function (
                         },
                     },
                 },
-                take: MESSAGES_INFINITE_SCROLL_COUNT,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                take: 1,
             },
         },
     })
