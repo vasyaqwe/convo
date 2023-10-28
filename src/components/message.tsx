@@ -124,7 +124,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     )}
                     <ContextMenu>
                         <ContextMenuTrigger
-                            className="max-md:pointer-events-none max-md:select-none"
+                            className="max-md:select-none"
                             disabled={message.senderId !== session?.user.id}
                         >
                             <div
