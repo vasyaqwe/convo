@@ -70,6 +70,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             .map((user) => user.name)
             .join(", ")
 
+        const bodyWithLinks = message.body?.replace(
+            /(https?:\/\/[^\s]+)/g,
+            (url) =>
+                `<a href="${url}" class="underline hover:no-underline" target="_blank">${url}</a>`
+        )
+
         return (
             <div
                 id={message.id}
@@ -118,11 +124,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     )}
                     <ContextMenu>
                         <ContextMenuTrigger
+                            className="max-md:pointer-events-none max-md:select-none"
                             disabled={message.senderId !== session?.user.id}
                         >
                             <div
                                 className={cn(
-                                    "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm max-md:select-none",
+                                    "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
                                     isOwn
                                         ? "ml-auto rounded-tr-none"
                                         : "rounded-tl-none",
@@ -148,15 +155,16 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         />
                                     </Link>
                                 )}
-                                {message.body && (
+                                {bodyWithLinks && (
                                     <p
+                                        dangerouslySetInnerHTML={{
+                                            __html: bodyWithLinks,
+                                        }}
                                         className={cn(
                                             "break-all",
                                             message.image ? "mt-2" : ""
                                         )}
-                                    >
-                                        {message.body}
-                                    </p>
+                                    ></p>
                                 )}
                                 {!message.displaySender && (
                                     <Date
