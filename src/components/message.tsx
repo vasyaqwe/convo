@@ -128,8 +128,9 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             disabled={message.senderId !== session?.user.id}
                         >
                             <div
+                                style={{ WebkitTouchCallout: "none" }}
                                 className={cn(
-                                    "relative mt-2 w-fit rounded-3xl bg-primary p-3 text-sm",
+                                    "relative my-1 w-fit rounded-3xl bg-primary p-3 text-sm",
                                     isOwn
                                         ? "ml-auto rounded-tr-none"
                                         : "rounded-tl-none",
@@ -142,6 +143,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             >
                                 {message.image && (
                                     <Link
+                                        style={{ WebkitTouchCallout: "none" }}
                                         href={message.image}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -157,6 +159,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 )}
                                 {bodyWithLinks && (
                                     <p
+                                        style={{ WebkitTouchCallout: "none" }}
                                         dangerouslySetInnerHTML={{
                                             __html: bodyWithLinks,
                                         }}
