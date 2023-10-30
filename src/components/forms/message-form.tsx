@@ -169,6 +169,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                             />
                         </Button>
                         <Image
+                            placeholder="blur"
                             style={{
                                 height: `${IMAGE_SIZE}px`,
                             }}
