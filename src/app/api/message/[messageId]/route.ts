@@ -4,6 +4,9 @@ import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
 import { NextResponse } from "next/server"
+import { UTApi } from "uploadthing/server"
+
+export const utapi = new UTApi()
 
 export const PATCH = withErrorHandling(async function (
     _req: Request,
@@ -101,6 +104,7 @@ export const DELETE = withErrorHandling(async function (
             id: true,
             senderId: true,
             chatId: true,
+            image: true,
         },
     })
 
@@ -117,6 +121,12 @@ export const DELETE = withErrorHandling(async function (
             id: messageId,
         },
     })
+
+    const imageId = message.image?.split("/f/")[1] ?? ""
+
+    if (message.image) {
+        await utapi.deleteFiles(imageId)
+    }
 
     const updatedChat = await db.chat.findFirst({
         where: {
@@ -145,7 +155,7 @@ export const DELETE = withErrorHandling(async function (
     for (const userId of updatedChat?.userIds ?? []) {
         await pusherServer.trigger(userId, "chat:update", {
             id: message.chatId,
-            messages: updatedChat?.messages,
+            message: updatedChat?.messages[0],
         })
     }
 

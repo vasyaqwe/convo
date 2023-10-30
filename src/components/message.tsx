@@ -150,7 +150,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         className="relative block h-40 w-40 rounded-2xl"
                                     >
                                         <Image
-                                            placeholder="blur"
                                             src={message.image}
                                             alt={message.body ?? ""}
                                             fill
