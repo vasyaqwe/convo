@@ -6,7 +6,7 @@ import { withErrorHandling } from "@/lib/utils"
 import { NextResponse } from "next/server"
 import { UTApi } from "uploadthing/server"
 
-export const utapi = new UTApi()
+const utapi = new UTApi()
 
 export const PATCH = withErrorHandling(async function (
     _req: Request,
