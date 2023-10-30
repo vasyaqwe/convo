@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button"
 import { FileButton } from "@/components/ui/file-button"
 import { Icons } from "@/components/ui/icons"
 import { Loading } from "@/components/ui/loading"
+import { Skeleton } from "@/components/ui/skeleton"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { useUploadThing } from "@/lib/uploadthing"
+import { cn } from "@/lib/utils"
 import { MessagePayload } from "@/lib/validations/message"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image"
@@ -101,81 +103,116 @@ export function MessageForm({ chatId }: MessageFormProps) {
     }
 
     return (
-        <form
-            onSubmit={(e) => {
-                e.preventDefault()
-                mutate({ body, image })
-            }}
-            className="h-[calc(var(--message-form-height)+var(--message-form-image-height))] overflow-hidden border-t border-secondary px-4"
-        >
-            <div className="flex h-[var(--message-form-height)] items-center ">
-                <FileButton
-                    className="flex-shrink-0"
-                    disabled={isUploading || !!image}
-                    onChange={onImageChange}
-                    accept="image/*"
-                >
-                    {isUploading ? <Loading /> : <Icons.image />}
-                    <span className="sr-only">Attach image</span>
-                </FileButton>
-                <TextArea
-                    maxLength={1000}
-                    onPaste={onImagePaste}
-                    onKeyDown={onKeyDown}
-                    autoFocus
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    placeholder="Type a message"
-                    className="h-[var(--message-form-height)] w-full"
-                />
-
-                <Button
-                    className="flex-shrink-0"
-                    disabled={
-                        (body.length < 1 && !image) || isUploading || isPending
-                    }
-                    variant={"ghost"}
-                    size={"icon"}
-                >
-                    <Icons.send />
-                    <span className="sr-only">Send message</span>
-                </Button>
-            </div>
-            {image && (
-                <div
-                    className="group relative w-fit rounded-lg border border-foreground/75"
-                    style={{
-                        marginBlock: `${IMAGE_MARGIN}px`,
-                    }}
-                >
-                    <Button
-                        onClick={() => {
-                            document.documentElement.style.setProperty(
-                                "--message-form-image-height",
-                                `0px`
-                            )
-                            setImage(undefined)
-                        }}
-                        size={"icon-sm"}
-                        className="absolute -right-1 -top-3 hidden group-hover:flex"
+        <MessageFormShell>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    mutate({ body, image })
+                }}
+            >
+                <div className="flex h-[var(--message-form-height)] items-center ">
+                    <FileButton
+                        className="flex-shrink-0"
+                        disabled={isUploading || !!image}
+                        onChange={onImageChange}
+                        accept="image/*"
                     >
-                        <Icons.X
-                            width={20}
-                            height={20}
-                        />
-                    </Button>
-                    <Image
-                        style={{
-                            height: `${IMAGE_SIZE}px`,
-                        }}
-                        className=" rounded-lg object-cover object-top"
-                        src={image}
-                        alt={body ?? ""}
-                        width={IMAGE_SIZE}
-                        height={IMAGE_SIZE}
+                        {isUploading ? <Loading /> : <Icons.image />}
+                        <span className="sr-only">Attach image</span>
+                    </FileButton>
+                    <TextArea
+                        maxLength={1000}
+                        onPaste={onImagePaste}
+                        onKeyDown={onKeyDown}
+                        autoFocus
+                        value={body}
+                        onChange={(e) => setBody(e.target.value)}
+                        placeholder="Type a message"
+                        className="h-[var(--message-form-height)] w-full"
                     />
+
+                    <Button
+                        className="flex-shrink-0"
+                        disabled={
+                            (body.length < 1 && !image) ||
+                            isUploading ||
+                            isPending
+                        }
+                        variant={"ghost"}
+                        size={"icon"}
+                    >
+                        <Icons.send />
+                        <span className="sr-only">Send message</span>
+                    </Button>
                 </div>
+                {image && (
+                    <div
+                        className="group relative w-fit rounded-lg border border-foreground/75"
+                        style={{
+                            marginBlock: `${IMAGE_MARGIN}px`,
+                        }}
+                    >
+                        <Button
+                            onClick={() => {
+                                document.documentElement.style.setProperty(
+                                    "--message-form-image-height",
+                                    `0px`
+                                )
+                                setImage(undefined)
+                            }}
+                            size={"icon-sm"}
+                            className="absolute -right-1 -top-3 hidden group-hover:flex"
+                        >
+                            <Icons.X
+                                width={20}
+                                height={20}
+                            />
+                        </Button>
+                        <Image
+                            style={{
+                                height: `${IMAGE_SIZE}px`,
+                            }}
+                            className=" rounded-lg object-cover object-top"
+                            src={image}
+                            alt={body ?? ""}
+                            width={IMAGE_SIZE}
+                            height={IMAGE_SIZE}
+                        />
+                    </div>
+                )}
+            </form>
+        </MessageFormShell>
+    )
+}
+
+export function MessageFormSkeleton({
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+    return (
+        <MessageFormShell {...props}>
+            <div className="flex h-full w-full items-center justify-between gap-4">
+                <Skeleton className="h-9 w-9 " />
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="ml-auto h-9 w-9 " />
+            </div>
+        </MessageFormShell>
+    )
+}
+
+function MessageFormShell({
+    children,
+    className,
+    ...props
+}: React.ComponentProps<"div">) {
+    return (
+        <div
+            className={cn(
+                "h-[calc(var(--message-form-height)+var(--message-form-image-height))] overflow-hidden border-t border-secondary px-4",
+                className
             )}
-        </form>
+            {...props}
+        >
+            {children}
+        </div>
     )
 }

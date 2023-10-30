@@ -17,6 +17,8 @@ import { axiosInstance } from "@/config"
 import { Loading } from "@/components/ui/loading"
 import Link from "next/link"
 import { User } from "next-auth"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type ChatHeaderProps = {
     user: User
@@ -45,7 +47,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
     })
 
     return (
-        <header className="flex h-[var(--header-height)] items-center justify-between border-b border-secondary p-4 ">
+        <ChatHeaderShell>
             <div className="flex items-center gap-3">
                 <Button
                     asChild
@@ -92,6 +94,41 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+        </ChatHeaderShell>
+    )
+}
+
+export function ChatHeaderSkeleton({
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+    return (
+        <ChatHeaderShell {...props}>
+            <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />
+            <div className="flex w-full items-center gap-10">
+                <div className="">
+                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="mt-3 h-3 w-40" />
+                </div>
+                <Skeleton className="ml-auto h-10 w-10 " />
+            </div>
+        </ChatHeaderShell>
+    )
+}
+
+function ChatHeaderShell({
+    children,
+    className,
+    ...props
+}: React.ComponentProps<"header">) {
+    return (
+        <header
+            className={cn(
+                "flex h-[var(--header-height)] items-center justify-between gap-3 border-b border-secondary p-4",
+                className
+            )}
+            {...props}
+        >
+            {children}
         </header>
     )
 }

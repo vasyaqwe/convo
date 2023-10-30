@@ -1,15 +1,15 @@
 "use client"
 
-import { Message, MessageDatePill } from "@/components/message"
+import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
 import { pusherClient } from "@/lib/pusher"
-import { addDisplaySender, groupByDate, reverseArray } from "@/lib/utils"
+import { addDisplaySender, cn, groupByDate, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
-import React, { useEffect, useRef, useState } from "react"
+import React, { forwardRef, useEffect, useRef, useState } from "react"
 
 type ChatProps = {
     session: Session | null
@@ -186,3 +186,40 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
         </div>
     )
 }
+
+// eslint-disable-next-line react/display-name
+export const ChatSkeleton = forwardRef<
+    HTMLDivElement,
+    React.ComponentProps<"div">
+>(({ ...props }, ref) => {
+    return (
+        <ChatShell
+            {...props}
+            ref={ref}
+        >
+            <MessageSkeleton />
+            <MessageSkeleton />
+            <MessageSkeleton />
+        </ChatShell>
+    )
+})
+
+// eslint-disable-next-line react/display-name
+export const ChatShell = forwardRef<
+    HTMLDivElement,
+    React.ComponentProps<"div">
+>(({ children, className, ...props }, ref) => {
+    return (
+        <div
+            ref={ref}
+            className={cn(
+                `relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height))] 
+                flex-col overflow-y-auto px-4 py-[var(--chat-padding-block)] [--chat-padding-block:25px]`,
+                className
+            )}
+            {...props}
+        >
+            {children}
+        </div>
+    )
+})
