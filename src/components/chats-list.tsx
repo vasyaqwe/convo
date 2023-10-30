@@ -7,7 +7,7 @@ import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import { pusherClient } from "@/lib/pusher"
-import { ExtendedChat } from "@/types"
+import { ExtendedChat, ExtendedMessage } from "@/types"
 import { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -77,13 +77,33 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
         pusherClient.subscribe(currentUserId)
 
-        function onUpdateChat(updatedChat: ExtendedChat) {
+        function onUpdateChat(updatedChat: {
+            id: string
+            message: ExtendedMessage
+        }) {
             setChats((prev) =>
                 prev.map((oldChat) => {
+                    if (
+                        oldChat.messages?.some(
+                            (m) => m.id === updatedChat.message.id
+                        )
+                    ) {
+                        return {
+                            ...oldChat,
+                            messages: oldChat.messages.map((m) =>
+                                m.id === updatedChat.message.id
+                                    ? updatedChat.message
+                                    : m
+                            ),
+                        }
+                    }
                     if (oldChat.id === updatedChat.id) {
                         return {
                             ...oldChat,
-                            messages: updatedChat.messages,
+                            messages: [
+                                ...(oldChat?.messages ?? []),
+                                updatedChat.message,
+                            ],
                         }
                     }
 
@@ -196,7 +216,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                         })
                     )
                 ) : chats.length < 1 ? (
-                    <p className="mt-6 text-sm text-foreground/80">
+                    <p className="text-sm text-foreground/80">
                         Nothing here yet.
                     </p>
                 ) : (

@@ -34,7 +34,7 @@ export function UserButton({
         },
         onSuccess: (chat) => {
             router.push(`/chat/${chat.id}`)
-            queryClient.invalidateQueries({ queryKey: ["chats"] })
+            router.refresh()
             onSelect()
         },
     })

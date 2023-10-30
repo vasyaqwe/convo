@@ -35,7 +35,7 @@ export default async function RootLayout({
                 <html
                     lang="en"
                     className={cn(
-                        "dark [--avatar-size:40px] [--chats-width:320px] [--header-height:73px] [--message-form-height:61px] [--message-form-image-height:0px] [--sidebar-width:65px] md:[--avatar-size:45px]"
+                        "dark [--avatar-size:45px] [--chats-width:320px] [--header-height:73px] [--message-form-height:61px] [--message-form-image-height:0px] [--sidebar-width:65px]"
                     )}
                 >
                     <body className={cn("flex", inter.className)}>

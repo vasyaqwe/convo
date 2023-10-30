@@ -69,7 +69,7 @@ export const PATCH = withErrorHandling(async function (
 
     await pusherServer.trigger(session.user.id, "chat:update", {
         id: updatedMessage.chatId,
-        messages: [updatedMessage],
+        message: updatedMessage,
     })
 
     await pusherServer.trigger(

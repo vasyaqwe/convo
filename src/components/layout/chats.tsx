@@ -1,5 +1,5 @@
 import { ChatsList } from "@/components/chats-list"
-import { USERS_SELECT } from "@/config"
+import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
 import { db } from "@/lib/db"
 import { cn } from "@/lib/utils"
 import { Session } from "next-auth"
@@ -28,6 +28,7 @@ export async function Chats({
                         select: USERS_SELECT,
                     },
                 },
+                take: MESSAGES_INFINITE_SCROLL_COUNT,
             },
         },
         orderBy: {
@@ -48,7 +49,10 @@ export async function Chats({
             </header>
             <ChatsList
                 session={session}
-                initialChats={chats}
+                initialChats={chats.map((chat) => ({
+                    ...chat,
+                    messages: chat.messages ?? [],
+                }))}
             />
         </aside>
     )

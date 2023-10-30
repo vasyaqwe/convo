@@ -69,7 +69,7 @@ export const POST = withErrorHandling(async function (req: Request) {
     for (const userId of updatedChat.userIds) {
         await pusherServer.trigger(userId, "chat:update", {
             id: chatId,
-            messages: [newMessage],
+            message: newMessage,
         })
     }
 

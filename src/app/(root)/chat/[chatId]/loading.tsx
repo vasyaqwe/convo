@@ -7,7 +7,6 @@ export default async function Page() {
         <div className="flex flex-1 flex-col bg-accent">
             <ChatHeaderSkeleton />
             <ChatSkeleton />
-
             <MessageFormSkeleton />
         </div>
     )
