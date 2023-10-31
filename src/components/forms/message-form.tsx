@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { MessagePayload } from "@/lib/validations/message"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -28,6 +29,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
     const { startUpload, isUploading } = useUploadThing("imageUploader")
 
     const queryClient = useQueryClient()
+    const router = useRouter()
 
     const { mutate, isPending } = useMutation({
         mutationFn: async ({ body, image }: Omit<MessagePayload, "chatId">) => {
@@ -51,6 +53,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["messages"] })
             queryClient.invalidateQueries({ queryKey: ["users-search"] })
+            router.refresh()
         },
         onError: () => {
             return toast.error("Something went wrong")

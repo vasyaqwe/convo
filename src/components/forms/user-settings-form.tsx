@@ -48,8 +48,8 @@ export function UserSettingsForm({
             return data
         },
         onSuccess: () => {
-            router.refresh()
             closeDialog()
+            router.refresh()
             toast.success("Settings saved")
             queryClient.invalidateQueries({ queryKey: ["messages"] })
         },
