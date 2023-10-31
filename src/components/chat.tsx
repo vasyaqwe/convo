@@ -89,7 +89,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
         if (wrapper) {
             wrapper.scrollTop = wrapper.scrollHeight
         }
-    }, [])
+    }, [isLoading])
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
@@ -109,7 +109,6 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
             })
 
             wrapperRef.current?.lastElementChild?.scrollIntoView({
-                block: "end",
                 behavior: "smooth",
             })
         }

@@ -21,6 +21,7 @@ import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
 
 import dynamic from "next/dynamic"
+import { useRouter } from "next/navigation"
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
 type MessageProps = {
@@ -32,6 +33,8 @@ type MessageProps = {
 // eslint-disable-next-line react/display-name
 const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, session, isLast }, ref) => {
+        const router = useRouter()
+
         useQuery({
             queryKey: ["see-message"],
             queryFn: async () => {
@@ -52,8 +55,8 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             },
             onSuccess: () => {
                 toast.success("Message deleted")
-                queryClient.invalidateQueries({ queryKey: ["chats"] })
                 queryClient.invalidateQueries({ queryKey: ["messages"] })
+                router.refresh()
             },
             onError: () => {
                 toast.error("Something went wrong")

@@ -56,12 +56,14 @@ export function ChatButton({
     const lastReadMessageIdx =
         chatPartnersMessages?.findIndex(
             (message) => message.id === lastReadMessage?.id
-        ) ?? -1 + 1
+        ) ?? -1
+
+    console.log(lastReadMessageIdx)
 
     const unseenCount = isSeen
         ? 0
         : (lastReadMessageIdx !== -1
-              ? chatPartnersMessages?.slice(lastReadMessageIdx)
+              ? chatPartnersMessages?.slice(lastReadMessageIdx + 1)
               : chatPartnersMessages
           )?.length ?? 0
 
