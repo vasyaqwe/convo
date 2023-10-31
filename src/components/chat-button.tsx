@@ -64,7 +64,7 @@ export function ChatButton({
                 user={user}
                 className="mr-2"
             />
-            <div className={cn("w-[80%]", isSeen ? "" : "font-semibold")}>
+            <div className={cn("w-[100%]", isSeen ? "" : "font-semibold")}>
                 <div className="flex w-full items-center justify-between">
                     <p
                         title={user.name}
@@ -82,7 +82,7 @@ export function ChatButton({
                     <p
                         title={lastMessageText}
                         className={cn(
-                            "w-[calc(var(--chats-width)/1.6)] truncate overflow-ellipsis text-sm",
+                            "w-[calc(var(--chats-width)/1.7)] truncate overflow-ellipsis text-sm",
                             isSeen ? "text-foreground/70" : ""
                         )}
                     >

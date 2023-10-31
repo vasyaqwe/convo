@@ -175,7 +175,7 @@ export function updateDocumentTitle({
         return
     }
 
-    document.title = `${chatPartnerName} (${
+    document.title = `(${
         unreadMessagesCount > 9 ? "9+" : unreadMessagesCount
-    })`
+    }) ${chatPartnerName}`
 }

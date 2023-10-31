@@ -3,6 +3,7 @@
 import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
+import { useDynamicFavicon } from "@/hooks/use-dynamic-favicon"
 import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
@@ -92,6 +93,8 @@ export function Chat({
         threshold: 0,
         isLoading,
     })
+
+    useDynamicFavicon({ messages, currentUserId: session?.user.id })
 
     useEffect(() => {
         if (entry?.isIntersecting && hasNextPage) {

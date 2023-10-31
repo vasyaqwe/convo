@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
+import { useDynamicFavicon } from "@/hooks/use-dynamic-favicon"
 import { pusherClient } from "@/lib/pusher"
 import { getUnreadMessagesCount, updateDocumentTitle } from "@/lib/utils"
 import { ExtendedChat, ExtendedMessage } from "@/types"
@@ -53,23 +54,11 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedInput])
 
-    //dynamically change favicon if there are unread messages
-    useEffect(() => {
-        const messages = chats.flatMap((chat) => chat.messages).filter(Boolean)
-        if (messages.length === 0) return
+    const messages = chats
+        .flatMap((chat) => chat?.messages ?? [])
+        .filter(Boolean)
 
-        const favicon =
-            document.querySelector<HTMLAnchorElement>("link[rel='icon']")
-
-        if (!favicon) return
-
-        if (messages.every((m) => m?.seenByIds.includes(session?.user.id))) {
-            favicon.href = "/favicon.ico"
-        } else {
-            favicon.href = "/favicon-indicator.ico"
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chats])
+    useDynamicFavicon({ messages, currentUserId: session?.user.id })
 
     useEffect(() => {
         let count = 0
