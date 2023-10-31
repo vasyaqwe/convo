@@ -10,6 +10,7 @@ import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import React, { forwardRef, useEffect, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 
 type ChatProps = {
     session: Session | null
@@ -51,11 +52,15 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
 
             if (messages && messages[0]?.chatId === chatId) {
                 setMessages(messages)
+
                 if (
+                    // only load new page if there's more than one page & if scroll position is at the very top
                     data.pages.length > 1 &&
                     wrapperRef.current &&
                     wrapperRef.current.scrollTop < 1
                 ) {
+                    // as soon as new page of messages loads, scroll to the last message you saw before that (first message of the previos page).
+                    // otherwise it will scroll to the very top automatically (bad ux)
                     const prevPage = data.pages[data.pages.length - 2]
                     if (prevPage && prevPage[0]) {
                         const prevPageFirstMessage = document.getElementById(
@@ -84,24 +89,29 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
         if (wrapper) {
             wrapper.scrollTop = wrapper.scrollHeight
         }
-    }, [isLoading])
+    }, [])
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
 
         function onNewMessage(newMessage: ExtendedMessage) {
-            setMessages((prev) => {
-                if (
-                    prev.some((prevMessage) => prevMessage.id === newMessage.id)
-                )
-                    return prev
+            flushSync(() => {
+                setMessages((prev) => {
+                    if (
+                        prev.some(
+                            (prevMessage) => prevMessage.id === newMessage.id
+                        )
+                    )
+                        return prev
 
-                return addDisplaySender([...prev, newMessage])
+                    return addDisplaySender([...prev, newMessage])
+                })
             })
 
-            setTimeout(() => {
-                document.getElementById(newMessage.id)?.scrollIntoView()
-            }, 100)
+            wrapperRef.current?.lastElementChild?.scrollIntoView({
+                block: "end",
+                behavior: "smooth",
+            })
         }
 
         function onUpdateMessage(newMessage: ExtendedMessage) {
