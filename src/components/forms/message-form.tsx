@@ -7,29 +7,43 @@ import { Loading } from "@/components/ui/loading"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
+import { useDebounce } from "@/hooks/use-debounce"
+import { pusherServer } from "@/lib/pusher"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
 import { MessagePayload } from "@/lib/validations/message"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Session } from "next-auth"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 type MessageFormProps = {
     chatId: string
+    session: Session | null
 }
 
 const IMAGE_SIZE = 100
 const IMAGE_MARGIN = 12
 
-export function MessageForm({ chatId }: MessageFormProps) {
+export function MessageForm({ chatId, session }: MessageFormProps) {
     const [body, setBody] = useState("")
+    const debouncedBody = useDebounce<string>(body, 500)
+
     const [image, setImage] = useState<string | undefined>(undefined)
     const { startUpload, isUploading } = useUploadThing("imageUploader")
 
     const queryClient = useQueryClient()
     const router = useRouter()
+
+    useEffect(() => {
+        async function onBodyChange() {
+            await pusherServer.trigger(session?.user.id, "chat:typing", {
+                user: session?.user,
+            })
+        }
+    }, [debouncedBody, session?.user])
 
     const { mutate, isPending } = useMutation({
         mutationFn: async ({ body, image }: Omit<MessagePayload, "chatId">) => {

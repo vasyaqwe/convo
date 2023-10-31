@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input"
 import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
-import { useDynamicFavicon } from "@/hooks/use-dynamic-favicon"
-import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
+import { useDynamicMetadata } from "@/hooks/use-dynamic-metadata"
 import { pusherClient } from "@/lib/pusher"
-import { getUnreadMessagesCount, updateDocumentTitle } from "@/lib/utils"
+import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
 import { ExtendedChat, ExtendedMessage } from "@/types"
 import { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
@@ -55,42 +54,13 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedInput])
 
-    const messages = chats
-        .flatMap((chat) => chat?.messages ?? [])
-        .filter(Boolean)
+    const { chats: chatsMap } = useTotalMessagesCountStore()
 
-    const { isTabFocused } = useIsTabFocused()
+    const unseenCount = chatsMap.reduce((a, b) => a + b.unseenMessagesCount, 0)
 
-    useDynamicFavicon({
-        messages,
-        currentUserId: session?.user.id,
-        pathname: pathname ?? "",
+    useDynamicMetadata({
+        unseenCount,
     })
-
-    useEffect(() => {
-        let count = 0
-
-        let _chats = chats
-
-        if (isTabFocused) {
-            _chats = chats.filter((chat) => !pathname?.includes(chat.id))
-        }
-
-        _chats.forEach((chat) => {
-            const unreadMessagesCount = getUnreadMessagesCount({
-                currentUserId: session?.user.id,
-                messages: chat.messages ?? [],
-            })
-
-            count += unreadMessagesCount
-        })
-
-        updateDocumentTitle({
-            unreadMessagesCount: count,
-            chatPartnerName: "convo.",
-        })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chats])
 
     useEffect(() => {
         if (!currentUserId) {

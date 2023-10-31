@@ -33,7 +33,6 @@ export async function generateMetadata({
     params,
 }: PageProps): Promise<Metadata> {
     const session = await getAuthSession()
-
     const chat: ExtendedChat = await getChat(params.chatId)
 
     const chatPartnerName = chat.users.find(
@@ -73,7 +72,10 @@ export default async function Page({ params: { chatId } }: PageProps) {
                 chatId={chatId}
             />
 
-            <MessageForm chatId={chatId} />
+            <MessageForm
+                session={session}
+                chatId={chatId}
+            />
         </div>
     )
 }

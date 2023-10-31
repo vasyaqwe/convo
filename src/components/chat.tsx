@@ -3,11 +3,13 @@
 import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
+import { useDynamicMetadata } from "@/hooks/use-dynamic-metadata"
 import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
+import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { pusherClient } from "@/lib/pusher"
 import { addDisplaySender, cn, groupByDate, reverseArray } from "@/lib/utils"
-import { ExtendedMessage } from "@/types"
+import { ExtendedMessage, UserType } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import React, { forwardRef, useEffect, useRef, useState } from "react"
@@ -47,6 +49,7 @@ export function Chat({
         })
 
     const wrapperRef = useRef<HTMLDivElement>(null)
+    const currentUserId = session?.user.id
 
     const [messages, setMessages] = useState<ExtendedMessage[]>(initialMessages)
 
@@ -86,6 +89,12 @@ export function Chat({
         isLoading,
     })
 
+    const { unseenCount } = useMessagesHelpers({ messages, currentUserId })
+    useDynamicMetadata({
+        unseenCount,
+        chatPartnerName,
+    })
+
     useEffect(() => {
         if (entry?.isIntersecting && hasNextPage) {
             fetchNextPage()
@@ -98,6 +107,7 @@ export function Chat({
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
+        // pusherClient.subscribe(currentUserId)
 
         function onNewMessage(newMessage: ExtendedMessage) {
             flushSync(() => {
@@ -135,6 +145,11 @@ export function Chat({
             )
         }
 
+        // function onUserTyping(user: UserType) {
+        //     console.log(user)
+        // }
+
+        // pusherClient.bind("chat:typing", onUserTyping)
         pusherClient.bind("message:new", onNewMessage)
         pusherClient.bind("message:update", onUpdateMessage)
         pusherClient.bind("message:delete", onDeleteMessage)
@@ -145,7 +160,7 @@ export function Chat({
             pusherClient.unbind("message:update", onUpdateMessage)
             pusherClient.unbind("message:delete", onDeleteMessage)
         }
-    }, [chatId, session?.user.id])
+    }, [chatId, currentUserId])
 
     return (
         <div
@@ -181,7 +196,6 @@ export function Chat({
                             </React.Fragment>
                         )
                     }
-
                     return (
                         <React.Fragment key={message.id}>
                             {message.dateAbove && (

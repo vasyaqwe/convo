@@ -3,11 +3,13 @@
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { usePathname } from "next/navigation"
 import { ExtendedChat, UserType } from "@/types"
-import { cn, formatDate, getUnreadMessagesCount } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { Session } from "next-auth"
 import dynamic from "next/dynamic"
-import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
+import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
+import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
+import { useEffect } from "react"
 
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
@@ -27,31 +29,20 @@ export function ChatButton({
     ...props
 }: ChatButtonProps) {
     const pathname = usePathname()
-    const { isTabFocused } = useIsTabFocused()
+    const { setChats } = useTotalMessagesCountStore()
 
     const currentUserId = session?.user.id
 
-    const lastMessage = chat.messages
-        ? chat.messages[chat.messages.length - 1]
-        : undefined
+    const { unseenCount, isLastMessageSeen, lastMessage, lastMessageText } =
+        useMessagesHelpers({
+            currentUserId,
+            messages: chat.messages ?? [],
+        })
 
-    const lastMessageText = lastMessage?.image
-        ? "Sent an image"
-        : lastMessage?.body ?? "Chat started"
-
-    const isSeen = !lastMessage
-        ? false
-        : isTabFocused && pathname?.includes(lastMessage?.chatId ?? "")
-        ? true
-        : lastMessage.seenBy.some((u) => u.id === currentUserId) ||
-          lastMessageText === "Chat started"
-
-    const unreadCount = isSeen
-        ? 0
-        : getUnreadMessagesCount({
-              currentUserId,
-              messages: chat.messages ?? [],
-          })
+    useEffect(() => {
+        setChats(chat.id, unseenCount)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chat, unseenCount])
 
     return (
         <Link
@@ -68,7 +59,12 @@ export function ChatButton({
                 user={user}
                 className="mr-2"
             />
-            <div className={cn("w-[100%]", isSeen ? "" : "font-semibold")}>
+            <div
+                className={cn(
+                    "w-[100%]",
+                    isLastMessageSeen ? "" : "font-semibold"
+                )}
+            >
                 <div className="flex w-full items-center justify-between">
                     <p
                         title={user.name}
@@ -87,17 +83,17 @@ export function ChatButton({
                         title={lastMessageText}
                         className={cn(
                             "w-[calc(var(--chats-width)/1.7)] truncate overflow-ellipsis text-sm",
-                            isSeen ? "text-foreground/70" : ""
+                            isLastMessageSeen ? "text-foreground/70" : ""
                         )}
                     >
                         {lastMessageText}
                     </p>
-                    {unreadCount > 0 && (
+                    {unseenCount > 0 && (
                         <span
-                            title={`${unreadCount} unread messages`}
+                            title={`${unseenCount} unread messages`}
                             className="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
                         >
-                            {unreadCount > 9 ? "9+" : unreadCount}
+                            {unseenCount > 9 ? "9+" : unseenCount}
                         </span>
                     )}
                 </div>

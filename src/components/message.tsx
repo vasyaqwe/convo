@@ -39,15 +39,19 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         useQuery({
             queryKey: ["see-message"],
             queryFn: async () => {
-                const { data } = await axiosInstance.patch(
-                    `/message/${message.id}`
-                )
-                return data
+                const lastMessage = queryClient.getQueryData<ExtendedMessage>([
+                    "see-message",
+                ])
+                if (!message.seenByIds.includes(session?.user.id)) {
+                    const { data } = await axiosInstance.patch(
+                        `/message/${lastMessage ? lastMessage.id : message.id}`
+                    )
+                    return data
+                }
+
+                return null
             },
-            enabled:
-                isLast &&
-                !message.seenByIds.includes(session?.user.id) &&
-                isTabFocused,
+            enabled: isLast && isTabFocused,
         })
 
         const queryClient = useQueryClient()
