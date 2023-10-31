@@ -1,14 +1,15 @@
 import "../globals.css"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import { Toaster } from "sonner"
 import { TanstackProvider } from "@/components/tanstack-provider"
 import SessionProvider from "@/components/session-provider"
 import { cn } from "@/lib/utils"
-import { metadataConfig } from "@/config"
+import { metadataConfig, viewportConfig } from "@/config"
 
 const inter = Inter({ subsets: ["latin"] })
 
+export const viewport: Viewport = viewportConfig
 export const metadata: Metadata = metadataConfig
 
 export default function RootLayout({
