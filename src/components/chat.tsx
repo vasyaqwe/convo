@@ -93,10 +93,7 @@ export function Chat({
     }, [entry, hasNextPage, fetchNextPage])
 
     useEffect(() => {
-        const wrapper = wrapperRef.current
-        if (wrapper) {
-            wrapper.scrollTop = wrapper.scrollHeight
-        }
+        wrapperRef.current?.lastElementChild?.scrollIntoView()
     }, [isLoading])
 
     useEffect(() => {
