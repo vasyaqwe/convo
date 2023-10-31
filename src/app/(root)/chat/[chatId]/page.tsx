@@ -42,16 +42,20 @@ export async function generateMetadata({
 
     return {
         ...metadataConfig,
-        title: `${chatPartnerName} | convo.`,
+        title: chatPartnerName,
     }
 }
 
 export default async function Page({ params: { chatId } }: PageProps) {
     const session = await getAuthSession()
 
-    const chat = await getChat(chatId)
+    const chat: ExtendedChat = await getChat(chatId)
 
     if (!chat) notFound()
+
+    const chatPartnerName =
+        chat.users.find((user) => user.id !== session?.user.id)?.name ??
+        "convo."
 
     return (
         <div className="flex flex-1 flex-col bg-accent">
@@ -61,7 +65,10 @@ export default async function Page({ params: { chatId } }: PageProps) {
             />
 
             <Chat
-                initialMessages={addDisplaySender(reverseArray(chat.messages))}
+                chatPartnerName={chatPartnerName}
+                initialMessages={addDisplaySender(
+                    reverseArray(chat.messages ?? [])
+                )}
                 session={session}
                 chatId={chatId}
             />

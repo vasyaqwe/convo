@@ -4,8 +4,16 @@ import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useIntersection } from "@/hooks/use-intersection"
+import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
-import { addDisplaySender, cn, groupByDate, reverseArray } from "@/lib/utils"
+import {
+    addDisplaySender,
+    cn,
+    getUnreadMessagesCount,
+    groupByDate,
+    reverseArray,
+    updateDocumentTitle,
+} from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -16,9 +24,15 @@ type ChatProps = {
     session: Session | null
     chatId: string
     initialMessages: ExtendedMessage[]
+    chatPartnerName: string
 }
 
-export function Chat({ session, chatId, initialMessages }: ChatProps) {
+export function Chat({
+    session,
+    chatId,
+    initialMessages,
+    chatPartnerName,
+}: ChatProps) {
     const queryKey = ["messages"]
 
     const { fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, data } =
@@ -73,6 +87,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
         }
     }, [data, chatId])
 
+    const { isTabFocused } = useIsTabFocused()
     const { ref, entry } = useIntersection({
         threshold: 0,
         isLoading,
@@ -90,6 +105,17 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
             wrapper.scrollTop = wrapper.scrollHeight
         }
     }, [isLoading])
+
+    //change document title to include unread messages
+    useEffect(() => {
+        const unreadMessagesCount = getUnreadMessagesCount({
+            currentUserId: session?.user.id,
+            messages,
+        })
+
+        updateDocumentTitle({ unreadMessagesCount, chatPartnerName })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [messages, chatPartnerName])
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
@@ -167,6 +193,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                                     </MessageDatePill>
                                 )}
                                 <Message
+                                    isTabFocused={isTabFocused}
                                     isLast={messages.length === 4}
                                     session={session}
                                     message={message}
@@ -184,6 +211,7 @@ export function Chat({ session, chatId, initialMessages }: ChatProps) {
                                 </MessageDatePill>
                             )}
                             <Message
+                                isTabFocused={isTabFocused}
                                 isLast={idx === messages.length - 1}
                                 session={session}
                                 message={message}

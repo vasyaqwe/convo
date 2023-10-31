@@ -7,6 +7,7 @@ import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import { pusherClient } from "@/lib/pusher"
+import { getUnreadMessagesCount, updateDocumentTitle } from "@/lib/utils"
 import { ExtendedChat, ExtendedMessage } from "@/types"
 import { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
@@ -52,23 +53,42 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedInput])
 
-    //dynamically change favicon, not working for some reason...
-    // useEffect(() => {
-    //     const messages = chats.flatMap((chat) => chat.messages).filter(Boolean)
-    //     if (messages.length === 0) return
+    //dynamically change favicon if there are unread messages
+    useEffect(() => {
+        const messages = chats.flatMap((chat) => chat.messages).filter(Boolean)
+        if (messages.length === 0) return
 
-    //     const favicon =
-    //         document.querySelector<HTMLAnchorElement>("link[rel='icon']")
+        const favicon =
+            document.querySelector<HTMLAnchorElement>("link[rel='icon']")
 
-    //     if (!favicon) return
+        if (!favicon) return
 
-    //     if (messages.every((m) => m?.seenByIds.includes(session?.user.id))) {
-    //         favicon.href = "/favicon.ico"
-    //     } else {
-    //         favicon.href = "/favicon-indicator.ico"
-    //     }
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [chats])
+        if (messages.every((m) => m?.seenByIds.includes(session?.user.id))) {
+            favicon.href = "/favicon.ico"
+        } else {
+            favicon.href = "/favicon-indicator.ico"
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chats])
+
+    useEffect(() => {
+        let count = 0
+
+        chats.forEach((chat) => {
+            const unreadMessagesCount = getUnreadMessagesCount({
+                currentUserId: session?.user.id,
+                messages: chat.messages ?? [],
+            })
+
+            count += unreadMessagesCount
+        })
+
+        updateDocumentTitle({
+            unreadMessagesCount: count,
+            chatPartnerName: "convo.",
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chats])
 
     useEffect(() => {
         if (!currentUserId) {

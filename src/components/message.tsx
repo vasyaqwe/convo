@@ -28,11 +28,12 @@ type MessageProps = {
     message: ExtendedMessage
     session: Session | null
     isLast: boolean
+    isTabFocused: boolean
 }
 
 // eslint-disable-next-line react/display-name
 const Message = forwardRef<HTMLDivElement, MessageProps>(
-    ({ message, session, isLast }, ref) => {
+    ({ message, session, isLast, isTabFocused }, ref) => {
         const router = useRouter()
 
         useQuery({
@@ -41,10 +42,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 const { data } = await axiosInstance.patch(
                     `/message/${message.id}`
                 )
-
                 return data
             },
-            enabled: isLast && !message.seenByIds.includes(session?.user.id),
+            enabled:
+                isLast &&
+                !message.seenByIds.includes(session?.user.id) &&
+                isTabFocused,
         })
 
         const queryClient = useQueryClient()

@@ -3,7 +3,7 @@
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { usePathname } from "next/navigation"
 import { ExtendedChat, UserType } from "@/types"
-import { cn, formatDate, reverseArray } from "@/lib/utils"
+import { cn, formatDate, getUnreadMessagesCount } from "@/lib/utils"
 import Link from "next/link"
 import { Session } from "next-auth"
 import dynamic from "next/dynamic"
@@ -42,30 +42,12 @@ export function ChatButton({
         : lastMessage.seenBy.some((u) => u.id === currentUserId) ||
           lastMessageText === "Chat started"
 
-    const chatPartnersMessages = chat.messages?.filter(
-        (message) => message.senderId !== currentUserId
-    )
-    // .filter((message) => !message.seenByIds.includes(currentUserId))
-    const readChatPartnersMessages = chatPartnersMessages?.filter((m) =>
-        m.seenByIds.includes(currentUserId)
-    )
-    const lastReadMessage = readChatPartnersMessages
-        ? readChatPartnersMessages[readChatPartnersMessages.length - 1]
-        : undefined
-
-    const lastReadMessageIdx =
-        chatPartnersMessages?.findIndex(
-            (message) => message.id === lastReadMessage?.id
-        ) ?? -1
-
-    const unseenCount = isSeen
+    const unreadCount = isSeen
         ? 0
-        : (lastReadMessageIdx !== -1
-              ? chatPartnersMessages?.slice(lastReadMessageIdx + 1)
-              : chatPartnersMessages
-          )?.length ?? 0
-
-    console.log(chat.messages)
+        : getUnreadMessagesCount({
+              currentUserId,
+              messages: chat.messages ?? [],
+          })
 
     return (
         <Link
@@ -106,12 +88,12 @@ export function ChatButton({
                     >
                         {lastMessageText}
                     </p>
-                    {unseenCount > 0 && (
+                    {unreadCount > 0 && (
                         <span
-                            title={`${unseenCount} unread messages`}
+                            title={`${unreadCount} unread messages`}
                             className="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
                         >
-                            {unseenCount > 9 ? "9+" : unseenCount}
+                            {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                     )}
                 </div>
