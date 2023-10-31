@@ -3,7 +3,7 @@
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { usePathname } from "next/navigation"
 import { ExtendedChat, UserType } from "@/types"
-import { cn, formatDate } from "@/lib/utils"
+import { cn, formatDate, reverseArray } from "@/lib/utils"
 import Link from "next/link"
 import { Session } from "next-auth"
 import dynamic from "next/dynamic"
@@ -57,8 +57,6 @@ export function ChatButton({
         chatPartnersMessages?.findIndex(
             (message) => message.id === lastReadMessage?.id
         ) ?? -1
-
-    console.log(lastReadMessageIdx)
 
     const unseenCount = isSeen
         ? 0
