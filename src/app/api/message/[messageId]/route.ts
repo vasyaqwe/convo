@@ -155,7 +155,8 @@ export const DELETE = withErrorHandling(async function (
     for (const userId of updatedChat?.userIds ?? []) {
         await pusherServer.trigger(userId, "chat:update", {
             id: message.chatId,
-            message: updatedChat?.messages[0],
+            message,
+            messageDeleted: true,
         })
     }
 

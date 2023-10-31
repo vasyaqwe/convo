@@ -65,6 +65,8 @@ export function ChatButton({
               : chatPartnersMessages
           )?.length ?? 0
 
+    console.log(chat.messages)
+
     return (
         <Link
             onClick={onSelect}

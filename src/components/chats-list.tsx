@@ -77,33 +77,33 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
         pusherClient.subscribe(currentUserId)
 
-        function onUpdateChat(updatedChat: {
+        function onUpdateChat({
+            id,
+            message,
+            messageDeleted,
+        }: {
             id: string
             message: ExtendedMessage
+            messageDeleted: boolean | undefined
         }) {
             setChats((prev) =>
                 prev.map((oldChat) => {
-                    if (
-                        oldChat.messages?.some(
-                            (m) => m.id === updatedChat.message.id
-                        )
-                    ) {
+                    if (oldChat.messages?.some((m) => m.id === message.id)) {
                         return {
                             ...oldChat,
-                            messages: oldChat.messages.map((m) =>
-                                m.id === updatedChat.message.id
-                                    ? updatedChat.message
-                                    : m
-                            ),
+                            messages: messageDeleted
+                                ? oldChat.messages.filter(
+                                      (m) => m.id !== message.id
+                                  )
+                                : oldChat.messages.map((m) =>
+                                      m.id === message.id ? message : m
+                                  ),
                         }
                     }
-                    if (oldChat.id === updatedChat.id) {
+                    if (oldChat.id === id) {
                         return {
                             ...oldChat,
-                            messages: [
-                                ...(oldChat?.messages ?? []),
-                                updatedChat.message,
-                            ],
+                            messages: [...(oldChat?.messages ?? []), message],
                         }
                     }
 
