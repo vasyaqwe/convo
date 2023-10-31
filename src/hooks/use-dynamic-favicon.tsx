@@ -13,8 +13,6 @@ export function useDynamicFavicon({
     currentUserId,
 }: UseDynamicFaviconProps) {
     useEffect(() => {
-        if (messages.length === 0) return
-
         const favicon =
             document.querySelector<HTMLAnchorElement>("link[rel='icon']")
 
