@@ -3,18 +3,10 @@
 import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
-import { useDynamicFavicon } from "@/hooks/use-dynamic-favicon"
 import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
-import {
-    addDisplaySender,
-    cn,
-    getUnreadMessagesCount,
-    groupByDate,
-    reverseArray,
-    updateDocumentTitle,
-} from "@/lib/utils"
+import { addDisplaySender, cn, groupByDate, reverseArray } from "@/lib/utils"
 import { ExtendedMessage } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
@@ -94,8 +86,6 @@ export function Chat({
         isLoading,
     })
 
-    useDynamicFavicon({ messages, currentUserId: session?.user.id })
-
     useEffect(() => {
         if (entry?.isIntersecting && hasNextPage) {
             fetchNextPage()
@@ -108,17 +98,6 @@ export function Chat({
             wrapper.scrollTop = wrapper.scrollHeight
         }
     }, [isLoading])
-
-    //change document title to include unread messages
-    useEffect(() => {
-        const unreadMessagesCount = getUnreadMessagesCount({
-            currentUserId: session?.user.id,
-            messages,
-        })
-
-        updateDocumentTitle({ unreadMessagesCount, chatPartnerName })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [messages, chatPartnerName])
 
     useEffect(() => {
         pusherClient.subscribe(chatId)

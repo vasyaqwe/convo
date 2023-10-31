@@ -7,6 +7,7 @@ import { UserButton, UserButtonSkeleton } from "@/components/user-button"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useDynamicFavicon } from "@/hooks/use-dynamic-favicon"
+import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
 import { getUnreadMessagesCount, updateDocumentTitle } from "@/lib/utils"
 import { ExtendedChat, ExtendedMessage } from "@/types"
@@ -58,12 +59,24 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         .flatMap((chat) => chat?.messages ?? [])
         .filter(Boolean)
 
-    useDynamicFavicon({ messages, currentUserId: session?.user.id })
+    const { isTabFocused } = useIsTabFocused()
+
+    useDynamicFavicon({
+        messages,
+        currentUserId: session?.user.id,
+        pathname: pathname ?? "",
+    })
 
     useEffect(() => {
         let count = 0
 
-        chats.forEach((chat) => {
+        let _chats = chats
+
+        if (isTabFocused) {
+            _chats = chats.filter((chat) => !pathname?.includes(chat.id))
+        }
+
+        _chats.forEach((chat) => {
             const unreadMessagesCount = getUnreadMessagesCount({
                 currentUserId: session?.user.id,
                 messages: chat.messages ?? [],

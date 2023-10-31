@@ -7,6 +7,7 @@ import { cn, formatDate, getUnreadMessagesCount } from "@/lib/utils"
 import Link from "next/link"
 import { Session } from "next-auth"
 import dynamic from "next/dynamic"
+import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
@@ -26,6 +27,7 @@ export function ChatButton({
     ...props
 }: ChatButtonProps) {
     const pathname = usePathname()
+    const { isTabFocused } = useIsTabFocused()
 
     const currentUserId = session?.user.id
 
@@ -39,6 +41,8 @@ export function ChatButton({
 
     const isSeen = !lastMessage
         ? false
+        : isTabFocused && pathname?.includes(lastMessage?.chatId ?? "")
+        ? true
         : lastMessage.seenBy.some((u) => u.id === currentUserId) ||
           lastMessageText === "Chat started"
 
