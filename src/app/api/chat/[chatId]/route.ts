@@ -56,18 +56,20 @@ export const DELETE = withErrorHandling(async function (
         return new NextResponse("Forbidden", { status: 403 })
     }
 
-    const deletedChat = await db.chat.delete({
-        where: {
-            id: chatId,
-        },
-    })
-
-    for (const userId of deletedChat.userIds) {
-        await pusherServer.trigger(userId, "chat:delete", {
-            deletedChat,
-            removerId: session.user.id,
+    await db.$transaction(async (tx) => {
+        const deletedChat = await tx.chat.delete({
+            where: {
+                id: chatId,
+            },
         })
-    }
+
+        for (const userId of deletedChat.userIds) {
+            await pusherServer.trigger(userId, "chat:delete", {
+                deletedChat,
+                removerId: session.user.id,
+            })
+        }
+    })
 
     return new NextResponse("OK")
 })

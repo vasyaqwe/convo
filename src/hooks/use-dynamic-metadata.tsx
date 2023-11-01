@@ -43,7 +43,7 @@ export function useDynamicMetadata({
         }
 
         document.title = `(${
-            unseenCount > 9 ? "9+" : unseenCount
+            unseenCount > 99 ? "99+" : unseenCount
         }) ${chatPartnerName}`
     }, [unseenCount, chatPartnerName])
 

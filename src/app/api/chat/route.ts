@@ -75,22 +75,24 @@ export const POST = withErrorHandling(async function (req: Request) {
         return new NextResponse(JSON.stringify(existingChat))
     }
 
-    const newChat = await db.chat.create({
-        data: {
-            users: {
-                connect: [{ id: session.user.id }, { id: userId }],
+    const newChat = await db.$transaction(async (tx) => {
+        const newChat = await tx.chat.create({
+            data: {
+                users: {
+                    connect: [{ id: session.user.id }, { id: userId }],
+                },
             },
-        },
-        include: {
-            users: {
-                select: USERS_SELECT,
+            include: {
+                users: {
+                    select: USERS_SELECT,
+                },
             },
-        },
-    })
+        })
 
-    for (const userId of newChat.userIds) {
-        await pusherServer.trigger(userId, "chat:new", newChat)
-    }
+        for (const userId of newChat.userIds) {
+            await pusherServer.trigger(userId, "chat:new", newChat)
+        }
+    })
 
     return new NextResponse(JSON.stringify(newChat))
 })

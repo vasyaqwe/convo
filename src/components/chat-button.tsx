@@ -93,7 +93,7 @@ export function ChatButton({
                             title={`${unseenCount} unread messages`}
                             className="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
                         >
-                            {unseenCount > 9 ? "9+" : unseenCount}
+                            {unseenCount > 99 ? "99+" : unseenCount}
                         </span>
                     )}
                 </div>

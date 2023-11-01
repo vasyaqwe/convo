@@ -65,8 +65,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
             queryClient.invalidateQueries({ queryKey: ["users-search"] })
             router.refresh()
         },
-        onError: (e) => {
-            console.log(e)
+        onError: () => {
             return toast.error("Something went wrong")
         },
     })
@@ -201,7 +200,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                     <Button
                         className="flex-shrink-0"
                         disabled={
-                            (body.length < 1 && !!image) ||
+                            (body.length < 1 && !image) ||
                             isUploading ||
                             isPending
                         }
