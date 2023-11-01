@@ -8,42 +8,38 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
-import { pusherServer } from "@/lib/pusher"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
 import { MessagePayload } from "@/lib/validations/message"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Session } from "next-auth"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { revalidatePath } from "next/cache"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 type MessageFormProps = {
     chatId: string
-    session: Session | null
 }
 
 const IMAGE_SIZE = 100
 const IMAGE_MARGIN = 12
 
-export function MessageForm({ chatId, session }: MessageFormProps) {
+export function MessageForm({ chatId }: MessageFormProps) {
     const [body, setBody] = useState("")
-    const debouncedBody = useDebounce<string>(body, 500)
+    const debouncedBody = useDebounce<string>({
+        value: body,
+        delay: 1500,
+        delayFirstLetter: false,
+    })
+
+    const [startedTyping, setStartedTyping] = useState(false)
 
     const [image, setImage] = useState<string | undefined>(undefined)
     const { startUpload, isUploading } = useUploadThing("imageUploader")
 
     const queryClient = useQueryClient()
     const router = useRouter()
-
-    useEffect(() => {
-        async function onBodyChange() {
-            await pusherServer.trigger(session?.user.id, "chat:typing", {
-                user: session?.user,
-            })
-        }
-    }, [debouncedBody, session?.user])
 
     const { mutate, isPending } = useMutation({
         mutationFn: async ({ body, image }: Omit<MessagePayload, "chatId">) => {
@@ -68,13 +64,62 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
             queryClient.invalidateQueries({ queryKey: ["messages"] })
             queryClient.invalidateQueries({ queryKey: ["users-search"] })
             router.refresh()
+            revalidatePath("/", "layout")
         },
         onError: () => {
             return toast.error("Something went wrong")
         },
     })
 
+    const { refetch: refetchStartTyping } = useQuery({
+        queryKey: ["chat-start-typing"],
+        queryFn: async () => {
+            const { data } = await axiosInstance.patch(
+                `/chat/${chatId}/start-typing`
+            )
+            return data
+        },
+        enabled: false,
+    })
+
+    const { refetch: refetchEndTyping } = useQuery({
+        queryKey: ["chat-end-typing"],
+        queryFn: async () => {
+            const { data } = await axiosInstance.patch(
+                `/chat/${chatId}/end-typing`
+            )
+            return data
+        },
+        enabled: false,
+    })
+
+    useEffect(() => {
+        if (debouncedBody.length === 0) return
+
+        refetchEndTyping()
+        setStartedTyping(false)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedBody])
+
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+        if (!startedTyping) {
+            refetchStartTyping()
+        }
+        setStartedTyping(true)
+
+        if (e.key === "Backspace") {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
+
+            timeoutRef.current = setTimeout(() => {
+                console.log("hello")
+                refetchEndTyping()
+                setStartedTyping(false)
+            }, 1500)
+        }
+
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
             if (
@@ -143,7 +188,9 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                         onKeyDown={onKeyDown}
                         autoFocus
                         value={body}
-                        onChange={(e) => setBody(e.target.value)}
+                        onChange={(e) => {
+                            setBody(e.target.value)
+                        }}
                         placeholder="Type a message"
                         className="h-[var(--message-form-height)] w-full"
                     />
@@ -151,7 +198,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                     <Button
                         className="flex-shrink-0"
                         disabled={
-                            (body.length < 1 && !image) ||
+                            (body.length < 1 && !!image) ||
                             isUploading ||
                             isPending
                         }

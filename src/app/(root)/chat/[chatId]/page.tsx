@@ -72,10 +72,7 @@ export default async function Page({ params: { chatId } }: PageProps) {
                 chatId={chatId}
             />
 
-            <MessageForm
-                session={session}
-                chatId={chatId}
-            />
+            <MessageForm chatId={chatId} />
         </div>
     )
 }

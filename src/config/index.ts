@@ -22,6 +22,7 @@ export const metadataConfig = {
         apple: "/apple-touch-icon.png",
     },
 }
+
 export const viewportConfig = {
     themeColor: "#000",
     width: "device-width",

@@ -39,7 +39,6 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
             toast.success("Chat deleted")
             router.push("/")
             router.refresh()
-            queryClient.invalidateQueries({ queryKey: ["chats"] })
             queryClient.invalidateQueries({ queryKey: ["messages"] })
         },
         onError: () => {
@@ -56,7 +55,10 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                     size={"icon"}
                     className="md:hidden"
                 >
-                    <Link href={"/"}>
+                    <Link
+                        prefetch={false}
+                        href={"/"}
+                    >
                         <Icons.chevronLeft />
                     </Link>
                 </Button>

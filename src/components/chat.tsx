@@ -52,6 +52,7 @@ export function Chat({
     const currentUserId = session?.user.id
 
     const [messages, setMessages] = useState<ExtendedMessage[]>(initialMessages)
+    const [typingUsers, setTypingUsers] = useState<UserType[]>([])
 
     useEffect(() => {
         if (data?.pages) {
@@ -107,7 +108,7 @@ export function Chat({
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
-        // pusherClient.subscribe(currentUserId)
+        pusherClient.subscribe(currentUserId)
 
         function onNewMessage(newMessage: ExtendedMessage) {
             flushSync(() => {
@@ -145,28 +146,46 @@ export function Chat({
             )
         }
 
-        // function onUserTyping(user: UserType) {
-        //     console.log(user)
-        // }
+        function onStartTyping({ typingUser }: { typingUser: UserType }) {
+            setTypingUsers((prev) => {
+                if (prev.some((u) => u.id === typingUser.id)) {
+                    return prev
+                }
 
-        // pusherClient.bind("chat:typing", onUserTyping)
+                return [...prev, typingUser]
+            })
+        }
+
+        function onEndTyping({ typingUser }: { typingUser: UserType }) {
+            setTypingUsers((prev) => prev.filter((u) => u.id !== typingUser.id))
+        }
+
+        pusherClient.bind("chat:start-typing", onStartTyping)
+        pusherClient.bind("chat:end-typing", onEndTyping)
         pusherClient.bind("message:new", onNewMessage)
         pusherClient.bind("message:update", onUpdateMessage)
         pusherClient.bind("message:delete", onDeleteMessage)
 
         return () => {
             pusherClient.unsubscribe(chatId)
+            pusherClient.unsubscribe(currentUserId)
+            pusherClient.unbind("chat:start-typing", onStartTyping)
+            pusherClient.unbind("chat:end-typing", onEndTyping)
             pusherClient.unbind("message:new", onNewMessage)
             pusherClient.unbind("message:update", onUpdateMessage)
             pusherClient.unbind("message:delete", onDeleteMessage)
         }
     }, [chatId, currentUserId])
 
+    const typingUsersList = `${typingUsers.map((u) => u.name).join(", ")} ${
+        typingUsers.length === 1 ? "is" : "are"
+    } typing...`
+
     return (
         <div
             ref={wrapperRef}
             className="relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height))] 
-            flex-col overflow-y-auto px-4 py-[var(--chat-padding-block)] [--chat-padding-block:25px]"
+            flex-col overflow-y-auto px-4 py-[var(--chat-padding-block)] [--chat-padding-block:2rem]"
         >
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
@@ -213,6 +232,14 @@ export function Chat({
                     )
                 })
             )}
+            <div className="relative">
+                <p
+                    className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)]
+            left-0 text-xs text-foreground/70`)}
+                >
+                    {typingUsers.length > 0 && typingUsersList}
+                </p>
+            </div>
         </div>
     )
 }

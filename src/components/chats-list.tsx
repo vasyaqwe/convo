@@ -26,7 +26,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
     const [chats, setChats] = useState(initialChats)
 
     const [input, setInput] = useState("")
-    const debouncedInput = useDebounce<string>(input, 400)
+    const debouncedInput = useDebounce<string>({ value: input, delay: 400 })
 
     const router = useRouter()
     const pathname = usePathname()
