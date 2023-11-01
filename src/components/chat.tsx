@@ -177,9 +177,13 @@ export function Chat({
         }
     }, [chatId, currentUserId])
 
-    const typingUsersList = `${typingUsers.map((u) => u.name).join(", ")} ${
-        typingUsers.length === 1 ? "is" : "are"
-    } typing...`
+    const filteredTypingUsers = typingUsers.filter(
+        (u) => u.id !== currentUserId
+    )
+
+    const typingUsersList = `${filteredTypingUsers
+        .map((u) => u.name)
+        .join(", ")} ${typingUsers.length === 1 ? "is" : "are"} typing...`
 
     return (
         <div
@@ -237,7 +241,7 @@ export function Chat({
                     className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)]
             left-0 text-xs text-foreground/70`)}
                 >
-                    {typingUsers.length > 0 && typingUsersList}
+                    {filteredTypingUsers.length > 0 && typingUsersList}
                 </p>
             </div>
         </div>

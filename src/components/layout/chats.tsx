@@ -4,6 +4,9 @@ import { db } from "@/lib/db"
 import { cn, reverseArray } from "@/lib/utils"
 import { Session } from "next-auth"
 
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 export async function Chats({
     className,
     session,

@@ -14,7 +14,7 @@ import { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { toast } from "sonner"
 
 type ChatsListProps = {
@@ -56,7 +56,9 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
     const { chats: chatsMap } = useTotalMessagesCountStore()
 
-    const unseenCount = chatsMap.reduce((a, b) => a + b.unseenMessagesCount, 0)
+    const unseenCount = useMemo(() => {
+        return chatsMap.reduce((a, b) => a + b.unseenMessagesCount, 0)
+    }, [chatsMap])
 
     useDynamicMetadata({
         unseenCount,

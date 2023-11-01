@@ -64,9 +64,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
             queryClient.invalidateQueries({ queryKey: ["messages"] })
             queryClient.invalidateQueries({ queryKey: ["users-search"] })
             router.refresh()
-            revalidatePath("/", "layout")
         },
-        onError: () => {
+        onError: (e) => {
+            console.log(e)
             return toast.error("Something went wrong")
         },
     })
@@ -102,12 +102,8 @@ export function MessageForm({ chatId }: MessageFormProps) {
     }, [debouncedBody])
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-    function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-        if (!startedTyping) {
-            refetchStartTyping()
-        }
-        setStartedTyping(true)
 
+    function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === "Backspace") {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current)
@@ -132,6 +128,15 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 mutate({ body, image })
             }
         }
+    }
+
+    function onBodyChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+        setBody(e.target.value)
+        if (!startedTyping) {
+            console.log("hello")
+            refetchStartTyping()
+        }
+        setStartedTyping(true)
     }
 
     async function onImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -188,9 +193,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                         onKeyDown={onKeyDown}
                         autoFocus
                         value={body}
-                        onChange={(e) => {
-                            setBody(e.target.value)
-                        }}
+                        onChange={onBodyChange}
                         placeholder="Type a message"
                         className="h-[var(--message-form-height)] w-full"
                     />
