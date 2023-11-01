@@ -185,6 +185,7 @@ export function Chat({
         .map((u) => u.name)
         .join(", ")} ${typingUsers.length === 1 ? "is" : "are"} typing...`
 
+    console.log(messages)
     return (
         <div
             ref={wrapperRef}
@@ -236,14 +237,16 @@ export function Chat({
                     )
                 })
             )}
-            <div className="relative h-full">
-                <p
-                    className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)]
+            {filteredTypingUsers.length > 0 && (
+                <div className="relative h-full">
+                    <p
+                        className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)]
             left-0 text-xs text-foreground/70`)}
-                >
-                    {filteredTypingUsers.length > 0 && typingUsersList}
-                </p>
-            </div>
+                    >
+                        {typingUsersList}
+                    </p>
+                </div>
+            )}
         </div>
     )
 }

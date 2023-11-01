@@ -18,9 +18,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const viewport: Viewport = viewportConfig
 export const metadata: Metadata = metadataConfig
 
-export const dynamic = "force-dynamic"
-export const fetchCache = "force-no-store"
-
 export default async function RootLayout({
     children,
 }: {

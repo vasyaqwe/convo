@@ -3,11 +3,9 @@ import { MessageForm } from "@/components/forms/message-form"
 import { ChatHeader } from "@/components/layout/chat-header"
 import { getAuthSession } from "@/lib/auth"
 import { addDisplaySender, reverseArray } from "@/lib/utils"
-import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { metadataConfig } from "@/config"
-import { ExtendedChat } from "@/types"
-import { headers } from "next/headers"
+import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
+import { db } from "@/lib/db"
 
 type PageProps = {
     params: {
@@ -15,40 +13,34 @@ type PageProps = {
     }
 }
 
-async function getChat(chatId: string) {
-    const host = headers().get("host")
-    const protocol = process?.env.NODE_ENV === "development" ? "http" : "https"
-    const res = await fetch(`${protocol}://${host}/api/chat/${chatId}`, {
-        cache: "no-store",
-    })
-
-    if (!res.ok) {
-        throw new Error("Failed to fetch chat")
-    }
-
-    return res.json()
-}
-
-export async function generateMetadata({
-    params,
-}: PageProps): Promise<Metadata> {
-    const session = await getAuthSession()
-    const chat: ExtendedChat = await getChat(params.chatId)
-
-    const chatPartnerName = chat.users.find(
-        (user) => user.id !== session?.user.id
-    )?.name
-
-    return {
-        ...metadataConfig,
-        title: chatPartnerName,
-    }
-}
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
 
 export default async function Page({ params: { chatId } }: PageProps) {
     const session = await getAuthSession()
 
-    const chat: ExtendedChat = await getChat(chatId)
+    const chat = await db.chat.findFirst({
+        where: { id: chatId },
+        include: {
+            users: {
+                select: USERS_SELECT,
+            },
+            messages: {
+                include: {
+                    sender: {
+                        select: USERS_SELECT,
+                    },
+                    seenBy: {
+                        select: USERS_SELECT,
+                    },
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+                take: MESSAGES_INFINITE_SCROLL_COUNT,
+            },
+        },
+    })
 
     if (!chat) notFound()
 
