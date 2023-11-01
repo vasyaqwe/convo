@@ -236,7 +236,7 @@ export function Chat({
                     )
                 })
             )}
-            <div className="relative">
+            <div className="relative h-full">
                 <p
                     className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)]
             left-0 text-xs text-foreground/70`)}
