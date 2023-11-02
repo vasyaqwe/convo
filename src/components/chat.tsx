@@ -185,7 +185,6 @@ export function Chat({
         .map((u) => u.name)
         .join(", ")} ${typingUsers.length === 1 ? "is" : "are"} typing...`
 
-    console.log(messages)
     return (
         <div
             ref={wrapperRef}

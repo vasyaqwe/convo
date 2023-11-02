@@ -68,6 +68,10 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  replyToId String?   @db.ObjectId
+  replyTo   Message?  @relation("ReplyTo", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Message[] @relation("ReplyTo")
+
   seenByIds String[] @db.ObjectId
   seenBy    User[]   @relation("SeenBy", fields: [seenByIds], references: [id])
 
