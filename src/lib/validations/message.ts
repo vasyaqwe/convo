@@ -7,6 +7,10 @@ export const messageSchema = z.object({
     replyToId: z.string().optional(),
 })
 
+export const seeMessageSchema = z.object({
+    chatId: z.string(),
+})
+
 export const messagesQuerySchema = z.object({
     limit: z.string(),
     page: z.string(),
@@ -14,3 +18,4 @@ export const messagesQuerySchema = z.object({
 })
 
 export type MessagePayload = z.infer<typeof messageSchema>
+export type SeeMessagePayload = z.infer<typeof seeMessageSchema>

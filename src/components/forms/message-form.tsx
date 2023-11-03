@@ -44,6 +44,28 @@ export function MessageForm({ chatId }: MessageFormProps) {
     const router = useRouter()
     const { replyTo, isReplying, setIsReplying } = useReplyStore()
 
+    const { refetch: refetchStartTyping } = useQuery({
+        queryKey: ["chat-start-typing"],
+        queryFn: async () => {
+            const { data } = await axiosInstance.patch(
+                `/chat/${chatId}/start-typing`
+            )
+            return data
+        },
+        enabled: false,
+    })
+
+    const { refetch: refetchEndTyping } = useQuery({
+        queryKey: ["chat-end-typing"],
+        queryFn: async () => {
+            const { data } = await axiosInstance.patch(
+                `/chat/${chatId}/end-typing`
+            )
+            return data
+        },
+        enabled: false,
+    })
+
     const { mutate, isPending } = useMutation({
         mutationFn: async ({
             body,
@@ -65,6 +87,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
             setBody("")
             setImage(undefined)
             setIsReplying(false)
+            refetchEndTyping()
             document.documentElement.style.setProperty(
                 "--message-form-image-height",
                 `0px`
@@ -78,28 +101,6 @@ export function MessageForm({ chatId }: MessageFormProps) {
         onError: () => {
             return toast.error("Something went wrong")
         },
-    })
-
-    const { refetch: refetchStartTyping } = useQuery({
-        queryKey: ["chat-start-typing"],
-        queryFn: async () => {
-            const { data } = await axiosInstance.patch(
-                `/chat/${chatId}/start-typing`
-            )
-            return data
-        },
-        enabled: false,
-    })
-
-    const { refetch: refetchEndTyping } = useQuery({
-        queryKey: ["chat-end-typing"],
-        queryFn: async () => {
-            const { data } = await axiosInstance.patch(
-                `/chat/${chatId}/end-typing`
-            )
-            return data
-        },
-        enabled: false,
     })
 
     useEffect(() => {

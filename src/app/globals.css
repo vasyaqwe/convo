@@ -1,3 +1,5 @@
+.chat-wrapper {}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -81,11 +83,16 @@
 }
 
 *::-webkit-scrollbar {
-  width: 0.35rem;
+  width: 0.45rem;
 }
 
 *::-webkit-scrollbar-track {
   border-radius: 100vmax;
+  background-color: hsl(var(--secondary)/.5);
+  transition: background-color .3s ease;
+}
+
+*::-webkit-scrollbar-track:hover {
   background-color: hsl(var(--secondary));
 }
 

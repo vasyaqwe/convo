@@ -3,13 +3,14 @@ import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
+import { seeMessageSchema } from "@/lib/validations/message"
 import { NextResponse } from "next/server"
 import { UTApi } from "uploadthing/server"
 
 const utapi = new UTApi()
 
 export const PATCH = withErrorHandling(async function (
-    _req: Request,
+    req: Request,
     { params: { messageId } }
 ) {
     const session = await getAuthSession()
@@ -20,23 +21,13 @@ export const PATCH = withErrorHandling(async function (
         })
     }
 
-    const message = await db.message.findFirst({
-        where: {
-            id: messageId,
-        },
-        select: {
-            id: true,
-            chatId: true,
-        },
-    })
+    const body = await req.json()
 
-    if (!message) {
-        return new NextResponse("Invalid message id", { status: 400 })
-    }
+    const { chatId } = seeMessageSchema.parse(body)
 
     const chat = await db.chat.findFirst({
         where: {
-            id: message?.chatId,
+            id: chatId,
         },
         select: {
             userIds: true,

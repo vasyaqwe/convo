@@ -19,6 +19,8 @@ import Link from "next/link"
 import { User } from "next-auth"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
+import { useMemo } from "react"
 
 type ChatHeaderProps = {
     user: User
@@ -30,6 +32,13 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
 
     const queryClient = useQueryClient()
     const router = useRouter()
+    const { chats: chatsMap } = useTotalMessagesCountStore()
+
+    const unseenCount = useMemo(() => {
+        return chatsMap
+            .filter((mapChat) => mapChat.id !== chat.id)
+            .reduce((a, b) => a + b.unseenMessagesCount, 0)
+    }, [chatsMap, chat.id])
 
     const { isPending, mutate: onDelete } = useMutation({
         mutationFn: async () => {
@@ -53,13 +62,21 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                     asChild
                     variant={"ghost"}
                     size={"icon"}
-                    className="md:hidden"
+                    className="relative md:hidden"
                 >
                     <Link
                         prefetch={false}
                         href={"/"}
                     >
                         <Icons.chevronLeft />
+                        {unseenCount > 0 && (
+                            <span
+                                title={`${unseenCount} unread messages`}
+                                className="absolute -right-2 -top-2 ml-auto inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
+                            >
+                                {unseenCount > 99 ? "99+" : unseenCount}
+                            </span>
+                        )}
                     </Link>
                 </Button>
                 <UserAvatar user={chatPartner} />

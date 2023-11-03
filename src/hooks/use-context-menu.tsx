@@ -1,5 +1,4 @@
 import { PointerEvent, useRef } from "react"
-import { toast } from "sonner"
 
 export function useContextMenu() {
     const triggerRef = useRef<HTMLSpanElement | null>(null)

@@ -22,11 +22,9 @@ export const PATCH = withErrorHandling(async function (
         return new NextResponse("Invalid chat id", { status: 400 })
     }
 
-    for (const userId of chat.userIds) {
-        await pusherServer.trigger(userId, "chat:start-typing", {
-            typingUser: session?.user,
-        })
-    }
+    await pusherServer.trigger(chat.id, "chat:start-typing", {
+        typingUser: session?.user,
+    })
 
     return new NextResponse("OK")
 })

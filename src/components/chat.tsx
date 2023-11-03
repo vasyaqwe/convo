@@ -108,7 +108,6 @@ export function Chat({
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
-        pusherClient.subscribe(currentUserId)
 
         function onNewMessage(newMessage: ExtendedMessage) {
             flushSync(() => {
@@ -168,14 +167,13 @@ export function Chat({
 
         return () => {
             pusherClient.unsubscribe(chatId)
-            pusherClient.unsubscribe(currentUserId)
             pusherClient.unbind("chat:start-typing", onStartTyping)
             pusherClient.unbind("chat:end-typing", onEndTyping)
             pusherClient.unbind("message:new", onNewMessage)
             pusherClient.unbind("message:update", onUpdateMessage)
             pusherClient.unbind("message:delete", onDeleteMessage)
         }
-    }, [chatId, currentUserId])
+    }, [chatId])
 
     const filteredTypingUsers = typingUsers.filter(
         (u) => u.id !== currentUserId
@@ -183,13 +181,15 @@ export function Chat({
 
     const typingUsersList = `${filteredTypingUsers
         .map((u) => u.name)
-        .join(", ")} ${typingUsers.length === 1 ? "is" : "are"} typing...`
+        .join(", ")} ${
+        filteredTypingUsers.length === 1 ? "is" : "are"
+    } typing...`
 
     return (
         <div
             ref={wrapperRef}
-            className="relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height)-var(--message-form-reply-height))] 
-            flex-col overflow-y-auto py-[var(--chat-padding-block)] [--chat-padding-block:2rem]"
+            className="chat-wrapper relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height)-var(--message-form-reply-height))] 
+            flex-col overflow-y-auto pb-[var(--chat-padding-block)] pt-[calc(var(--chat-padding-block)/2)] [--chat-padding-block:3rem]"
         >
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
@@ -237,10 +237,10 @@ export function Chat({
                 })
             )}
             {filteredTypingUsers.length > 0 && (
-                <div className="relative h-full">
+                <div className="relative h-full ">
                     <p
-                        className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)]
-            left-0 text-xs text-foreground/70`)}
+                        className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)] left-0
+            px-4 text-xs text-foreground/70`)}
                     >
                         {typingUsersList}
                     </p>
