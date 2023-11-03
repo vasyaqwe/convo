@@ -1,6 +1,6 @@
 import { PointerEvent, useRef } from "react"
 
-export function useContentMenu() {
+export function useContextMenu() {
     const triggerRef = useRef<HTMLSpanElement | null>(null)
     const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
     const clearLongPress = () => {
@@ -22,5 +22,9 @@ export function useContentMenu() {
         }, 700)
     }
 
-    return { onPointerDown, triggerRef }
+    function onPointerUp() {
+        clearLongPress()
+    }
+
+    return { onPointerDown, onPointerUp, triggerRef }
 }

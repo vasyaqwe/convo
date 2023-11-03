@@ -21,7 +21,7 @@ import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useContentMenu } from "@/hooks/use-content-menu"
+import { useContextMenu } from "@/hooks/use-context-menu"
 import { useReplyStore } from "@/stores/use-reply-store.tsx"
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
@@ -36,7 +36,7 @@ type MessageProps = {
 const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, session, isLast, isTabFocused }, ref) => {
         const router = useRouter()
-        const { triggerRef, onPointerDown } = useContentMenu()
+        const { triggerRef, onPointerDown, onPointerUp } = useContextMenu()
         const { setIsReplying, setReplyTo } = useReplyStore()
 
         useQuery({
@@ -145,6 +145,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             ref={triggerRef}
                             className="max-md:select-none"
                             onPointerDown={onPointerDown}
+                            onPointerUp={onPointerUp}
                         >
                             <div
                                 style={{
