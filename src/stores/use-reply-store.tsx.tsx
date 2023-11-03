@@ -1,4 +1,4 @@
-import { ExtendedMessage, UserType } from "@/types"
+import { ExtendedMessage } from "@/types"
 import { create } from "zustand"
 
 type StoreState = {
@@ -6,11 +6,27 @@ type StoreState = {
     setIsReplying: (val: boolean) => void
     replyTo: ExtendedMessage | undefined
     setReplyTo: (message: ExtendedMessage) => void
+    highlightedMessageId: string
+    setHighlightedMessageId: (id: string) => void
 }
+
+let timeout: NodeJS.Timeout | null = null
 
 export const useReplyStore = create<StoreState>()((set, get) => ({
     isReplying: false,
     replyTo: undefined,
+    highlightedMessageId: "",
+    setHighlightedMessageId: (highlightedMessageId) => {
+        set(() => ({ highlightedMessageId }))
+
+        if (timeout) {
+            clearTimeout(timeout)
+        }
+
+        timeout = setTimeout(() => {
+            set(() => ({ highlightedMessageId: "" }))
+        }, 1500)
+    },
     setReplyTo: (replyTo) => {
         set(() => ({ replyTo }))
     },

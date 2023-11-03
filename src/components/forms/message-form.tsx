@@ -38,6 +38,8 @@ export function MessageForm({ chatId }: MessageFormProps) {
     const [image, setImage] = useState<string | undefined>(undefined)
     const { startUpload, isUploading } = useUploadThing("imageUploader")
 
+    const messageBodyRef = useRef<HTMLTextAreaElement | null>(null)
+
     const queryClient = useQueryClient()
     const router = useRouter()
     const { replyTo, isReplying, setIsReplying } = useReplyStore()
@@ -99,6 +101,12 @@ export function MessageForm({ chatId }: MessageFormProps) {
         },
         enabled: false,
     })
+
+    useEffect(() => {
+        setTimeout(() => {
+            messageBodyRef?.current?.focus()
+        }, 0)
+    }, [replyTo])
 
     useEffect(() => {
         if (debouncedBody.length === 0) return
@@ -195,6 +203,8 @@ export function MessageForm({ chatId }: MessageFormProps) {
                         <span className="sr-only">Attach image</span>
                     </FileButton>
                     <TextArea
+                        ref={messageBodyRef}
+                        id="message-input"
                         maxLength={1000}
                         onPaste={onImagePaste}
                         onKeyDown={onKeyDown}

@@ -16,7 +16,7 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { forwardRef } from "react"
+import { forwardRef, useState } from "react"
 import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
@@ -37,7 +37,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, session, isLast, isTabFocused }, ref) => {
         const router = useRouter()
         const { triggerRef, onPointerDown, onPointerUp } = useContextMenu()
-        const { setIsReplying, setReplyTo } = useReplyStore()
+        const {
+            setIsReplying,
+            setReplyTo,
+            setHighlightedMessageId,
+            highlightedMessageId,
+        } = useReplyStore()
 
         useQuery({
             queryKey: ["see-message"],
@@ -91,204 +96,220 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
 
         return (
             <div
-                id={message.id}
                 ref={ref}
                 className={cn(
-                    "relative flex gap-[var(--message-gap)] [--message-gap:10px]",
-                    isOwn ? "ml-auto" : "mr-auto flex-row-reverse",
-                    message.displaySender ? "mt-2" : "",
+                    "relative flex gap-[var(--message-gap)] px-4 transition-colors duration-1000 [--message-gap:10px]",
                     !isLast
                         ? "scroll-mt-[calc(var(--chat-padding-block)-1px)]"
-                        : ""
+                        : "",
+                    highlightedMessageId === message.id ? "bg-secondary" : "",
+                    !isOwn ? "flex-row-reverse" : ""
                 )}
+                id={message.id}
             >
-                <div
-                    className={cn(
-                        "group",
-                        isOwn ? "flex flex-col items-end" : ""
-                    )}
-                >
-                    {message.displaySender && (
-                        <UserAvatar
-                            className={cn(
-                                "mb-0.5 md:hidden",
-                                isOwn ? "ml-auto" : "mr-auto"
-                            )}
-                            user={message.sender}
-                        />
-                    )}
-                    {message.displaySender && (
-                        <p className={cn(isOwn ? "text-right" : "text-left")}>
-                            {isOwn ? (
-                                <>
-                                    {message.sender.name}{" "}
-                                    <Date className="text-xs text-foreground/75">
-                                        {formatDateToTimestamp(
-                                            message.createdAt
-                                        )}
-                                    </Date>
-                                </>
-                            ) : (
-                                <>
-                                    <Date className="text-xs text-foreground/75">
-                                        {formatDateToTimestamp(
-                                            message.createdAt
-                                        )}
-                                    </Date>{" "}
-                                    {message.sender.name}
-                                </>
-                            )}
-                        </p>
-                    )}
-                    <ContextMenu>
-                        <ContextMenuTrigger
-                            ref={triggerRef}
-                            className="max-md:select-none"
-                            onPointerDown={onPointerDown}
-                            onPointerUp={onPointerUp}
-                        >
-                            <div
-                                style={{
-                                    WebkitTouchCallout: "none",
-                                }}
+                <div className={cn(isOwn ? "ml-auto" : "mr-auto ")}>
+                    <div
+                        className={cn(
+                            "group",
+                            isOwn ? "flex flex-col items-end" : ""
+                        )}
+                    >
+                        {message.displaySender && (
+                            <UserAvatar
                                 className={cn(
-                                    "relative my-1 w-fit rounded-3xl bg-primary p-3 text-sm",
-                                    isOwn
-                                        ? "rounded-tr-none"
-                                        : "rounded-tl-none",
+                                    "mb-0.5 md:hidden",
+                                    isOwn ? "ml-auto" : "mr-auto"
+                                )}
+                                user={message.sender}
+                            />
+                        )}
+                        {message.displaySender && (
+                            <p
+                                className={cn(
+                                    isOwn ? "text-right" : "text-left"
+                                )}
+                            >
+                                {isOwn ? (
+                                    <>
+                                        {message.sender.name}{" "}
+                                        <Date className="text-xs text-foreground/75">
+                                            {formatDateToTimestamp(
+                                                message.createdAt
+                                            )}
+                                        </Date>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Date className="text-xs text-foreground/75">
+                                            {formatDateToTimestamp(
+                                                message.createdAt
+                                            )}
+                                        </Date>{" "}
+                                        {message.sender.name}
+                                    </>
+                                )}
+                            </p>
+                        )}
+                        <ContextMenu>
+                            <ContextMenuTrigger
+                                ref={triggerRef}
+                                className="max-md:select-none"
+                                onPointerDown={onPointerDown}
+                                onPointerUp={onPointerUp}
+                            >
+                                <div
+                                    style={{
+                                        WebkitTouchCallout: "none",
+                                    }}
+                                    className={cn(
+                                        "relative my-1 w-fit rounded-3xl bg-primary p-3 text-sm",
+                                        isOwn
+                                            ? "rounded-tr-none"
+                                            : "rounded-tl-none",
+                                        !message.displaySender
+                                            ? isOwn
+                                                ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
+                                                : "md:ml-[calc(var(--avatar-size)+var(--message-gap))]"
+                                            : ""
+                                    )}
+                                >
+                                    {message.replyTo && (
+                                        <button
+                                            onClick={() => {
+                                                const replyTo =
+                                                    document.getElementById(
+                                                        message.replyTo?.id ??
+                                                            ""
+                                                    )
+
+                                                if (replyTo) {
+                                                    replyTo.scrollIntoView({
+                                                        behavior: "smooth",
+                                                        block: "center",
+                                                    })
+
+                                                    setHighlightedMessageId(
+                                                        replyTo.id
+                                                    )
+                                                }
+                                            }}
+                                            className="relative mb-3 block overflow-hidden rounded-lg bg-foreground/20 p-2 pl-3.5 text-left transition-opacity before:absolute
+                                    before:left-0 before:top-0 before:h-full before:w-1.5 before:bg-secondary/80 hover:opacity-80"
+                                        >
+                                            <p className="font-medium">
+                                                {message.replyTo.sender.name}
+                                            </p>
+
+                                            <p
+                                                className={cn(
+                                                    "mt-1 max-w-[130px] truncate"
+                                                )}
+                                            >
+                                                {message.replyTo.body}
+                                            </p>
+                                        </button>
+                                    )}
+                                    {message.image && (
+                                        <Link
+                                            style={{
+                                                WebkitTouchCallout: "none",
+                                            }}
+                                            href={message.image}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="relative block h-40 w-40 rounded-2xl"
+                                        >
+                                            <Image
+                                                src={message.image}
+                                                alt={message.body ?? ""}
+                                                fill
+                                                className="rounded-2xl object-cover"
+                                            />
+                                        </Link>
+                                    )}
+                                    {bodyWithLinks && (
+                                        <p
+                                            style={{
+                                                WebkitTouchCallout: "none",
+                                            }}
+                                            dangerouslySetInnerHTML={{
+                                                __html: bodyWithLinks,
+                                            }}
+                                            className={cn(
+                                                "break-all",
+                                                message.image ? "mt-2" : ""
+                                            )}
+                                        ></p>
+                                    )}
+                                    {!message.displaySender && (
+                                        <Date
+                                            className={cn(
+                                                "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
+                                                isOwn
+                                                    ? "left-[calc(100%+var(--message-gap))]"
+                                                    : "right-[calc(100%+var(--message-gap))]"
+                                            )}
+                                        >
+                                            {formatDateToTimestamp(
+                                                message.createdAt
+                                            )}
+                                        </Date>
+                                    )}
+                                </div>
+                            </ContextMenuTrigger>
+                            <ContextMenuContent>
+                                {message.senderId === session?.user.id ? (
+                                    <>
+                                        <ContextMenuItem
+                                            disabled={isPending}
+                                            className="!text-destructive"
+                                            onSelect={(e) => {
+                                                e.preventDefault()
+                                                onDelete()
+                                            }}
+                                        >
+                                            {isPending ? (
+                                                <Loading className="mr-2" />
+                                            ) : (
+                                                <Icons.trash className="mr-2" />
+                                            )}{" "}
+                                            Delete message
+                                        </ContextMenuItem>
+                                    </>
+                                ) : (
+                                    <ContextMenuItem
+                                        onSelect={() => {
+                                            setIsReplying(true)
+                                            setReplyTo(message)
+                                        }}
+                                    >
+                                        <Icons.reply className="mr-2" />
+                                        Reply
+                                    </ContextMenuItem>
+                                )}
+                            </ContextMenuContent>
+                        </ContextMenu>
+
+                        {isLast && seenByList.length > 0 && (
+                            <p
+                                title={`Seen by ${seenByList}`}
+                                className={cn(
+                                    "mt-4 text-right text-xs font-light text-foreground/60",
                                     !message.displaySender
-                                        ? isOwn
-                                            ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
-                                            : "md:ml-[calc(var(--avatar-size)+var(--message-gap))]"
+                                        ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
                                         : ""
                                 )}
                             >
-                                {message.replyTo && (
-                                    <button
-                                        onClick={() => {
-                                            const replyTo =
-                                                document.getElementById(
-                                                    message.replyTo?.id ?? ""
-                                                )
-
-                                            if (replyTo) {
-                                                replyTo.scrollIntoView({
-                                                    behavior: "smooth",
-                                                })
-                                            }
-                                        }}
-                                        className="relative mb-3 block overflow-hidden rounded-md bg-foreground/20 p-2 pl-3 text-left
-                                    before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-secondary/75"
-                                    >
-                                        <p className="font-medium">
-                                            {message.replyTo.sender.name}
-                                        </p>
-
-                                        <p
-                                            className={cn(
-                                                "mt-1 max-w-[130px] truncate"
-                                            )}
-                                        >
-                                            {message.replyTo.body}
-                                        </p>
-                                    </button>
-                                )}
-                                {message.image && (
-                                    <Link
-                                        style={{ WebkitTouchCallout: "none" }}
-                                        href={message.image}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="relative block h-40 w-40 rounded-2xl"
-                                    >
-                                        <Image
-                                            src={message.image}
-                                            alt={message.body ?? ""}
-                                            fill
-                                            className="rounded-2xl object-cover"
-                                        />
-                                    </Link>
-                                )}
-                                {bodyWithLinks && (
-                                    <p
-                                        style={{ WebkitTouchCallout: "none" }}
-                                        dangerouslySetInnerHTML={{
-                                            __html: bodyWithLinks,
-                                        }}
-                                        className={cn(
-                                            "w-fitbreak-all",
-                                            message.image ? "mt-2" : ""
-                                        )}
-                                    ></p>
-                                )}
-                                {!message.displaySender && (
-                                    <Date
-                                        className={cn(
-                                            "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
-                                            isOwn
-                                                ? "left-[calc(100%+var(--message-gap))]"
-                                                : "right-[calc(100%+var(--message-gap))]"
-                                        )}
-                                    >
-                                        {formatDateToTimestamp(
-                                            message.createdAt
-                                        )}
-                                    </Date>
-                                )}
-                            </div>
-                        </ContextMenuTrigger>
-                        <ContextMenuContent>
-                            {message.senderId === session?.user.id ? (
-                                <>
-                                    <ContextMenuItem
-                                        disabled={isPending}
-                                        className="!text-destructive"
-                                        onSelect={(e) => {
-                                            e.preventDefault()
-                                            onDelete()
-                                        }}
-                                    >
-                                        {isPending ? (
-                                            <Loading className="mr-2" />
-                                        ) : (
-                                            <Icons.trash className="mr-2" />
-                                        )}{" "}
-                                        Delete message
-                                    </ContextMenuItem>
-                                </>
-                            ) : (
-                                <ContextMenuItem
-                                    onSelect={() => {
-                                        setIsReplying(true)
-                                        setReplyTo(message)
-                                    }}
-                                >
-                                    <Icons.reply className="mr-2" />
-                                    Reply
-                                </ContextMenuItem>
-                            )}
-                        </ContextMenuContent>
-                    </ContextMenu>
-
-                    {isLast && seenByList.length > 0 && (
-                        <p
-                            title={`Seen by ${seenByList}`}
-                            className={cn(
-                                "mt-4 text-right text-xs font-light text-foreground/60",
-                                !message.displaySender
-                                    ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
-                                    : ""
-                            )}
-                        >
-                            <span className="sr-only">Seen by</span>
-                            <Icons.eye
-                                className="inline"
-                                width={15}
-                                height={15}
-                            />{" "}
-                            {seenByList}
-                        </p>
-                    )}
+                                <span className="sr-only">Seen by</span>
+                                <Icons.eye
+                                    className="inline"
+                                    width={15}
+                                    height={15}
+                                />{" "}
+                                {seenByList}
+                            </p>
+                        )}
+                    </div>
                 </div>
                 {message.displaySender && (
                     <UserAvatar

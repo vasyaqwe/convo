@@ -189,7 +189,7 @@ export function Chat({
         <div
             ref={wrapperRef}
             className="relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height)-var(--message-form-reply-height))] 
-            flex-col overflow-y-auto px-4 py-[var(--chat-padding-block)] [--chat-padding-block:2rem]"
+            flex-col overflow-y-auto py-[var(--chat-padding-block)] [--chat-padding-block:2rem]"
         >
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
