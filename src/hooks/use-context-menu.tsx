@@ -1,4 +1,5 @@
 import { PointerEvent, useRef } from "react"
+import { toast } from "sonner"
 
 export function useContextMenu() {
     const triggerRef = useRef<HTMLSpanElement | null>(null)
@@ -8,10 +9,18 @@ export function useContextMenu() {
     }
 
     function onPointerDown(e: PointerEvent) {
+        const wrapper = findNearestScrollableContainer(triggerRef.current)
+        const prevScrollPosition = wrapper?.scrollTop
+
         clearLongPress()
         if (e.pointerType === "mouse") return
 
         longPressTimerRef.current = setTimeout(() => {
+            const wrapper = findNearestScrollableContainer(triggerRef.current)
+            const scrollPosition = wrapper?.scrollTop
+
+            if (scrollPosition !== prevScrollPosition) return
+
             triggerRef?.current?.dispatchEvent(
                 new MouseEvent("contextmenu", {
                     bubbles: true,
@@ -27,4 +36,23 @@ export function useContextMenu() {
     }
 
     return { onPointerDown, onPointerUp, triggerRef }
+}
+
+function findNearestScrollableContainer(
+    element: HTMLElement | null
+): HTMLElement | undefined {
+    if (!element) {
+        return undefined
+    }
+
+    let parent = element.parentElement
+    while (parent) {
+        const { overflow } = window.getComputedStyle(parent)
+        if (overflow.split(" ").every((o) => o === "auto" || o === "scroll")) {
+            return parent
+        }
+        parent = parent.parentElement
+    }
+
+    return document.documentElement
 }

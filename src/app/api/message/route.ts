@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
 import { messageSchema } from "@/lib/validations/message"
+import { Prisma } from "@prisma/client"
 import { NextResponse } from "next/server"
 
 export const POST = withErrorHandling(async function (req: Request) {
@@ -20,31 +21,39 @@ export const POST = withErrorHandling(async function (req: Request) {
     const { chatId, body, image, replyToId } = messageSchema.parse(_body)
 
     await db.$transaction(async (tx) => {
-        const newMessage = await tx.message.create({
-            data: {
-                chat: {
-                    connect: {
-                        id: chatId,
-                    },
+        let data: Prisma.MessageCreateInput = {
+            chat: {
+                connect: {
+                    id: chatId,
                 },
+            },
+            sender: {
+                connect: {
+                    id: session.user.id,
+                },
+            },
+            seenBy: {
+                connect: {
+                    id: session.user.id,
+                },
+            },
+            body,
+            image,
+        }
+
+        if (replyToId) {
+            data = {
+                ...data,
                 replyTo: {
                     connect: {
                         id: replyToId,
                     },
                 },
-                sender: {
-                    connect: {
-                        id: session.user.id,
-                    },
-                },
-                seenBy: {
-                    connect: {
-                        id: session.user.id,
-                    },
-                },
-                body,
-                image,
-            },
+            }
+        }
+
+        const newMessage = await tx.message.create({
+            data,
             include: MESSAGE_INCLUDE,
         })
 
