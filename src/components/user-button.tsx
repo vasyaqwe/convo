@@ -2,7 +2,7 @@
 
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { Chat } from "@prisma/client"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
 import { ChatPayload } from "@/lib/validations/chat"
@@ -21,7 +21,6 @@ export function UserButton({
     onSelect,
     ...props
 }: UserButtonProps) {
-    const queryClient = useQueryClient()
     const router = useRouter()
 
     const { mutate } = useMutation({
@@ -33,6 +32,7 @@ export function UserButton({
             return data as Chat
         },
         onSuccess: (chat) => {
+            console.log(chat)
             router.push(`/chat/${chat.id}`)
             router.refresh()
             onSelect()

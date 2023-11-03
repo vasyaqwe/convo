@@ -11,8 +11,8 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
 import { MessagePayload } from "@/lib/validations/message"
+import { useReplyStore } from "@/stores/use-reply-store.tsx"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { revalidatePath } from "next/cache"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
@@ -40,14 +40,21 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
     const queryClient = useQueryClient()
     const router = useRouter()
+    const { replyTo, isReplying, setIsReplying } = useReplyStore()
 
     const { mutate, isPending } = useMutation({
-        mutationFn: async ({ body, image }: Omit<MessagePayload, "chatId">) => {
+        mutationFn: async ({
+            body,
+            image,
+            isReplying,
+        }: Omit<MessagePayload, "chatId"> & { isReplying: boolean }) => {
             const payload: MessagePayload = {
                 chatId,
                 body,
                 image,
+                replyToId: isReplying ? replyTo?.id : undefined,
             }
+
             const { data } = await axiosInstance.post("/message", payload)
 
             return data
@@ -55,6 +62,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
         onMutate: () => {
             setBody("")
             setImage(undefined)
+            setIsReplying(false)
             document.documentElement.style.setProperty(
                 "--message-form-image-height",
                 `0px`
@@ -124,7 +132,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 !isPending &&
                 (body.length > 0 || image)
             ) {
-                mutate({ body, image })
+                mutate({ body, image, isReplying })
             }
         }
     }
@@ -173,7 +181,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
             <form
                 onSubmit={(e) => {
                     e.preventDefault()
-                    mutate({ body, image })
+                    mutate({ body, image, isReplying })
                 }}
             >
                 <div className="flex h-[var(--message-form-height)] items-center ">
@@ -270,14 +278,34 @@ function MessageFormShell({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const { setIsReplying, isReplying, replyTo } = useReplyStore()
+
     return (
         <div
             className={cn(
-                "h-[calc(var(--message-form-height)+var(--message-form-image-height))] overflow-hidden border-t border-secondary px-4",
+                "h-[calc(var(--message-form-height)+var(--message-form-image-height)+var(--message-form-reply-height))] overflow-hidden border-t border-secondary px-4",
                 className
             )}
             {...props}
         >
+            {isReplying && (
+                <div className="flex h-[var(--message-form-reply-height)] w-full items-center gap-3">
+                    <Icons.reply className="flex-shrink-0 stroke-primary" />
+                    <div>
+                        <p className="font-medium">{replyTo?.sender.name}</p>
+                        <p className="line-clamp-1 text-sm">{replyTo?.body}</p>
+                    </div>
+                    <Button
+                        onClick={() => setIsReplying(false)}
+                        size={"icon-sm"}
+                        variant={"ghost"}
+                        className="ml-auto flex-shrink-0"
+                    >
+                        <Icons.X />
+                        <span className="sr-only">Close</span>
+                    </Button>
+                </div>
+            )}
             {children}
         </div>
     )

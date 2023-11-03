@@ -4,7 +4,11 @@ import { ChatHeader } from "@/components/layout/chat-header"
 import { getAuthSession } from "@/lib/auth"
 import { addDisplaySender, reverseArray } from "@/lib/utils"
 import { notFound } from "next/navigation"
-import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
+import {
+    MESSAGES_INFINITE_SCROLL_COUNT,
+    MESSAGE_INCLUDE,
+    USERS_SELECT,
+} from "@/config"
 import { db } from "@/lib/db"
 
 type PageProps = {
@@ -13,11 +17,18 @@ type PageProps = {
     }
 }
 
+function isObjectId(string: string) {
+    const objectIdRegex = /^[0-9a-fA-F]{24}$/
+    return objectIdRegex.test(string)
+}
+
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
 export default async function Page({ params: { chatId } }: PageProps) {
     const session = await getAuthSession()
+
+    if (!isObjectId(chatId)) notFound()
 
     const chat = await db.chat.findFirst({
         where: { id: chatId },
@@ -26,14 +37,7 @@ export default async function Page({ params: { chatId } }: PageProps) {
                 select: USERS_SELECT,
             },
             messages: {
-                include: {
-                    sender: {
-                        select: USERS_SELECT,
-                    },
-                    seenBy: {
-                        select: USERS_SELECT,
-                    },
-                },
+                include: MESSAGE_INCLUDE,
                 orderBy: {
                     createdAt: "desc",
                 },

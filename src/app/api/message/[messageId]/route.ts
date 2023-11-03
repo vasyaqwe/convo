@@ -1,4 +1,4 @@
-import { USERS_SELECT } from "@/config"
+import { MESSAGE_INCLUDE, USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
@@ -61,14 +61,7 @@ export const PATCH = withErrorHandling(async function (
                     },
                 },
             },
-            include: {
-                sender: {
-                    select: USERS_SELECT,
-                },
-                seenBy: {
-                    select: USERS_SELECT,
-                },
-            },
+            include: MESSAGE_INCLUDE,
         })
 
         await pusherServer.trigger(session.user.id, "chat:update", {

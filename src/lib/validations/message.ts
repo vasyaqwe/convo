@@ -4,6 +4,7 @@ export const messageSchema = z.object({
     body: z.string().optional(),
     chatId: z.string(),
     image: z.string().optional(),
+    replyToId: z.string().optional(),
 })
 
 export const messagesQuerySchema = z.object({

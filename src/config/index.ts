@@ -29,3 +29,19 @@ export const viewportConfig = {
     initialScale: 1,
     maximumScale: 1,
 }
+
+export const MESSAGE_INCLUDE = {
+    sender: {
+        select: USERS_SELECT,
+    },
+    seenBy: {
+        select: USERS_SELECT,
+    },
+    replyTo: {
+        include: {
+            sender: {
+                select: USERS_SELECT,
+            },
+        },
+    },
+}

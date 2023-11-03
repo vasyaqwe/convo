@@ -1,4 +1,4 @@
-import { USERS_SELECT } from "@/config"
+import { MESSAGE_INCLUDE } from "@/config"
 import { db } from "@/lib/db"
 import { addDisplaySender, reverseArray, withErrorHandling } from "@/lib/utils"
 import { messagesQuerySchema } from "@/lib/validations/message"
@@ -22,14 +22,7 @@ export const GET = withErrorHandling(async function (req: Request) {
         orderBy: {
             createdAt: "desc",
         },
-        include: {
-            sender: {
-                select: USERS_SELECT,
-            },
-            seenBy: {
-                select: USERS_SELECT,
-            },
-        },
+        include: MESSAGE_INCLUDE,
     })
 
     return new NextResponse(

@@ -6,6 +6,11 @@ export type ExtendedMessage = Message & {
     sender: UserType
     seenBy: UserType[]
     displaySender?: boolean
+    replyTo:
+        | (Message & {
+              sender: UserType
+          })
+        | null
 }
 
 export type ExtendedChat = Chat & {

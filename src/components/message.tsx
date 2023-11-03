@@ -16,13 +16,13 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { forwardRef, useRef } from "react"
+import { forwardRef } from "react"
 import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
-
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useContentMenu } from "@/hooks/use-content-menu"
+import { useReplyStore } from "@/stores/use-reply-store.tsx"
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
 type MessageProps = {
@@ -37,6 +37,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, session, isLast, isTabFocused }, ref) => {
         const router = useRouter()
         const { triggerRef, onPointerDown } = useContentMenu()
+        const { setIsReplying, setReplyTo } = useReplyStore()
 
         useQuery({
             queryKey: ["see-message"],
@@ -101,7 +102,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         : ""
                 )}
             >
-                <div className="group">
+                <div
+                    className={cn(
+                        "group",
+                        isOwn ? "flex flex-col items-end" : ""
+                    )}
+                >
                     {message.displaySender && (
                         <UserAvatar
                             className={cn(
@@ -138,18 +144,16 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         <ContextMenuTrigger
                             ref={triggerRef}
                             className="max-md:select-none"
-                            disabled={message.senderId !== session?.user.id}
                             onPointerDown={onPointerDown}
                         >
                             <div
                                 style={{
                                     WebkitTouchCallout: "none",
-                                    userSelect: "none",
                                 }}
                                 className={cn(
                                     "relative my-1 w-fit rounded-3xl bg-primary p-3 text-sm",
                                     isOwn
-                                        ? "ml-auto rounded-tr-none"
+                                        ? "rounded-tr-none"
                                         : "rounded-tl-none",
                                     !message.displaySender
                                         ? isOwn
@@ -158,6 +162,36 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         : ""
                                 )}
                             >
+                                {message.replyTo && (
+                                    <button
+                                        onClick={() => {
+                                            const replyTo =
+                                                document.getElementById(
+                                                    message.replyTo?.id ?? ""
+                                                )
+
+                                            if (replyTo) {
+                                                replyTo.scrollIntoView({
+                                                    behavior: "smooth",
+                                                })
+                                            }
+                                        }}
+                                        className="relative mb-3 block overflow-hidden rounded-md bg-foreground/20 p-2 pl-3 text-left
+                                    before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-secondary/75"
+                                    >
+                                        <p className="font-medium">
+                                            {message.replyTo.sender.name}
+                                        </p>
+
+                                        <p
+                                            className={cn(
+                                                "mt-1 max-w-[130px] truncate"
+                                            )}
+                                        >
+                                            {message.replyTo.body}
+                                        </p>
+                                    </button>
+                                )}
                                 {message.image && (
                                     <Link
                                         style={{ WebkitTouchCallout: "none" }}
@@ -181,7 +215,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                             __html: bodyWithLinks,
                                         }}
                                         className={cn(
-                                            "break-all",
+                                            "w-fitbreak-all",
                                             message.image ? "mt-2" : ""
                                         )}
                                     ></p>
@@ -203,21 +237,35 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             </div>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
-                            <ContextMenuItem
-                                disabled={isPending}
-                                className="!text-destructive"
-                                onSelect={(e) => {
-                                    e.preventDefault()
-                                    onDelete()
-                                }}
-                            >
-                                {isPending ? (
-                                    <Loading className="mr-2" />
-                                ) : (
-                                    <Icons.trash className="mr-2" />
-                                )}{" "}
-                                Delete message
-                            </ContextMenuItem>
+                            {message.senderId === session?.user.id ? (
+                                <>
+                                    <ContextMenuItem
+                                        disabled={isPending}
+                                        className="!text-destructive"
+                                        onSelect={(e) => {
+                                            e.preventDefault()
+                                            onDelete()
+                                        }}
+                                    >
+                                        {isPending ? (
+                                            <Loading className="mr-2" />
+                                        ) : (
+                                            <Icons.trash className="mr-2" />
+                                        )}{" "}
+                                        Delete message
+                                    </ContextMenuItem>
+                                </>
+                            ) : (
+                                <ContextMenuItem
+                                    onSelect={() => {
+                                        setIsReplying(true)
+                                        setReplyTo(message)
+                                    }}
+                                >
+                                    <Icons.reply className="mr-2" />
+                                    Reply
+                                </ContextMenuItem>
+                            )}
                         </ContextMenuContent>
                     </ContextMenu>
 
@@ -277,7 +325,7 @@ function MessageSkeleton({
     return (
         <div
             role="status"
-            className={cn("relative flex flex-col gap-5")}
+            className={cn("relative flex flex-col gap-5", className)}
             {...props}
         >
             <div

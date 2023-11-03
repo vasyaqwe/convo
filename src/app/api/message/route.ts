@@ -1,4 +1,4 @@
-import { USERS_SELECT } from "@/config"
+import { MESSAGE_INCLUDE, USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
@@ -17,7 +17,7 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     const _body = await req.json()
 
-    const { chatId, body, image } = messageSchema.parse(_body)
+    const { chatId, body, image, replyToId } = messageSchema.parse(_body)
 
     await db.$transaction(async (tx) => {
         const newMessage = await tx.message.create({
@@ -25,6 +25,11 @@ export const POST = withErrorHandling(async function (req: Request) {
                 chat: {
                     connect: {
                         id: chatId,
+                    },
+                },
+                replyTo: {
+                    connect: {
+                        id: replyToId,
                     },
                 },
                 sender: {
@@ -40,14 +45,7 @@ export const POST = withErrorHandling(async function (req: Request) {
                 body,
                 image,
             },
-            include: {
-                seenBy: {
-                    select: USERS_SELECT,
-                },
-                sender: {
-                    select: USERS_SELECT,
-                },
-            },
+            include: MESSAGE_INCLUDE,
         })
 
         const updatedChat = await tx.chat.update({

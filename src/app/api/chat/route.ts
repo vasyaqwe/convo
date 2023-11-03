@@ -92,6 +92,8 @@ export const POST = withErrorHandling(async function (req: Request) {
         for (const userId of newChat.userIds) {
             await pusherServer.trigger(userId, "chat:new", newChat)
         }
+
+        return newChat
     })
 
     return new NextResponse(JSON.stringify(newChat))
