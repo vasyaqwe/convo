@@ -1,5 +1,9 @@
 import { ChatsList } from "@/components/chats-list"
-import { MESSAGES_INFINITE_SCROLL_COUNT, USERS_SELECT } from "@/config"
+import {
+    MESSAGES_INFINITE_SCROLL_COUNT,
+    MESSAGE_INCLUDE,
+    USERS_SELECT,
+} from "@/config"
 import { db } from "@/lib/db"
 import { cn, reverseArray } from "@/lib/utils"
 import { Session } from "next-auth"
@@ -23,14 +27,7 @@ export async function Chats({
                 select: USERS_SELECT,
             },
             messages: {
-                include: {
-                    seenBy: {
-                        select: USERS_SELECT,
-                    },
-                    sender: {
-                        select: USERS_SELECT,
-                    },
-                },
+                include: MESSAGE_INCLUDE,
                 orderBy: {
                     createdAt: "desc",
                 },
