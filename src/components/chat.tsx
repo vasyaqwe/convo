@@ -200,12 +200,22 @@ export function Chat({
                     No history yet.
                 </p>
             ) : (
-                groupByDate(messages).map((message, idx) => {
+                groupByDate(messages).map((message, idx, array) => {
+                    const messagesWidthDatesIds = array
+                        .filter((m) => m.dateAbove)
+                        .map((m) => m.id)
+
                     if (idx === 3) {
                         return (
                             <React.Fragment key={message.id}>
                                 {message.dateAbove && (
-                                    <MessageDatePill>
+                                    <MessageDatePill
+                                        messagesWidthDatesIds={
+                                            messagesWidthDatesIds
+                                        }
+                                        messageId={message.id}
+                                        wrapperRef={wrapperRef}
+                                    >
                                         {message.dateAbove}
                                     </MessageDatePill>
                                 )}
@@ -219,10 +229,17 @@ export function Chat({
                             </React.Fragment>
                         )
                     }
+
                     return (
                         <React.Fragment key={message.id}>
                             {message.dateAbove && (
-                                <MessageDatePill>
+                                <MessageDatePill
+                                    messagesWidthDatesIds={
+                                        messagesWidthDatesIds
+                                    }
+                                    messageId={message.id}
+                                    wrapperRef={wrapperRef}
+                                >
                                     {message.dateAbove}
                                 </MessageDatePill>
                             )}
