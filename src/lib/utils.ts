@@ -1,4 +1,4 @@
-import { ExtendedMessage } from "@/types"
+import type { ExtendedMessage } from "@/types"
 import { type ClassValue, clsx } from "clsx"
 import { NextResponse } from "next/server"
 import { twMerge } from "tailwind-merge"
@@ -11,9 +11,11 @@ export function cn(...inputs: ClassValue[]) {
 export function withErrorHandling(
     handler: (
         req: Request,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         { params }: { params?: any }
     ) => Promise<NextResponse>
 ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return async function (req: Request, { params }: { params?: any }) {
         try {
             return await handler(req, { params })
@@ -117,10 +119,12 @@ export function addDisplaySender(messages: ExtendedMessage[]) {
     return newMessages
 }
 
-export function groupByDate<T extends Record<string, any>>(arr: T[]) {
+export function groupByDate<T extends Record<string, never>>(arr: T[]) {
     let prevDate: string | null = null
 
     return arr.map((item) => {
+        if (!item.createdAt) return
+
         const currentDate = formatDate(item.createdAt, "long", false)
         if (currentDate !== prevDate) {
             prevDate = currentDate

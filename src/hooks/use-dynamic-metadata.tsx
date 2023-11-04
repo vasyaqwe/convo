@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from "react"
 
 type UseDynamicMetadataArgs = {
@@ -14,7 +16,8 @@ export function useDynamicMetadata({
             document.querySelector<HTMLAnchorElement>("link[rel='icon']")
 
         if (!favicon) {
-            let link = document.createElement("link") as any
+            const link = document.createElement("link") as any
+
             link.rel = "icon"
             link.href = "/favicon.ico"
             link.type = "image/x-icon"

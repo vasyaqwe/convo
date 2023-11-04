@@ -14,7 +14,7 @@ import { ErrorMessage, Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { useFormValidation } from "@/hooks/use-form-validation"
-import { SignInPayload, signInSchema } from "@/lib/validations/sign-in"
+import { type SignInPayload, signInSchema } from "@/lib/validations/sign-in"
 import { useRouter } from "next/navigation"
 
 type SignInFormProps = React.ComponentProps<"div">

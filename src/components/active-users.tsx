@@ -2,7 +2,7 @@
 
 import { pusherClient } from "@/lib/pusher"
 import { useActiveUsersStore } from "@/stores/use-active-users-store"
-import { Channel, Members } from "pusher-js"
+import type { Channel, Members } from "pusher-js"
 import { useEffect, useState } from "react"
 
 export function ActiveUsers() {
@@ -19,21 +19,24 @@ export function ActiveUsers() {
 
         channel.bind("pusher:subscription_succeeded", (members: Members) => {
             const initialMembers: string[] = []
-            members.each((member: Record<string, any>) => {
-                if (!initialMembers.includes(member.id))
+            members.each((member: Record<string, never>) => {
+                if (member.id && !initialMembers.includes(member.id))
                     initialMembers.push(member.id)
             })
 
             setMembers(initialMembers)
         })
 
-        channel.bind("pusher:member_added", (member: Record<string, any>) => {
-            addMember(member.id)
+        channel.bind("pusher:member_added", (member: Record<string, never>) => {
+            member.id && addMember(member.id)
         })
 
-        channel.bind("pusher:member_removed", (member: Record<string, any>) => {
-            removeMember(member.id)
-        })
+        channel.bind(
+            "pusher:member_removed",
+            (member: Record<string, never>) => {
+                member.id && removeMember(member.id)
+            }
+        )
 
         return () => {
             if (activeChannel) {

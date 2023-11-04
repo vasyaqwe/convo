@@ -1,6 +1,7 @@
+import { type UseMutateFunction } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
-import { ZodIssueBase } from "zod"
-import * as z from "zod"
+import type { ZodIssue } from "zod"
+import type { z } from "zod"
 
 type Errors<T> = Record<keyof T, string>
 
@@ -9,20 +10,22 @@ export const useFormValidation = <TFormData,>({
     formData,
     zodSchema,
 }: {
-    onSubmit: () => void
+    onSubmit:
+        | (() => Promise<void>)
+        | UseMutateFunction<string, Error, void, unknown>
     formData: TFormData
     zodSchema: z.Schema<TFormData>
 }) => {
-    const [errors, setErrors] = useState<Errors<TFormData> | {}>({})
+    const [errors, setErrors] = useState<Errors<TFormData> | object>({})
     const [showErrors, setShowErrors] = useState(false)
 
     const validate = () => {
         const res = zodSchema.safeParse(formData)
         if (!res.success) {
-            const errorsArr = JSON.parse(res.error.message)
+            const errorsArr: ZodIssue[] = JSON.parse(res.error.message)
 
             const errorsObject = errorsArr.reduce(
-                (result: Record<string, string>, e: ZodIssueBase) => {
+                (result: Record<string, string>, e) => {
                     const key = e.path[0]
                     const message = e.message
                     if (message && key) {

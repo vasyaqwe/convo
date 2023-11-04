@@ -16,7 +16,7 @@ export function useDebounce<T extends string>({
     useEffect(() => {
         const timer = setTimeout(
             () => setDebouncedValue(value),
-            value.length === 1 && delayFirstLetter ? 0 : delay || 500
+            value.length === 1 && delayFirstLetter ? 0 : delay ?? 500
         )
 
         return () => {

@@ -1,5 +1,5 @@
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
-import { ExtendedMessage } from "@/types"
+import { type ExtendedMessage } from "@/types"
 import { usePathname } from "next/navigation"
 
 type useMessagesArgsHelpers = {

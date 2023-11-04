@@ -2,10 +2,10 @@
 
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { usePathname } from "next/navigation"
-import { ExtendedChat, UserType } from "@/types"
+import type { ExtendedChat, UserType } from "@/types"
 import { cn, formatDate } from "@/lib/utils"
 import Link from "next/link"
-import { Session } from "next-auth"
+import type { Session } from "next-auth"
 import dynamic from "next/dynamic"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"

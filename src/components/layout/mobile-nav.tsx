@@ -4,7 +4,7 @@ import { UserSettingsForm } from "@/components/forms/user-settings-form"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/ui/icons"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
-import { Session } from "next-auth"
+import type { Session } from "next-auth"
 import { useState } from "react"
 import { Drawer } from "vaul"
 

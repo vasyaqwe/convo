@@ -1,10 +1,10 @@
-import { MESSAGE_INCLUDE, USERS_SELECT } from "@/config"
+import { MESSAGE_INCLUDE } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
 import { messageSchema } from "@/lib/validations/message"
-import { Prisma } from "@prisma/client"
+import { type Prisma } from "@prisma/client"
 import { NextResponse } from "next/server"
 
 export const POST = withErrorHandling(async function (req: Request) {

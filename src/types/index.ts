@@ -1,4 +1,4 @@
-import { Chat, Message, User } from "@prisma/client"
+import type { Chat, Message, User } from "@prisma/client"
 
 export type UserType = Pick<User, "name" | "username" | "id" | "image">
 

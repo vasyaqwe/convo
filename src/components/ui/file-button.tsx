@@ -1,6 +1,6 @@
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ComponentProps, ReactNode, useRef } from "react"
+import { type ComponentProps, type ReactNode, useRef } from "react"
 
 type FileButtonProps = ComponentProps<"input"> & {
     children: ReactNode

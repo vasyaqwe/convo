@@ -10,7 +10,7 @@ import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
-import { MessagePayload } from "@/lib/validations/message"
+import { type MessagePayload } from "@/lib/validations/message"
 import { useReplyStore } from "@/stores/use-reply-store.tsx"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image"
@@ -47,10 +47,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
     const { refetch: refetchStartTyping } = useQuery({
         queryKey: ["chat-start-typing"],
         queryFn: async () => {
-            const { data } = await axiosInstance.patch(
-                `/chat/${chatId}/start-typing`
-            )
-            return data
+            await axiosInstance.patch(`/chat/${chatId}/start-typing`)
+
+            return "OK"
         },
         enabled: false,
     })
@@ -58,10 +57,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
     const { refetch: refetchEndTyping } = useQuery({
         queryKey: ["chat-end-typing"],
         queryFn: async () => {
-            const { data } = await axiosInstance.patch(
-                `/chat/${chatId}/end-typing`
-            )
-            return data
+            await axiosInstance.patch(`/chat/${chatId}/end-typing`)
+
+            return "OK"
         },
         enabled: false,
     })
@@ -79,9 +77,9 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 replyToId: isReplying ? replyTo?.id : undefined,
             }
 
-            const { data } = await axiosInstance.post("/message", payload)
+            await axiosInstance.post("/message", payload)
 
-            return data
+            return "OK"
         },
         onMutate: () => {
             setBody("")
@@ -156,7 +154,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
     }
 
     async function onImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        if (e.target.files && e.target.files[0]) {
+        if (e.target.files?.[0]) {
             const uploadedImage = await startUpload([e.target.files[0]])
 
             if (uploadedImage) {
@@ -171,8 +169,10 @@ export function MessageForm({ chatId }: MessageFormProps) {
     }
 
     async function onImagePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
-        if (e.clipboardData && e.clipboardData.files[0]) {
-            const uploadedImage = await startUpload([e.clipboardData.files[0]])
+        if (e.clipboardData.files?.[0]) {
+            const uploadedImage = await startUpload([
+                e.clipboardData.files?.[0],
+            ])
 
             if (uploadedImage) {
                 setImage(uploadedImage[0]?.url)

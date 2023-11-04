@@ -7,7 +7,7 @@ import {
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/ui/user-avatar"
-import { ExtendedChat, UserType } from "@/types"
+import type { ExtendedChat } from "@/types"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
 import { Loading } from "@/components/ui/loading"
 import Link from "next/link"
-import { User } from "next-auth"
+import type { User } from "next-auth"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
@@ -28,7 +28,7 @@ type ChatHeaderProps = {
 }
 
 export function ChatHeader({ user, chat }: ChatHeaderProps) {
-    const chatPartner = chat.users.find((u) => u.id !== user.id) as UserType
+    const chatPartner = chat.users.find((u) => u.id !== user.id)!
 
     const queryClient = useQueryClient()
     const router = useRouter()

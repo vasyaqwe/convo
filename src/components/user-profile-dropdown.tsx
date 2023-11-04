@@ -7,11 +7,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Icons } from "@/components/ui/icons"
 import { UserAvatar } from "@/components/ui/user-avatar"
-import {
+import type {
     DropdownMenuContentProps,
     DropdownMenuProps,
 } from "@radix-ui/react-dropdown-menu"
-import { Session } from "next-auth"
+import type { Session } from "next-auth"
 import { signOut } from "next-auth/react"
 
 type UserProfileDropdownProps = DropdownMenuProps &

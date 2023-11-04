@@ -13,7 +13,9 @@ export default async function handler(
         return res.status(401)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const socketId = req.body.socket_id
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const channel = req.body.channel_name
     const data = {
         user_id: session.user.id,

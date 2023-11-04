@@ -5,9 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { cn, formatDateToTimestamp } from "@/lib/utils"
-import { ExtendedMessage } from "@/types"
+import { type ExtendedMessage } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Session } from "next-auth"
+import { type Session } from "next-auth"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -16,7 +16,7 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { forwardRef, useState } from "react"
+import { forwardRef } from "react"
 import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
@@ -53,11 +53,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 ])
                 console.log(message)
                 if (!message.seenByIds.includes(session?.user.id)) {
-                    const { data } = await axiosInstance.patch(
+                    await axiosInstance.patch(
                         `/message/${lastMessage ? lastMessage.id : message.id}`,
                         { chatId: message.chatId }
                     )
-                    return data
+
+                    return "OK"
                 }
 
                 return null

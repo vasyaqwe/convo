@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Textarea, { TextareaAutosizeProps } from "react-textarea-autosize"
+import Textarea, { type TextareaAutosizeProps } from "react-textarea-autosize"
 
 import { cn } from "@/lib/utils"
 

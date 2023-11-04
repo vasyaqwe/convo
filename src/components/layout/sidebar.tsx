@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Icons } from "@/components/ui/icons"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
-import { Session } from "next-auth"
+import type { Session } from "next-auth"
 import { useState } from "react"
 
 export function Sidebar({ session }: { session: Session }) {

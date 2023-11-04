@@ -1,12 +1,12 @@
 "use client"
 
 import { UserAvatar } from "@/components/ui/user-avatar"
-import { Chat } from "@prisma/client"
+import type { Chat } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/config"
-import { ChatPayload } from "@/lib/validations/chat"
-import { UserType } from "@/types"
+import type { ChatPayload } from "@/lib/validations/chat"
+import type { UserType } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 

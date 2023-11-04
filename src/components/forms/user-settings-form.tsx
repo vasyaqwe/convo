@@ -9,10 +9,13 @@ import { axiosInstance } from "@/config"
 import { useFormValidation } from "@/hooks/use-form-validation"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
-import { SettingsPayload, settingsSchema } from "@/lib/validations/settings"
+import {
+    type SettingsPayload,
+    settingsSchema,
+} from "@/lib/validations/settings"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
-import { Session } from "next-auth"
+import type { Session } from "next-auth"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -43,9 +46,9 @@ export function UserSettingsForm({
 
     const { mutate: onSubmit, isPending } = useMutation({
         mutationFn: async () => {
-            const { data } = await axiosInstance.patch("/settings", formData)
+            await axiosInstance.patch("/settings", formData)
 
-            return data
+            return "OK"
         },
         onSuccess: () => {
             closeDialog()
@@ -73,7 +76,7 @@ export function UserSettingsForm({
     })
 
     async function onImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        if (e.target.files && e.target.files[0]) {
+        if (e.target.files?.[0]) {
             const uploadedImage = await startUpload([e.target.files[0]])
 
             if (uploadedImage) {

@@ -6,7 +6,7 @@ import { withErrorHandling } from "@/lib/utils"
 import { chatSchema } from "@/lib/validations/chat"
 import { NextResponse } from "next/server"
 
-export const GET = withErrorHandling(async function (req: Request) {
+export const GET = withErrorHandling(async function () {
     const session = await getAuthSession()
 
     if (!session) {

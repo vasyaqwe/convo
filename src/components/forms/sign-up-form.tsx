@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { axiosInstance } from "@/config"
 import { AxiosError } from "axios"
-import { SignUpPayload, signUpSchema } from "@/lib/validations/sign-up"
+import { type SignUpPayload, signUpSchema } from "@/lib/validations/sign-up"
 import { useFormValidation } from "@/hooks/use-form-validation"
 
 type SignUpFormProps = React.ComponentProps<"div">

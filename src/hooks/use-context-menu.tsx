@@ -1,4 +1,4 @@
-import { PointerEvent, useRef } from "react"
+import { type PointerEvent, useRef } from "react"
 
 export function useContextMenu() {
     const triggerRef = useRef<HTMLSpanElement | null>(null)

@@ -2,8 +2,8 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import Image from "next/image"
-import { AvatarProps } from "@radix-ui/react-avatar"
-import { User } from "next-auth"
+import { type AvatarProps } from "@radix-ui/react-avatar"
+import { type User } from "next-auth"
 import { useActiveUsersStore } from "@/stores/use-active-users-store"
 import { cn } from "@/lib/utils"
 

@@ -10,7 +10,7 @@ type StoreState = {
     setChats: (chatId: string, messagesCount: number) => void
 }
 
-export const useTotalMessagesCountStore = create<StoreState>()((set, get) => ({
+export const useTotalMessagesCountStore = create<StoreState>()((set) => ({
     chats: [],
     setChats: (chatId, unseenMessagesCount) => {
         set((state) => {

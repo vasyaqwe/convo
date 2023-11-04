@@ -6,7 +6,7 @@ import {
 } from "@/config"
 import { db } from "@/lib/db"
 import { cn, reverseArray } from "@/lib/utils"
-import { Session } from "next-auth"
+import type { Session } from "next-auth"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"

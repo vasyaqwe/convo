@@ -2,8 +2,8 @@
 
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
-import { ExtendedMessage } from "@/types"
-import { Session } from "next-auth"
+import type { ExtendedMessage } from "@/types"
+import type { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
 
@@ -50,6 +50,7 @@ export function Notifications({ session }: NotificationsProps) {
                     .query({ name: "notifications" })
                     .then((permission) => {
                         if (
+                            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                             (pathname?.includes(chatId) && isTabFocused) ||
                             permission.state !== "granted"
                         )
