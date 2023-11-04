@@ -119,7 +119,7 @@ export function addDisplaySender(messages: ExtendedMessage[]) {
     return newMessages
 }
 
-export function groupByDate<T extends Record<string, never>>(arr: T[]) {
+export function groupByDate<T extends { createdAt: Date }>(arr: T[]) {
     let prevDate: string | null = null
 
     return arr.map((item) => {
