@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
                     where: { username: credentials.username },
                 })
 
-                if (!user || !user?.password) {
+                if (!user?.password) {
                     throw new Error("Invalid credentials")
                 }
 
@@ -52,7 +52,7 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async session({ token, session }) {
+        session({ token, session }) {
             if (token) {
                 session.user.id = token.id
                 session.user.name = token.name
