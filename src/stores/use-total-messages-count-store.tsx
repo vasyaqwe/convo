@@ -8,6 +8,7 @@ type Chat = {
 type StoreState = {
     chats: Chat[]
     setChats: (chatId: string, messagesCount: number) => void
+    removeChat: (chatId: string) => void
 }
 
 export const useTotalMessagesCountStore = create<StoreState>()((set) => ({
@@ -31,5 +32,10 @@ export const useTotalMessagesCountStore = create<StoreState>()((set) => ({
                 }
             }
         })
+    },
+    removeChat: (chatId) => {
+        set((state) => ({
+            chats: state.chats.filter((chat) => chat.id !== chatId),
+        }))
     },
 }))

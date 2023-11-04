@@ -16,7 +16,14 @@ export const DELETE = withErrorHandling(async function (
         })
     }
 
-    const chat = await db.chat.findFirst({ where: { id: chatId } })
+    const chat = await db.chat.findFirst({
+        where: { id: chatId },
+        include: {
+            messages: {
+                select: { id: true, replyToId: true },
+            },
+        },
+    })
 
     if (!chat) {
         return new NextResponse("Invalid chat id", { status: 400 })
@@ -27,6 +34,29 @@ export const DELETE = withErrorHandling(async function (
     }
 
     await db.$transaction(async (tx) => {
+        for (const message of chat.messages) {
+            if (message.replyToId) {
+                await tx.message.update({
+                    where: {
+                        id: message.replyToId,
+                    },
+                    data: {
+                        replies: {
+                            disconnect: {
+                                id: message.id,
+                            },
+                        },
+                    },
+                })
+            }
+        }
+
+        await tx.message.deleteMany({
+            where: {
+                chatId,
+            },
+        })
+
         const deletedChat = await tx.chat.delete({
             where: {
                 id: chatId,

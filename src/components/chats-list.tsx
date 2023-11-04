@@ -30,6 +30,8 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
     const router = useRouter()
     const pathname = usePathname()
+    const { chats: chatsMap, removeChat: removeChatFromTotalMessagesCount } =
+        useTotalMessagesCountStore()
 
     const currentUserId = session?.user?.id
 
@@ -53,8 +55,6 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         refetch()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedInput])
-
-    const { chats: chatsMap } = useTotalMessagesCountStore()
 
     const unseenCount = useMemo(() => {
         return chatsMap.reduce((a, b) => a + b.unseenMessagesCount, 0)
@@ -127,6 +127,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                     ...prev.filter((oldChat) => oldChat.id !== deletedChat.id),
                 ]
             })
+            removeChatFromTotalMessagesCount(deletedChat.id)
 
             if (
                 removerId !== currentUserId &&
@@ -147,6 +148,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
             pusherClient.unbind("chat:new", onNewChat)
             pusherClient.unbind("chat:delete", onDeleteChat)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUserId, pathname, router])
 
     return (
