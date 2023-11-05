@@ -23,6 +23,7 @@ import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useContextMenu } from "@/hooks/use-context-menu"
 import { useReplyStore } from "@/stores/use-reply-store.tsx"
+import { useShallow } from "zustand/react/shallow"
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
 type MessageProps = {
@@ -38,12 +39,20 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         const queryClient = useQueryClient()
         const router = useRouter()
         const { triggerRef, onPointerDown, onPointerUp } = useContextMenu()
+
         const {
-            setIsReplying,
             setReplyTo,
+            setIsReplying,
             setHighlightedMessageId,
             highlightedMessageId,
-        } = useReplyStore()
+        } = useReplyStore(
+            useShallow((state) => ({
+                highlightedMessageId: state.highlightedMessageId,
+                setHighlightedMessageId: state.setHighlightedMessageId,
+                setReplyTo: state.setReplyTo,
+                setIsReplying: state.setIsReplying,
+            }))
+        )
 
         useQuery({
             queryKey: ["see-message"],
@@ -108,6 +117,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 `<a href="${url}" class="underline hover:no-underline" target="_blank">${url}</a>`
         )
 
+        console.log("render")
         return (
             <div
                 ref={ref}
