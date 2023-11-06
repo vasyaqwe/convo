@@ -22,5 +22,7 @@ export type ExtendedChat = Chat & {
 
 export type ExtendedReaction = Omit<Reaction, "senderId"> & {
     sender: UserType
-    body: (typeof emojis)[number]
+    body: string
 }
+
+export type Emoji = (typeof emojis)[number]

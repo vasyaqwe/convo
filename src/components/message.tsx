@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { cn, formatDateToTimestamp } from "@/lib/utils"
-import { type ExtendedMessage } from "@/types"
+import { type Emoji, type ExtendedMessage } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type Session } from "next-auth"
 import Image from "next/image"
@@ -296,7 +296,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                 <button
                                                     onClick={() =>
                                                         onReact({
-                                                            body: r.body,
+                                                            body: r.body as Emoji,
                                                         })
                                                     }
                                                     className="bounce inline-flex rounded-full transition-transform hover:scale-110"
