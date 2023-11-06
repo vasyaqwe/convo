@@ -22,9 +22,11 @@ export function UserAvatar({
     const isActive = members.includes(user.id ?? "")
 
     const size =
-        +getComputedStyle(document.documentElement)
-            .getPropertyValue("--avatar-size")
-            .replace("px", "") ?? 40
+        typeof window !== "undefined"
+            ? +getComputedStyle(document.documentElement)
+                  .getPropertyValue("--avatar-size")
+                  .replace("px", "") ?? 45
+            : 45
 
     return (
         <Avatar

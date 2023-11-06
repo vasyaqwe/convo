@@ -512,16 +512,18 @@ function ReactionButton({
         <button
             aria-pressed={reaction.sender.id === session?.user.id}
             className={cn(
-                "inline-flex items-center gap-0.5 overflow-hidden rounded-full p-1 outline outline-1 outline-transparent hover:outline-white",
+                "inline-flex items-center overflow-hidden rounded-full px-[.2rem] py-[.25rem] outline outline-1 outline-transparent hover:outline-white",
                 reaction.sender.id === session?.user.id
                     ? "bg-black"
                     : "bg-secondary/75"
             )}
             {...props}
         >
-            <span className={cn("text-lg")}>{reaction.body}</span>
+            <span className={cn("-ml-[0.2rem] text-lg leading-none")}>
+                {reaction.body}
+            </span>
             <UserAvatar
-                className={"[--avatar-size:18px]"}
+                className={"[--avatar-size:17px]"}
                 user={reaction.sender}
                 showActiveIndicator={false}
             />
