@@ -25,7 +25,7 @@ export function UserAvatar({
         <Avatar
             {...props}
             className={cn(
-                "h-[var(--size)] w-[var(--size)] [--size:40px]",
+                "h-[var(--avatar-size)] w-[var(--avatar-size)]",
                 className
             )}
         >
@@ -39,7 +39,7 @@ export function UserAvatar({
                     className="w-full rounded-full object-cover"
                 />
             ) : (
-                <AvatarFallback className="text-[calc(var(--size)/2.5)]">
+                <AvatarFallback className="text-[calc(var(--avatar-size)/2.5)]">
                     {user.name ? user.name[0] : "U"}
                 </AvatarFallback>
             )}
