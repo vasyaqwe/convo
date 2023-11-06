@@ -180,7 +180,7 @@ export function UserSettingsForm({
 
             <Button
                 className="mt-9 w-full"
-                disabled={isPending}
+                disabled={isPending || isUploading}
             >
                 {isPending ? <Loading /> : "Save"}
             </Button>
