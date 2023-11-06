@@ -21,13 +21,6 @@ export function UserAvatar({
     const members = useActiveUsersStore((state) => state.members)
     const isActive = members.includes(user.id ?? "")
 
-    const size =
-        typeof window !== "undefined"
-            ? +getComputedStyle(document.documentElement)
-                  .getPropertyValue("--avatar-size")
-                  .replace("px", "")
-            : 45
-
     return (
         <Avatar
             {...props}
@@ -38,8 +31,8 @@ export function UserAvatar({
         >
             {user.image ? (
                 <Image
-                    width={size}
-                    height={size}
+                    width={45}
+                    height={45}
                     src={user.image}
                     alt={user.name ?? "user's avatar"}
                     referrerPolicy="no-referrer"
