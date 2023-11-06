@@ -3,7 +3,7 @@ import { MessageForm } from "@/components/forms/message-form"
 import { ChatHeader } from "@/components/layout/chat-header"
 import { getAuthSession } from "@/lib/auth"
 import { addDisplaySender, reverseArray } from "@/lib/utils"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import {
     MESSAGES_INFINITE_SCROLL_COUNT,
     MESSAGE_INCLUDE,
@@ -47,6 +47,8 @@ export default async function Page({ params: { chatId } }: PageProps) {
     })
 
     if (!chat) notFound()
+
+    if (!chat.userIds.includes(session?.user.id)) redirect("/")
 
     const chatPartnerName =
         chat.users.find((user) => user.id !== session?.user.id)?.name ??

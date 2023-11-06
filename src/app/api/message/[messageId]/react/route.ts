@@ -3,11 +3,8 @@ import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
 import { withErrorHandling } from "@/lib/utils"
-import { seeMessageSchema } from "@/lib/validations/message"
+import { reactionSchema } from "@/lib/validations/reaction"
 import { NextResponse } from "next/server"
-import { UTApi } from "uploadthing/server"
-
-const utapi = new UTApi()
 
 export const PATCH = withErrorHandling(async function (
     req: Request,
@@ -21,13 +18,22 @@ export const PATCH = withErrorHandling(async function (
         })
     }
 
-    const body = await req.json()
+    const message = await db.message.findUnique({
+        where: {
+            id: messageId,
+        },
+        include: MESSAGE_INCLUDE,
+    })
 
-    const { chatId } = seeMessageSchema.parse(body)
+    if (!message) {
+        return new NextResponse("Invalid message id", {
+            status: 400,
+        })
+    }
 
     const chat = await db.chat.findFirst({
         where: {
-            id: chatId,
+            id: message.chatId,
         },
         select: {
             userIds: true,
@@ -35,36 +41,63 @@ export const PATCH = withErrorHandling(async function (
     })
 
     if (!chat?.userIds.includes(session.user.id)) {
-        return new NextResponse("To see message, must be one of chat users", {
-            status: 403,
+        return new NextResponse(
+            "To react to message, must be one of chat users",
+            {
+                status: 403,
+            }
+        )
+    }
+
+    const _body = await req.json()
+    const { body } = reactionSchema.parse(_body)
+
+    const existingReaction = message.reactions.find(
+        (r) => r.sender.id === session.user.id && r.body === body
+    )
+
+    if (existingReaction) {
+        await db.$transaction(async (tx) => {
+            const deletedReaction = await tx.reaction.delete({
+                where: {
+                    senderId: existingReaction.sender.id,
+                    id: existingReaction.id,
+                    body: existingReaction.body,
+                },
+            })
+
+            await pusherServer.trigger(message.chatId, "message:update", {
+                ...message,
+                reactions: message.reactions.filter(
+                    (r) => r.id !== deletedReaction.id
+                ),
+            })
         })
+
+        return new NextResponse("OK")
     }
 
     await db.$transaction(async (tx) => {
-        const updatedMessage = await tx.message.update({
-            where: {
-                id: messageId,
-            },
+        const createdReaction = await tx.reaction.create({
             data: {
-                seenBy: {
+                body,
+                message: {
+                    connect: {
+                        id: messageId,
+                    },
+                },
+                sender: {
                     connect: {
                         id: session.user.id,
                     },
                 },
             },
-            include: MESSAGE_INCLUDE,
         })
 
-        await pusherServer.trigger(session.user.id, "chat:update", {
-            id: updatedMessage.chatId,
-            message: updatedMessage,
+        await pusherServer.trigger(message.chatId, "message:update", {
+            ...message,
+            reactions: [...message.reactions, createdReaction],
         })
-
-        await pusherServer.trigger(
-            updatedMessage.chatId,
-            "message:update",
-            updatedMessage
-        )
     })
 
     return new NextResponse("OK")
@@ -108,12 +141,6 @@ export const DELETE = withErrorHandling(async function (
                 id: messageId,
             },
         })
-
-        const imageId = message.image?.split("/f/")[1] ?? ""
-
-        if (message.image) {
-            await utapi.deleteFiles(imageId)
-        }
 
         const updatedChat = await tx.chat.findFirst({
             where: {

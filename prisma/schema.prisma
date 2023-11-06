@@ -46,6 +46,7 @@ model User {
 
   accounts Account[]
   messages Message[]
+  Reaction Reaction[]
 }
 
 model Chat {
@@ -72,6 +73,8 @@ model Message {
   replyTo   Message?  @relation("ReplyTo", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   replies   Message[] @relation("ReplyTo")
 
+  reactions Reaction[]
+
   seenByIds String[] @db.ObjectId
   seenBy    User[]   @relation("SeenBy", fields: [seenByIds], references: [id])
 
@@ -80,4 +83,16 @@ model Message {
 
   senderId String @db.ObjectId
   sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model Reaction {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  body String
+
+  senderId String @db.ObjectId
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String  @db.ObjectId
 }

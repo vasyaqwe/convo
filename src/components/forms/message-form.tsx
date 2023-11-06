@@ -124,7 +124,6 @@ export function MessageForm({ chatId }: MessageFormProps) {
             }
 
             timeoutRef.current = setTimeout(() => {
-                console.log("hello")
                 refetchEndTyping()
                 setStartedTyping(false)
             }, 1500)
@@ -147,7 +146,6 @@ export function MessageForm({ chatId }: MessageFormProps) {
     function onBodyChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         setBody(e.target.value)
         if (!startedTyping) {
-            console.log("hello")
             refetchStartTyping()
         }
         setStartedTyping(true)
