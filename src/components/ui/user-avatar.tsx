@@ -15,24 +15,17 @@ type UserAvatarProps = {
 export function UserAvatar({
     user,
     showActiveIndicator = true,
-    className,
     ...props
 }: UserAvatarProps) {
     const members = useActiveUsersStore((state) => state.members)
     const isActive = members.includes(user.id ?? "")
 
     return (
-        <Avatar
-            {...props}
-            className={cn(
-                "h-[var(--avatar-size)] w-[var(--avatar-size)]",
-                className
-            )}
-        >
+        <Avatar {...props}>
             {user.image ? (
                 <Image
-                    width={45}
-                    height={45}
+                    width={40}
+                    height={40}
                     src={user.image}
                     alt={user.name ?? "user's avatar"}
                     referrerPolicy="no-referrer"
