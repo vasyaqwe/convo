@@ -20,7 +20,7 @@ export type ExtendedChat = Chat & {
     messages: ExtendedMessage[] | undefined
 }
 
-export type ExtendedReaction = Omit<Reaction, "senderId"> & {
+export type ExtendedReaction = Omit<Reaction, "senderId" | "messageId"> & {
     sender: UserType
     body: string
 }

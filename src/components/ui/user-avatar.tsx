@@ -31,6 +31,7 @@ export function UserAvatar({
         >
             {user.image ? (
                 <Image
+                    sizes={"40px"}
                     fill
                     src={user.image}
                     alt={user.name ?? "user's avatar"}

@@ -5,7 +5,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { cn, formatDateToTimestamp } from "@/lib/utils"
-import { type Emoji, type ExtendedMessage } from "@/types"
+import {
+    type ExtendedReaction,
+    type Emoji,
+    type ExtendedMessage,
+} from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type Session } from "next-auth"
 import Image from "next/image"
@@ -16,7 +20,14 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { type RefObject, forwardRef, useEffect, useRef, useState } from "react"
+import {
+    type RefObject,
+    forwardRef,
+    useEffect,
+    useRef,
+    useState,
+    type ComponentProps,
+} from "react"
 import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
@@ -97,8 +108,14 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             },
         })
 
-        const { mutate: onReact } = useMutation({
-            mutationFn: async ({ body }: ReactionPayload) => {
+        const {
+            variables,
+            isPending: isOnReactPending,
+            mutate: onReact,
+        } = useMutation({
+            mutationFn: async ({
+                body,
+            }: ReactionPayload & { action: "delete" | "create" }) => {
                 await axiosInstance.patch(`/message/${message.id}/react`, {
                     body,
                 })
@@ -139,6 +156,47 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             (url) =>
                 `<a href="${url}" class="underline hover:no-underline" target="_blank">${url}</a>`
         )
+
+        const reactions = message.reactions?.map((r) => (
+            <ReactionButton
+                key={r.id}
+                session={session}
+                reaction={r}
+                onClick={() =>
+                    onReact({
+                        body: r.body as Emoji,
+                        action:
+                            r.sender.id === session?.user.id
+                                ? "delete"
+                                : "create",
+                    })
+                }
+            />
+        ))
+
+        const filteredForOptimisticDeletionReactions = message.reactions
+            ?.filter(
+                (r) =>
+                    r.body !== variables?.body ||
+                    r.sender.id !== session?.user.id
+            )
+            ?.map((r) => (
+                <ReactionButton
+                    key={r.id}
+                    session={session}
+                    reaction={r}
+                    onClick={() =>
+                        onReact({
+                            body: r.body as Emoji,
+                            action:
+                                r.sender.id === session?.user.id
+                                    ? "delete"
+                                    : "create",
+                        })
+                    }
+                />
+            ))
+
         return (
             <div
                 ref={ref}
@@ -200,7 +258,17 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 <TooltipTrigger asChild>
                                     <ContextMenuTrigger
                                         onDoubleClick={() =>
-                                            onReact({ body: "❤️" })
+                                            onReact({
+                                                body: "❤️",
+                                                action: message.reactions?.some(
+                                                    (r) =>
+                                                        r.sender.id ===
+                                                            session?.user.id &&
+                                                        r.body === "❤️"
+                                                )
+                                                    ? "delete"
+                                                    : "create",
+                                            })
                                         }
                                         ref={triggerRef}
                                         className={cn(
@@ -291,40 +359,55 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                             </Date>
                                         )}
                                         <div className="mt-2 flex flex-wrap gap-1 empty:hidden">
-                                            {message.reactions?.map((r) => (
-                                                <button
-                                                    aria-pressed={
+                                            {/* optimistic delete reaction */}
+                                            {isOnReactPending &&
+                                            variables.action === "delete"
+                                                ? filteredForOptimisticDeletionReactions
+                                                : reactions}
+
+                                            {/* optimistic create reaction */}
+                                            {isOnReactPending &&
+                                                !message.reactions?.some(
+                                                    (r) =>
                                                         r.sender.id ===
-                                                        session?.user.id
-                                                    }
-                                                    onClick={() =>
-                                                        onReact({
-                                                            body: r.body as Emoji,
-                                                        })
-                                                    }
-                                                    className={cn(
-                                                        "inline-flex items-center gap-0.5 overflow-hidden rounded-full p-1 outline outline-1 outline-transparent hover:outline-white",
-                                                        r.sender.id ===
-                                                            session?.user.id
-                                                            ? "bg-popover"
-                                                            : "bg-secondary"
-                                                    )}
-                                                    key={r.id}
-                                                >
-                                                    <span className="bounce -mt-1">
-                                                        {r.body}
-                                                    </span>
-                                                    <UserAvatar
-                                                        className={
-                                                            "[--size:20px]"
+                                                            session?.user.id &&
+                                                        r.body ===
+                                                            variables.body
+                                                ) &&
+                                                variables.action ===
+                                                    "create" && (
+                                                    <ReactionButton
+                                                        disabled={
+                                                            isOnReactPending &&
+                                                            variables.action ===
+                                                                "create"
                                                         }
-                                                        user={r.sender}
-                                                        showActiveIndicator={
-                                                            false
-                                                        }
+                                                        session={session}
+                                                        reaction={{
+                                                            ...variables,
+                                                            id: "id",
+                                                            sender: {
+                                                                id: session
+                                                                    ?.user.id,
+                                                                image:
+                                                                    session
+                                                                        ?.user
+                                                                        .image ??
+                                                                    "",
+                                                                username:
+                                                                    session
+                                                                        ?.user
+                                                                        .username ??
+                                                                    "",
+                                                                name:
+                                                                    session
+                                                                        ?.user
+                                                                        .name ??
+                                                                    "",
+                                                            },
+                                                        }}
                                                     />
-                                                </button>
-                                            ))}
+                                                )}
                                         </div>
                                     </ContextMenuTrigger>
                                 </TooltipTrigger>
@@ -337,7 +420,17 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 >
                                     <EmojiBar
                                         onEmojiClick={(emoji) =>
-                                            onReact({ body: emoji })
+                                            onReact({
+                                                body: emoji,
+                                                action: message.reactions?.some(
+                                                    (r) =>
+                                                        r.sender.id ===
+                                                            session?.user.id &&
+                                                        r.body === emoji
+                                                )
+                                                    ? "delete"
+                                                    : "create",
+                                            })
                                         }
                                     />
                                 </TooltipContent>
@@ -406,6 +499,35 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         )
     }
 )
+
+function ReactionButton({
+    session,
+    reaction,
+    ...props
+}: ComponentProps<"button"> & {
+    reaction: ExtendedReaction
+    session: Session | null
+}) {
+    return (
+        <button
+            aria-pressed={reaction.sender.id === session?.user.id}
+            className={cn(
+                "inline-flex items-center gap-0.5 overflow-hidden rounded-full p-1 outline outline-1 outline-transparent hover:outline-white",
+                reaction.sender.id === session?.user.id
+                    ? "bg-black"
+                    : "bg-secondary/75"
+            )}
+            {...props}
+        >
+            <span className={cn("-mt-1")}>{reaction.body}</span>
+            <UserAvatar
+                className={"[--size:20px]"}
+                user={reaction.sender}
+                showActiveIndicator={false}
+            />
+        </button>
+    )
+}
 
 type MessageDatePillProps = React.ComponentProps<"p"> & {
     messageId: string
