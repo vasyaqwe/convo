@@ -25,7 +25,7 @@ export function UserAvatar({
         typeof window !== "undefined"
             ? +getComputedStyle(document.documentElement)
                   .getPropertyValue("--avatar-size")
-                  .replace("px", "") ?? 45
+                  .replace("px", "")
             : 45
 
     return (
