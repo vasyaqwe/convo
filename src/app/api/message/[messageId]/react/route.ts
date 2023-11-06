@@ -1,4 +1,4 @@
-import { MESSAGE_INCLUDE, USERS_SELECT } from "@/config"
+import { MESSAGE_INCLUDE, REACTION_SELECT, USERS_SELECT } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
@@ -92,6 +92,7 @@ export const PATCH = withErrorHandling(async function (
                     },
                 },
             },
+            select: REACTION_SELECT,
         })
 
         await pusherServer.trigger(message.chatId, "message:update", {

@@ -15,24 +15,30 @@ type UserAvatarProps = {
 export function UserAvatar({
     user,
     showActiveIndicator = true,
+    className,
     ...props
 }: UserAvatarProps) {
-    const { members } = useActiveUsersStore()
+    const members = useActiveUsersStore((state) => state.members)
     const isActive = members.includes(user.id ?? "")
 
     return (
-        <Avatar {...props}>
+        <Avatar
+            {...props}
+            className={cn(
+                "h-[var(--size)] w-[var(--size)] [--size:40px]",
+                className
+            )}
+        >
             {user.image ? (
                 <Image
-                    width={40}
-                    height={40}
+                    fill
                     src={user.image}
                     alt={user.name ?? "user's avatar"}
                     referrerPolicy="no-referrer"
                     className="w-full rounded-full object-cover"
                 />
             ) : (
-                <AvatarFallback>
+                <AvatarFallback className="text-[calc(var(--size)/2.5)]">
                     {user.name ? user.name[0] : "U"}
                 </AvatarFallback>
             )}

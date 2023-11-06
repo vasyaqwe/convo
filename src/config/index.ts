@@ -30,6 +30,15 @@ export const viewportConfig = {
     maximumScale: 1,
 }
 
+export const REACTION_SELECT = {
+    body: true,
+    id: true,
+    messageId: true,
+    sender: {
+        select: USERS_SELECT,
+    },
+}
+
 export const MESSAGE_INCLUDE = {
     sender: {
         select: USERS_SELECT,
@@ -45,25 +54,21 @@ export const MESSAGE_INCLUDE = {
         },
     },
     reactions: {
-        select: {
-            body: true,
-            id: true,
-            messageId: true,
-            sender: {
-                select: USERS_SELECT,
-            },
-        },
+        select: REACTION_SELECT,
     },
 }
+
 export const emojis = [
     "❤️",
     "🔥",
+    "💀",
+    "🥲",
+    "🫡",
     "😀",
     "😃",
     "😄",
     "😁",
     "😆",
-    "🥲",
     "😅",
     "🤣",
     "😂",
@@ -143,7 +148,6 @@ export const emojis = [
     "👿",
     "👹",
     "👺",
-    "💀",
     "👻",
     "👽",
     "👾",

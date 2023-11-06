@@ -44,14 +44,13 @@ export function EmojiBar({ onEmojiClick }: EmojiBarProps) {
                 className="emoji-bar flex h-52 flex-col overflow-y-auto p-2"
             >
                 {emojis.map((e) => (
-                    <span
+                    <button
                         onClick={() => onEmojiClick(e)}
-                        role="button"
-                        className="mt-2 text-lg transition-transform duration-300 first:mt-0 hover:scale-[140%]"
+                        className="mt-2 text-lg transition-transform duration-300 first:mt-0 hover:scale-[140%] "
                         key={e}
                     >
                         {e}
-                    </span>
+                    </button>
                 ))}
             </div>
         </div>

@@ -139,7 +139,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             (url) =>
                 `<a href="${url}" class="underline hover:no-underline" target="_blank">${url}</a>`
         )
-
         return (
             <div
                 ref={ref}
@@ -291,18 +290,39 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                 )}
                                             </Date>
                                         )}
-                                        <div className="mt-2 empty:hidden">
+                                        <div className="mt-2 flex flex-wrap gap-1 empty:hidden">
                                             {message.reactions?.map((r) => (
                                                 <button
+                                                    aria-pressed={
+                                                        r.sender.id ===
+                                                        session?.user.id
+                                                    }
                                                     onClick={() =>
                                                         onReact({
                                                             body: r.body as Emoji,
                                                         })
                                                     }
-                                                    className="bounce inline-flex rounded-full transition-transform hover:scale-110"
+                                                    className={cn(
+                                                        "inline-flex items-center gap-0.5 overflow-hidden rounded-full p-1 outline outline-1 outline-transparent hover:outline-white",
+                                                        r.sender.id ===
+                                                            session?.user.id
+                                                            ? "bg-popover"
+                                                            : "bg-secondary"
+                                                    )}
                                                     key={r.id}
                                                 >
-                                                    {r.body}
+                                                    <span className="bounce -mt-1">
+                                                        {r.body}
+                                                    </span>
+                                                    <UserAvatar
+                                                        className={
+                                                            "[--size:20px]"
+                                                        }
+                                                        user={r.sender}
+                                                        showActiveIndicator={
+                                                            false
+                                                        }
+                                                    />
                                                 </button>
                                             ))}
                                         </div>
@@ -311,8 +331,9 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                 <TooltipContent
                                     className="bg-transparent p-0"
                                     align={isOwn ? "start" : "end"}
+                                    alignOffset={-20}
                                     side="bottom"
-                                    sideOffset={-8}
+                                    sideOffset={-12}
                                 >
                                     <EmojiBar
                                         onEmojiClick={(emoji) =>
