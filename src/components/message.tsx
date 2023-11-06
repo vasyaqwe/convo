@@ -519,9 +519,9 @@ function ReactionButton({
             )}
             {...props}
         >
-            <span className={cn("-mt-1")}>{reaction.body}</span>
+            <span className={cn("text-lg")}>{reaction.body}</span>
             <UserAvatar
-                className={"[--avatar-size:20px]"}
+                className={"[--avatar-size:18px]"}
                 user={reaction.sender}
                 showActiveIndicator={false}
             />
