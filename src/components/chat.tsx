@@ -1,6 +1,7 @@
 "use client"
 
-import { Message, MessageDatePill, MessageSkeleton } from "@/components/message"
+import { DatePill } from "@/components/date-pill"
+import { Message, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useDynamicMetadata } from "@/hooks/use-dynamic-metadata"
@@ -209,7 +210,7 @@ export function Chat({
                         return (
                             <React.Fragment key={message.id}>
                                 {message.dateAbove && (
-                                    <MessageDatePill
+                                    <DatePill
                                         messagesWidthDatesIds={
                                             messagesWidthDatesIds
                                         }
@@ -217,7 +218,7 @@ export function Chat({
                                         wrapperRef={wrapperRef}
                                     >
                                         {message.dateAbove}
-                                    </MessageDatePill>
+                                    </DatePill>
                                 )}
                                 <Message
                                     isTabFocused={isTabFocused}
@@ -233,7 +234,7 @@ export function Chat({
                     return (
                         <React.Fragment key={message.id}>
                             {message.dateAbove && (
-                                <MessageDatePill
+                                <DatePill
                                     messagesWidthDatesIds={
                                         messagesWidthDatesIds
                                     }
@@ -241,7 +242,7 @@ export function Chat({
                                     wrapperRef={wrapperRef}
                                 >
                                     {message.dateAbove}
-                                </MessageDatePill>
+                                </DatePill>
                             )}
                             <Message
                                 isTabFocused={isTabFocused}

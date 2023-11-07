@@ -5,29 +5,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { cn, formatDateToTimestamp } from "@/lib/utils"
-import {
-    type ExtendedReaction,
-    type Emoji,
-    type ExtendedMessage,
-} from "@/types"
+import { type Emoji, type ExtendedMessage } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type Session } from "next-auth"
 import Image from "next/image"
 import Link from "next/link"
-import {
-    ContextMenu,
-    ContextMenuContent,
-    ContextMenuItem,
-    ContextMenuTrigger,
-} from "@/components/ui/context-menu"
-import {
-    type RefObject,
-    forwardRef,
-    useEffect,
-    useRef,
-    useState,
-    type ComponentProps,
-} from "react"
+import { forwardRef, useState, type ComponentProps, memo } from "react"
 import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
@@ -42,7 +25,15 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { type ReactionPayload } from "@/lib/validations/reaction"
-import { EmojiBar } from "@/components/emoji-bar"
+import { EmojiPicker } from "@/components/emoji-picker"
+import {
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuSeparator,
+    ContextMenuTrigger,
+} from "@/components/ui/context-menu"
+import { ReactionButton } from "@/components/reaction-button"
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
 type MessageProps = {
@@ -142,7 +133,8 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     }
                 )
             },
-            onError: () => {
+            onError: (e) => {
+                console.log(e)
                 toast.error("Couldn't remove reaction, something went wrong.")
             },
         })
@@ -180,12 +172,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             .map((user) => user.name)
             .join(", ")
 
-        const bodyWithLinks = message.body?.replace(
-            /(https?:\/\/[^\s]+)/g,
-            (url) =>
-                `<a href="${url}" class="underline hover:no-underline" target="_blank">${url}</a>`
-        )
-
         const filteredReactions = (
             isRemoveReactionPending
                 ? message.reactions?.filter(
@@ -196,12 +182,12 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 : message.reactions
         )?.map((r) => (
             <ReactionButton
-                disabled={isRemoveReactionPending}
+                disabled={isRemoveReactionPending || isAddReactionPending}
                 key={r.id}
                 session={session}
                 reaction={r}
                 onClick={() =>
-                    onReact({
+                    onRemoveReaction({
                         body: r.body as Emoji,
                     })
                 }
@@ -261,18 +247,24 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     )}
                     <TooltipProvider>
                         <Tooltip
-                            delayDuration={200}
+                            delayDuration={100}
                             open={reactTooltipOpen}
                             onOpenChange={setReactTooltipOpen}
                         >
                             <ContextMenu>
                                 <TooltipTrigger asChild>
                                     <ContextMenuTrigger
-                                        onDoubleClick={() =>
+                                        onClick={(e) => e.preventDefault()}
+                                        onDoubleClick={() => {
+                                            const isTouchDevice =
+                                                "ontouchstart" in window
+
+                                            if (!isTouchDevice) return
+
                                             onReact({
                                                 body: "❤️",
                                             })
-                                        }
+                                        }}
                                         ref={triggerRef}
                                         className={cn(
                                             "relative my-1 inline-block w-fit rounded-3xl bg-primary p-3 text-sm max-md:select-none",
@@ -336,16 +328,13 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                 />
                                             </Link>
                                         )}
-                                        {bodyWithLinks && (
-                                            <p
-                                                dangerouslySetInnerHTML={{
-                                                    __html: bodyWithLinks,
-                                                }}
+                                        {message.body && (
+                                            <MessageBody
+                                                body={message.body}
                                                 className={cn(
-                                                    "break-all",
                                                     message.image ? "mt-2" : ""
                                                 )}
-                                            ></p>
+                                            />
                                         )}
                                         {!message.displaySender && (
                                             <Date
@@ -373,7 +362,8 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                 ) && (
                                                     <ReactionButton
                                                         disabled={
-                                                            isAddReactionPending
+                                                            isAddReactionPending ||
+                                                            isRemoveReactionPending
                                                         }
                                                         session={session}
                                                         reaction={{
@@ -411,7 +401,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                     side="bottom"
                                     sideOffset={-12}
                                 >
-                                    <EmojiBar
+                                    <EmojiPicker
                                         onEmojiClick={(emoji) =>
                                             onReact({
                                                 body: emoji,
@@ -449,6 +439,19 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                             Reply
                                         </ContextMenuItem>
                                     )}
+                                    <ContextMenuSeparator />
+                                    <ContextMenuItem className="p-0 hover:!bg-transparent">
+                                        <EmojiPicker
+                                            className="bg-none"
+                                            direction="horizontal"
+                                            onEmojiClick={(emoji) => {
+                                                onReact({
+                                                    body: emoji,
+                                                })
+                                                console.log("hello")
+                                            }}
+                                        />
+                                    </ContextMenuItem>
                                 </ContextMenuContent>
                             </ContextMenu>
                         </Tooltip>
@@ -485,117 +488,37 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
     }
 )
 
-function ReactionButton({
-    session,
-    reaction,
-    ...props
-}: ComponentProps<"button"> & {
-    reaction: ExtendedReaction
-    session: Session | null
-}) {
-    return (
-        <button
-            aria-pressed={reaction.sender.id === session?.user.id}
-            className={cn(
-                "inline-flex scale-100 items-center overflow-hidden rounded-full p-1 outline outline-1 outline-transparent hover:outline-white active:scale-95 disabled:scale-100",
-                reaction.sender.id === session?.user.id
-                    ? "bg-black"
-                    : "bg-secondary/75"
-            )}
-            {...props}
-        >
-            <span className={cn("-ml-[0.2rem] text-lg leading-none")}>
-                {reaction.body}
-            </span>
-            <UserAvatar
-                className={"[--avatar-size:17px]"}
-                user={reaction.sender}
-                showActiveIndicator={false}
-            />
-        </button>
-    )
-}
-
-type MessageDatePillProps = React.ComponentProps<"p"> & {
-    messageId: string
-    wrapperRef: RefObject<HTMLElement>
-    messagesWidthDatesIds: string[]
-}
-
-function MessageDatePill({
+function MessageBody({
+    body,
     className,
-    children,
-    messagesWidthDatesIds,
-    messageId,
-    wrapperRef,
     ...props
-}: MessageDatePillProps) {
-    const isLast =
-        messagesWidthDatesIds[messagesWidthDatesIds.length - 1] === messageId
-
-    const ref = useRef<HTMLParagraphElement | null>(null)
-    const [isSticking, setIsSticking] = useState(false)
-    const [y, setY] = useState(wrapperRef.current?.scrollHeight ?? 0)
-    const [scrollDirection, setScrollDirection] = useState("up")
-
-    useEffect(() => {
-        const wrapper = wrapperRef.current
-
-        const onScroll = () => {
-            if (!wrapper) return
-
-            const element = ref.current
-            const wrapperPadding = window
-                .getComputedStyle(wrapper, null)
-                .getPropertyValue("padding-bottom")
-                .replace("px", "")
-
-            if (element) {
-                const rect = element.getBoundingClientRect()
-                setIsSticking(rect.top <= +wrapperPadding * 2)
+}: { body: string } & ComponentProps<"p">) {
+    const replacedString = body
+        .split(/(https?:\/\/[^\s]+)/g)
+        .map((part, index) => {
+            if (index % 2 === 1) {
+                return (
+                    <a
+                        onClick={(e) => e.stopPropagation()}
+                        href={part}
+                        className="underline hover:no-underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        key={index}
+                    >
+                        {part}
+                    </a>
+                )
             }
-
-            if (y > wrapper.scrollTop) {
-                setScrollDirection("up")
-            } else if (y < wrapper.scrollTop) {
-                setScrollDirection("down")
-            }
-
-            setY(wrapper.scrollTop)
-        }
-
-        if (wrapper) wrapper.addEventListener("scroll", onScroll)
-
-        return () => {
-            if (wrapper) wrapper.removeEventListener("scroll", onScroll)
-        }
-    }, [wrapperRef, y])
-
-    const dates = wrapperRef.current?.querySelectorAll<
-        HTMLParagraphElement & { dataset: { sticking: "true" | "false" } }
-    >("#message-date-pill")
-
-    const stickingPills = Array.from(dates ?? [])
-        ?.filter((date) => date.dataset.sticking === "true")
-        .map((p) => p.dataset.messageid)
+            return part
+        })
 
     return (
         <p
-            data-sticking={isSticking}
-            data-messageid={messageId}
-            id="message-date-pill"
-            ref={ref}
-            className={cn(
-                "sticky -top-[1px] left-1/2 z-[2] w-fit -translate-x-1/2 rounded-full border border-primary/75 bg-secondary px-3 text-center transition-opacity ",
-                className,
-                (isSticking && !isLast && scrollDirection === "down") ||
-                    stickingPills.slice(0, -1).includes(messageId)
-                    ? "pointer-events-none opacity-0"
-                    : "pointer-events-auto opacity-100"
-            )}
+            className={cn("break-all", className)}
             {...props}
         >
-            <Date className="mb-1 inline-block text-[0.85rem]">{children}</Date>
+            {replacedString}
         </p>
     )
 }
@@ -694,4 +617,6 @@ function MessageSkeleton({
     )
 }
 
-export { Message, MessageDatePill, MessageSkeleton }
+const MemoizedMessage = memo(Message)
+
+export { MemoizedMessage as Message, MessageSkeleton }

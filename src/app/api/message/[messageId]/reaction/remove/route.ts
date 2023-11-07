@@ -56,20 +56,23 @@ export const POST = withErrorHandling(async function (
         (r) => r.sender.id === session.user.id && r.body === body
     )
 
-    if (!existingReaction)
-        return new NextResponse("Bad request", { status: 400 })
+    if (!existingReaction) return new NextResponse("Reaction doesn't exist yet")
 
-    const deletedReaction = await db.reaction.delete({
-        where: {
-            senderId: existingReaction.sender.id,
-            id: existingReaction.id,
-            body: existingReaction.body,
-        },
-    })
+    await db.$transaction(async (tx) => {
+        const deletedReaction = await tx.reaction.delete({
+            where: {
+                senderId: existingReaction.sender.id,
+                id: existingReaction.id,
+                body: existingReaction.body,
+            },
+        })
 
-    await pusherServer.trigger(message.chatId, "message:update", {
-        ...message,
-        reactions: message.reactions.filter((r) => r.id !== deletedReaction.id),
+        await pusherServer.trigger(message.chatId, "message:update", {
+            ...message,
+            reactions: message.reactions.filter(
+                (r) => r.id !== deletedReaction.id
+            ),
+        })
     })
 
     return new NextResponse("OK")

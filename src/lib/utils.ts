@@ -121,7 +121,6 @@ export function addDisplaySender(messages: ExtendedMessage[]) {
 
 export function groupByDate<T extends { createdAt: Date }>(arr: T[]) {
     let prevDate: string | null = null
-
     return arr.map((item) => {
         if (!item.createdAt) return
 

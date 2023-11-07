@@ -1,7 +1,7 @@
 import { type PointerEvent, useRef } from "react"
 
 export function useContextMenu() {
-    const triggerRef = useRef<HTMLSpanElement | null>(null)
+    const triggerRef = useRef<HTMLButtonElement | null>(null)
     const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
     const clearLongPress = () => {
         if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
@@ -10,6 +10,7 @@ export function useContextMenu() {
     function onPointerDown(e: PointerEvent) {
         const wrapper = findNearestScrollableContainer(triggerRef.current)
         const prevScrollPosition = wrapper?.scrollTop
+        // console.log(triggerRef?.current?.getBoundingClientRect())
 
         clearLongPress()
         if (e.pointerType === "mouse") return
@@ -19,12 +20,11 @@ export function useContextMenu() {
             const scrollPosition = wrapper?.scrollTop
 
             if (scrollPosition !== prevScrollPosition) return
-
             triggerRef?.current?.dispatchEvent(
                 new MouseEvent("contextmenu", {
                     bubbles: true,
-                    clientX: e.clientX,
-                    clientY: e.clientY,
+                    clientX: 0,
+                    clientY: 0,
                 })
             )
         }, 700)

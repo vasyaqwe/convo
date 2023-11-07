@@ -132,11 +132,11 @@
   background-color: hsl(var(--primary));
 }
 
-.emoji-bar {
+.emoji-bar.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-.emoji-bar::-webkit-scrollbar {
+.emoji-bar.no-scrollbar::-webkit-scrollbar {
   display: none !important;
 }
