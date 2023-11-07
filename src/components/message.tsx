@@ -187,7 +187,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 session={session}
                 reaction={r}
                 onClick={() =>
-                    onRemoveReaction({
+                    onReact({
                         body: r.body as Emoji,
                     })
                 }
@@ -448,7 +448,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                 onReact({
                                                     body: emoji,
                                                 })
-                                                console.log("hello")
                                             }}
                                         />
                                     </ContextMenuItem>
