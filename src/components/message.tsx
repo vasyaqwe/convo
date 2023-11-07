@@ -109,16 +109,17 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         })
 
         const {
-            variables,
-            isPending: isOnReactPending,
-            mutate: onReact,
+            variables: addedReaction,
+            isPending: isAddReactionPending,
+            mutate: onAddReaction,
         } = useMutation({
-            mutationFn: async ({
-                body,
-            }: ReactionPayload & { action: "delete" | "create" }) => {
-                await axiosInstance.patch(`/message/${message.id}/react`, {
-                    body,
-                })
+            mutationFn: async ({ body }: ReactionPayload) => {
+                await axiosInstance.post(
+                    `/message/${message.id}/reaction/add`,
+                    {
+                        body,
+                    }
+                )
             },
             onMutate: () => {
                 setReactTooltipOpen(false)
@@ -127,6 +128,34 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 toast.error("Couldn't react to message, something went wrong.")
             },
         })
+
+        const {
+            variables: removedReaction,
+            isPending: isRemoveReactionPending,
+            mutate: onRemoveReaction,
+        } = useMutation({
+            mutationFn: async ({ body }: ReactionPayload) => {
+                await axiosInstance.post(
+                    `/message/${message.id}/reaction/remove`,
+                    {
+                        body,
+                    }
+                )
+            },
+            onError: () => {
+                toast.error("Couldn't remove reaction, something went wrong.")
+            },
+        })
+
+        function onReact({ body }: ReactionPayload) {
+            const existingReaction = message.reactions?.find(
+                (r) => r.sender.id === session?.user.id && r.body === body
+            )
+
+            if (existingReaction) return onRemoveReaction({ body })
+
+            return onAddReaction({ body })
+        }
 
         function onReplyClick() {
             const replyTo = document.getElementById(message.replyTo?.id ?? "")
@@ -157,51 +186,33 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 `<a href="${url}" class="underline hover:no-underline" target="_blank">${url}</a>`
         )
 
-        const reactions = message.reactions?.map((r) => (
+        const filteredReactions = (
+            isRemoveReactionPending
+                ? message.reactions?.filter(
+                      (r) =>
+                          r.body !== removedReaction?.body ||
+                          r.sender.id !== session?.user.id
+                  )
+                : message.reactions
+        )?.map((r) => (
             <ReactionButton
+                disabled={isRemoveReactionPending}
                 key={r.id}
                 session={session}
                 reaction={r}
                 onClick={() =>
                     onReact({
                         body: r.body as Emoji,
-                        action:
-                            r.sender.id === session?.user.id
-                                ? "delete"
-                                : "create",
                     })
                 }
             />
         ))
 
-        const filteredForOptimisticDeletionReactions = message.reactions
-            ?.filter(
-                (r) =>
-                    r.body !== variables?.body ||
-                    r.sender.id !== session?.user.id
-            )
-            ?.map((r) => (
-                <ReactionButton
-                    key={r.id}
-                    session={session}
-                    reaction={r}
-                    onClick={() =>
-                        onReact({
-                            body: r.body as Emoji,
-                            action:
-                                r.sender.id === session?.user.id
-                                    ? "delete"
-                                    : "create",
-                        })
-                    }
-                />
-            ))
-
         return (
             <div
                 ref={ref}
                 className={cn(
-                    "relative flex gap-[var(--message-gap)] px-4 transition-colors duration-1000 [--message-gap:6px]",
+                    "relative flex gap-[var(--message-gap)] px-[var(--chat-padding-inline)] transition-colors duration-1000 [--chat-padding-inline:1rem] [--message-gap:6px]",
                     !isLast
                         ? "scroll-mt-[calc(var(--chat-padding-block)-1px)]"
                         : "",
@@ -260,14 +271,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         onDoubleClick={() =>
                                             onReact({
                                                 body: "❤️",
-                                                action: message.reactions?.some(
-                                                    (r) =>
-                                                        r.sender.id ===
-                                                            session?.user.id &&
-                                                        r.body === "❤️"
-                                                )
-                                                    ? "delete"
-                                                    : "create",
                                             })
                                         }
                                         ref={triggerRef}
@@ -359,32 +362,22 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                             </Date>
                                         )}
                                         <div className="mt-2 flex flex-wrap gap-1 empty:hidden">
-                                            {/* optimistic delete reaction */}
-                                            {isOnReactPending &&
-                                            variables.action === "delete"
-                                                ? filteredForOptimisticDeletionReactions
-                                                : reactions}
-
-                                            {/* optimistic create reaction */}
-                                            {isOnReactPending &&
+                                            {filteredReactions}
+                                            {isAddReactionPending &&
                                                 !message.reactions?.some(
                                                     (r) =>
                                                         r.sender.id ===
                                                             session?.user.id &&
                                                         r.body ===
-                                                            variables.body
-                                                ) &&
-                                                variables.action ===
-                                                    "create" && (
+                                                            addedReaction.body
+                                                ) && (
                                                     <ReactionButton
                                                         disabled={
-                                                            isOnReactPending &&
-                                                            variables.action ===
-                                                                "create"
+                                                            isAddReactionPending
                                                         }
                                                         session={session}
                                                         reaction={{
-                                                            ...variables,
+                                                            ...addedReaction,
                                                             id: "id",
                                                             sender: {
                                                                 id: session
@@ -422,14 +415,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         onEmojiClick={(emoji) =>
                                             onReact({
                                                 body: emoji,
-                                                action: message.reactions?.some(
-                                                    (r) =>
-                                                        r.sender.id ===
-                                                            session?.user.id &&
-                                                        r.body === emoji
-                                                )
-                                                    ? "delete"
-                                                    : "create",
                                             })
                                         }
                                     />
@@ -473,9 +458,9 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         <p
                             title={`Seen by ${seenByList}`}
                             className={cn(
-                                "absolute -bottom-6 text-right text-xs font-light text-foreground/60",
+                                "absolute -bottom-6 right-0 text-right text-xs font-light text-foreground/60",
                                 !message.displaySender
-                                    ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
+                                    ? "md:mr-[calc(var(--avatar-size)+var(--message-gap)+var(--chat-padding-inline))]"
                                     : ""
                             )}
                         >
@@ -512,7 +497,7 @@ function ReactionButton({
         <button
             aria-pressed={reaction.sender.id === session?.user.id}
             className={cn(
-                "inline-flex items-center overflow-hidden rounded-full px-[.2rem] py-[.25rem] outline outline-1 outline-transparent hover:outline-white",
+                "inline-flex scale-100 items-center overflow-hidden rounded-full p-1 outline outline-1 outline-transparent hover:outline-white active:scale-95 disabled:scale-100",
                 reaction.sender.id === session?.user.id
                     ? "bg-black"
                     : "bg-secondary/75"
