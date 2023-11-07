@@ -478,10 +478,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         <p
                             title={`Seen by ${seenByList}`}
                             className={cn(
-                                "absolute -bottom-6 right-0 text-right text-xs font-light text-foreground/60",
-                                !message.displaySender
-                                    ? "mr-[var(--chat-padding-inline)] md:mr-[calc(var(--avatar-size)+var(--message-gap)+var(--chat-padding-inline))]"
-                                    : ""
+                                "absolute -bottom-6 right-0 mr-[var(--chat-padding-inline)] text-right text-xs font-light text-foreground/60 md:mr-[calc(var(--avatar-size)+var(--message-gap)+var(--chat-padding-inline))]"
                             )}
                         >
                             <span className="sr-only">Seen by</span>
