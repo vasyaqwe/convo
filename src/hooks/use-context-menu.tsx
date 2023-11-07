@@ -23,8 +23,8 @@ export function useContextMenu() {
             triggerRef?.current?.dispatchEvent(
                 new MouseEvent("contextmenu", {
                     bubbles: true,
-                    clientX: 0,
-                    clientY: 0,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
                 })
             )
         }, 700)

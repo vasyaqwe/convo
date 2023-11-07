@@ -189,8 +189,8 @@ export function Chat({
     return (
         <div
             ref={wrapperRef}
-            className="chat-wrapper relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height)-var(--message-form-reply-height))] 
-            flex-col overflow-y-auto pb-[var(--chat-padding-block)] pt-[calc(var(--chat-padding-block)/2)] [--chat-padding-block:3rem]"
+            className="chat-wrapper relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height)-var(--message-form-reply-height))] flex-col 
+            overflow-y-auto pb-[var(--chat-padding-block)] pt-[calc(var(--chat-padding-block)/2)] [--chat-padding-block:3rem] [--chat-padding-inline:0.5rem] md:[--chat-padding-inline:1rem]"
         >
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
@@ -221,6 +221,7 @@ export function Chat({
                                     </DatePill>
                                 )}
                                 <Message
+                                    wrapperRef={wrapperRef}
                                     isTabFocused={isTabFocused}
                                     isLast={messages.length === 4}
                                     session={session}
@@ -245,6 +246,7 @@ export function Chat({
                                 </DatePill>
                             )}
                             <Message
+                                wrapperRef={wrapperRef}
                                 isTabFocused={isTabFocused}
                                 isLast={idx === messages.length - 1}
                                 session={session}

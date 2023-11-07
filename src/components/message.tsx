@@ -10,7 +10,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type Session } from "next-auth"
 import Image from "next/image"
 import Link from "next/link"
-import { forwardRef, useState, type ComponentProps, memo } from "react"
+import {
+    forwardRef,
+    useState,
+    type ComponentProps,
+    memo,
+    type RefObject,
+} from "react"
 import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
@@ -41,11 +47,12 @@ type MessageProps = {
     session: Session | null
     isLast: boolean
     isTabFocused: boolean
+    wrapperRef: RefObject<HTMLDivElement>
 }
 
 // eslint-disable-next-line react/display-name
 const Message = forwardRef<HTMLDivElement, MessageProps>(
-    ({ message, session, isLast, isTabFocused }, ref) => {
+    ({ message, session, isLast, isTabFocused, wrapperRef }, ref) => {
         const queryClient = useQueryClient()
         const router = useRouter()
         const [reactTooltipOpen, setReactTooltipOpen] = useState(false)
@@ -58,7 +65,10 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             highlightedMessageId,
         } = useReplyStore(
             useShallow((state) => ({
-                highlightedMessageId: state.highlightedMessageId,
+                highlightedMessageId:
+                    message.id === state.highlightedMessageId
+                        ? state.highlightedMessageId
+                        : undefined,
                 setHighlightedMessageId: state.setHighlightedMessageId,
                 setReplyTo: state.setReplyTo,
                 setIsReplying: state.setIsReplying,
@@ -157,8 +167,16 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     behavior: "smooth",
                     block: "center",
                 })
+                if (message.replyToId) setHighlightedMessageId(replyTo.id)
 
-                setHighlightedMessageId(replyTo.id)
+                return
+            } else {
+                if (wrapperRef.current) {
+                    wrapperRef.current.scrollTop = 0
+                    setTimeout(() => {
+                        onReplyClick()
+                    }, 500)
+                }
             }
         }
 
@@ -198,7 +216,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             <div
                 ref={ref}
                 className={cn(
-                    "relative flex gap-[var(--message-gap)] px-[var(--chat-padding-inline)] transition-colors duration-1000 [--chat-padding-inline:1rem] [--message-gap:6px]",
+                    "relative flex gap-[var(--message-gap)] px-[var(--chat-padding-inline)] transition-colors duration-1000 [--message-gap:6px]",
                     !isLast
                         ? "scroll-mt-[calc(var(--chat-padding-block)-1px)]"
                         : "",
@@ -282,7 +300,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                     >
                                         {message.replyTo && (
                                             <button
-                                                onClick={onReplyClick}
+                                                onClick={() => onReplyClick()}
                                                 className="relative mb-3 block overflow-hidden rounded-lg bg-foreground/20 p-2 pl-3.5 text-left transition-opacity before:absolute
                                     before:left-0 before:top-0 before:h-full before:w-1.5 before:bg-secondary/80 hover:opacity-80"
                                             >
