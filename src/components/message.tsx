@@ -333,6 +333,9 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         )}
                                         {message.image && (
                                             <Link
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
                                                 href={message.image}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
