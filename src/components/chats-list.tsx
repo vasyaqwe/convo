@@ -9,7 +9,7 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { useDynamicMetadata } from "@/hooks/use-dynamic-metadata"
 import { pusherClient } from "@/lib/pusher"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
-import type { ExtendedChat, ExtendedMessage } from "@/types"
+import type { ExtendedChat, ExtendedMessage, SearchQueryMessage } from "@/types"
 import type { User } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import type { Session } from "next-auth"
@@ -21,6 +21,8 @@ type ChatsListProps = {
     session: Session | null
     initialChats: ExtendedChat[]
 }
+
+type UserType = User & { messages: SearchQueryMessage[] }
 
 export function ChatsList({ session, initialChats }: ChatsListProps) {
     const [chats, setChats] = useState(initialChats)
@@ -42,11 +44,18 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
     } = useQuery({
         queryKey: ["users-search"],
         queryFn: async () => {
-            if (!input) return []
+            if (!input)
+                return {
+                    matchingMessages: [],
+                    matchingUsers: [],
+                }
 
             const { data } = await axiosInstance.get(`/users-search?q=${input}`)
 
-            return (data as User[]).filter((user) => user.id !== currentUserId)
+            return data as {
+                matchingMessages: UserType[]
+                matchingUsers: UserType[]
+            }
         },
         enabled: false,
     })
@@ -151,22 +160,33 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUserId, pathname, router])
 
+    const matchingQueryMessages =
+        results?.matchingMessages
+            ?.flatMap((r) => r.messages)
+            .sort(
+                (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime()
+            ) ?? []
+
     return (
-        <div className="mt-3 overflow-hidden px-1.5">
-            <div className="relative mt-2 px-3">
-                <Icons.search
-                    className="absolute left-5 top-[49%] -translate-y-1/2 text-muted-foreground"
-                    width={19}
-                    height={19}
-                />
-                <Input
-                    placeholder="Enter a name or @username..."
-                    value={input}
-                    className="pl-8"
-                    onChange={(e) => setInput(e.target.value)}
-                />
+        <div className="overflow-hidden px-1.5">
+            <div className="flex h-[70px] items-center">
+                <div className="relative w-full px-3">
+                    <Icons.search
+                        className="absolute left-5 top-[49%] -translate-y-1/2 text-muted-foreground"
+                        width={19}
+                        height={19}
+                    />
+                    <Input
+                        placeholder="Enter a name or @username..."
+                        value={input}
+                        className="pl-8"
+                        onChange={(e) => setInput(e.target.value)}
+                    />
+                </div>
             </div>
-            <div className="mt-5 h-full overflow-y-auto px-3">
+            <div className="h-full overflow-y-auto px-3">
                 {input.length > 0 ? (
                     isFetching ? (
                         Array(10)
@@ -177,12 +197,65 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                                     key={idx}
                                 />
                             ))
-                    ) : (results?.length ?? 0) < 1 ? (
+                    ) : [
+                          ...(results?.matchingMessages ?? []),
+                          ...(results?.matchingUsers ?? []),
+                      ]?.length < 1 ? (
                         <p className="text-sm text-foreground/80">
                             No results found.
                         </p>
+                    ) : matchingQueryMessages.length > 0 ? (
+                        <>
+                            {matchingQueryMessages.map((message) => {
+                                return (
+                                    <ChatButton
+                                        aria-current={undefined}
+                                        className="mt-3 first:mt-0 "
+                                        onSelect={() => setInput("")}
+                                        session={session}
+                                        chat={message.chat}
+                                        isLastMessageSeen={true}
+                                        key={message.id}
+                                        user={{
+                                            ...message.chat.users.find(
+                                                (u) => u.id !== currentUserId
+                                            )!,
+                                        }}
+                                        lastMessage={message}
+                                    />
+                                )
+                            })}
+                            {results?.matchingUsers?.map((user) => {
+                                const chat = chats?.find(
+                                    (chat) =>
+                                        chat.userIds.includes(currentUserId) &&
+                                        chat.userIds.includes(user.id)
+                                )
+
+                                if (chat) {
+                                    return (
+                                        <ChatButton
+                                            className="mt-3 first:mt-0"
+                                            onSelect={() => setInput("")}
+                                            session={session}
+                                            chat={chat}
+                                            key={user.id}
+                                            user={user}
+                                        />
+                                    )
+                                }
+
+                                return (
+                                    <UserButton
+                                        onSelect={() => setInput("")}
+                                        key={user.id}
+                                        user={user}
+                                    />
+                                )
+                            })}
+                        </>
                     ) : (
-                        results?.map((user) => {
+                        results?.matchingUsers?.map((user) => {
                             const chat = chats?.find(
                                 (chat) =>
                                     chat.userIds.includes(currentUserId) &&

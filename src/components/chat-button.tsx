@@ -2,7 +2,7 @@
 
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { usePathname } from "next/navigation"
-import type { ExtendedChat, UserType } from "@/types"
+import type { ExtendedChat, SearchQueryMessage, UserType } from "@/types"
 import { cn, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import type { Session } from "next-auth"
@@ -18,6 +18,8 @@ type ChatButtonProps = {
     chat: ExtendedChat
     session: Session | null
     onSelect?: () => void
+    lastMessage?: SearchQueryMessage
+    isLastMessageSeen?: boolean
 } & React.HTMLAttributes<HTMLAnchorElement>
 
 export function ChatButton({
@@ -26,6 +28,8 @@ export function ChatButton({
     chat,
     session,
     onSelect,
+    lastMessage: lastMatchingQueryMessage,
+    isLastMessageSeen: lastMatchingQueryMessageSeen,
     ...props
 }: ChatButtonProps) {
     const pathname = usePathname()
@@ -33,16 +37,29 @@ export function ChatButton({
 
     const currentUserId = session?.user.id
 
-    const { unseenCount, isLastMessageSeen, lastMessage, lastMessageText } =
-        useMessagesHelpers({
-            currentUserId,
-            messages: chat.messages ?? [],
-        })
+    const {
+        unseenCount,
+        isLastMessageSeen: chatLastMessageSeen,
+        lastMessage: chatLastMessage,
+        lastMessageText: chatLastMessageText,
+    } = useMessagesHelpers({
+        currentUserId,
+        messages: chat.messages ?? [],
+    })
 
     useEffect(() => {
         setChats(chat.id, unseenCount)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chat, unseenCount])
+
+    const lastMessage = lastMatchingQueryMessage ?? chatLastMessage
+    const isLastMessageSeen =
+        lastMatchingQueryMessageSeen ?? chatLastMessageSeen
+
+    const lastMessageText =
+        (lastMatchingQueryMessage?.image
+            ? "Sent an image"
+            : lastMessage?.body ?? "Chat started") ?? chatLastMessageText
 
     return (
         <Link
@@ -91,7 +108,7 @@ export function ChatButton({
                     {unseenCount > 0 && (
                         <span
                             title={`${unseenCount} unread messages`}
-                            className="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
+                            className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
                         >
                             {unseenCount > 99 ? "99+" : unseenCount}
                         </span>

@@ -15,6 +15,12 @@ export type ExtendedMessage = Message & {
         | null
 }
 
+export type SearchQueryMessage = Message & {
+    sender: UserType
+    seenBy: UserType[]
+    chat: ExtendedChat
+}
+
 export type ExtendedChat = Chat & {
     users: UserType[]
     messages: ExtendedMessage[] | undefined

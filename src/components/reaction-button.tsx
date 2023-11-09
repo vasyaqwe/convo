@@ -16,7 +16,7 @@ export function ReactionButton({
         <button
             aria-pressed={reaction.sender.id === session?.user.id}
             className={cn(
-                "inline-flex h-[28px] w-[50px] scale-100 items-center justify-center overflow-hidden rounded-full outline outline-1 outline-transparent hover:outline-white active:scale-95 disabled:scale-100",
+                "inline-flex h-[29px] w-[53px] scale-100 items-center justify-center gap-0.5 overflow-hidden rounded-full outline outline-1 outline-transparent hover:outline-white active:scale-95 disabled:scale-100",
                 reaction.sender.id === session?.user.id
                     ? "bg-black"
                     : "bg-secondary/75"
@@ -25,7 +25,7 @@ export function ReactionButton({
         >
             <span
                 className={cn(
-                    "-ml-[0.1rem] -mt-[0.1rem] text-[1.085rem] leading-none"
+                    "text-[1.035rem] leading-none md:text-[1.085rem]"
                 )}
             >
                 {reaction.body}
