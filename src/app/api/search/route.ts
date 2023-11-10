@@ -31,8 +31,10 @@ export const GET = withErrorHandling(async function (req: Request) {
                                 mode: "insensitive",
                             },
                             chat: {
-                                userIds: {
-                                    has: session.user.id,
+                                users: {
+                                    some: {
+                                        id: session.user.id,
+                                    },
                                 },
                             },
                         },
@@ -62,6 +64,13 @@ export const GET = withErrorHandling(async function (req: Request) {
                     body: {
                         contains: q,
                         mode: "insensitive",
+                    },
+                    chat: {
+                        users: {
+                            some: {
+                                id: session.user.id,
+                            },
+                        },
                     },
                 },
                 include: {

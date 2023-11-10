@@ -170,7 +170,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
             ) ?? []
 
     return (
-        <div className="overflow-hidden px-1.5">
+        <div className="h-full overflow-hidden px-1.5">
             <div className="flex h-[70px] items-center">
                 <div className="relative w-full px-3">
                     <Icons.search
