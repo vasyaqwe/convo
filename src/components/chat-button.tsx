@@ -1,15 +1,14 @@
 "use client"
 
 import { UserAvatar } from "@/components/ui/user-avatar"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import type { ExtendedChat, SearchQueryMessage, UserType } from "@/types"
 import { cn, formatDate } from "@/lib/utils"
-import Link from "next/link"
 import type { Session } from "next-auth"
 import dynamic from "next/dynamic"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
-import { useEffect } from "react"
+import { startTransition, useEffect } from "react"
 
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
@@ -17,23 +16,23 @@ type ChatButtonProps = {
     user: UserType
     chat: ExtendedChat
     session: Session | null
-    onSelect?: () => void
     lastMessage?: SearchQueryMessage
     isLastMessageSeen?: boolean
-} & React.HTMLAttributes<HTMLAnchorElement>
+} & React.HTMLAttributes<HTMLButtonElement>
 
 export function ChatButton({
     user,
     className,
     chat,
     session,
-    onSelect,
+    onClick,
     lastMessage: lastMatchingQueryMessage,
     isLastMessageSeen: lastMatchingQueryMessageSeen,
     ...props
 }: ChatButtonProps) {
     const pathname = usePathname()
     const { setChats } = useTotalMessagesCountStore()
+    const router = useRouter()
 
     const currentUserId = session?.user.id
 
@@ -62,12 +61,17 @@ export function ChatButton({
             : lastMessage?.body ?? "Chat started") ?? chatLastMessageText
 
     return (
-        <Link
-            onClick={onSelect}
+        <button
+            role="link"
+            onClick={(e) => {
+                startTransition(() => {
+                    router.push(`/chat/${chat.id}`)
+                    if (onClick) onClick(e)
+                })
+            }}
             aria-current={pathname?.includes(chat.id) ? "page" : undefined}
-            href={`/chat/${chat.id}`}
             className={cn(
-                "flex items-center rounded-lg p-2 transition-colors duration-100 hover:bg-secondary aria-[current=page]:bg-secondary",
+                "flex w-full items-center rounded-lg p-2 text-start transition-colors duration-100 hover:bg-secondary aria-[current=page]:bg-secondary",
                 className
             )}
             {...props}
@@ -99,7 +103,7 @@ export function ChatButton({
                     <p
                         title={lastMessageText}
                         className={cn(
-                            "w-[calc(var(--chats-width)/1.7)] truncate overflow-ellipsis text-sm",
+                            "line-clamp-1 overflow-ellipsis break-all text-sm",
                             isLastMessageSeen ? "text-foreground/70" : ""
                         )}
                     >
@@ -108,13 +112,13 @@ export function ChatButton({
                     {unseenCount > 0 && (
                         <span
                             title={`${unseenCount} unread messages`}
-                            className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
+                            className="ml-1 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
                         >
                             {unseenCount > 99 ? "99+" : unseenCount}
                         </span>
                     )}
                 </div>
             </div>
-        </Link>
+        </button>
     )
 }

@@ -30,6 +30,11 @@ export const GET = withErrorHandling(async function (req: Request) {
                                 contains: q,
                                 mode: "insensitive",
                             },
+                            chat: {
+                                userIds: {
+                                    has: session.user.id,
+                                },
+                            },
                         },
                     },
                 },

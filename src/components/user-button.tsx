@@ -45,7 +45,7 @@ export function UserButton({
                 mutate(user.id)
             }}
             className={cn(
-                "mt-3 flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
+                "flex w-full items-center gap-3 rounded-lg p-2 transition-colors duration-100 hover:bg-secondary",
                 className
             )}
             {...props}
@@ -62,7 +62,7 @@ export function UserButtonSkeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
     return (
         <div
-            className={cn("flex items-center gap-3", className)}
+            className={cn("flex items-center gap-3 p-2", className)}
             {...props}
         >
             <Skeleton className="h-[var(--avatar-size)] w-[var(--avatar-size)] flex-shrink-0 rounded-full" />

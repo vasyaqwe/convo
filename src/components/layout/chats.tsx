@@ -42,7 +42,7 @@ export async function Chats({
     return (
         <aside
             className={cn(
-                "sticky left-0 top-0 flex h-[100svh] flex-col border-r border-secondary bg-accent pb-5 md:w-[var(--chats-width)]",
+                "sticky left-0 top-0 flex h-[100svh] flex-col border-r border-secondary bg-accent md:w-[var(--chats-width)] md:pb-5",
                 className
             )}
             {...props}

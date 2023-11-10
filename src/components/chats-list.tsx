@@ -42,7 +42,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         refetch,
         isFetching,
     } = useQuery({
-        queryKey: ["users-search"],
+        queryKey: ["search"],
         queryFn: async () => {
             if (!input)
                 return {
@@ -50,7 +50,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                     matchingUsers: [],
                 }
 
-            const { data } = await axiosInstance.get(`/users-search?q=${input}`)
+            const { data } = await axiosInstance.get(`/search?q=${input}`)
 
             return data as {
                 matchingMessages: UserType[]
@@ -179,21 +179,21 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                         height={19}
                     />
                     <Input
-                        placeholder="Enter a name or @username..."
+                        placeholder="Enter a message, name or @..."
                         value={input}
                         className="pl-8"
                         onChange={(e) => setInput(e.target.value)}
                     />
                 </div>
             </div>
-            <div className="h-full overflow-y-auto px-3">
+            <div className="h-[calc(100%-70px-var(--message-form-height))] overflow-y-auto px-3 max-md:pb-5 md:h-[calc(100%-70px)]">
                 {input.length > 0 ? (
                     isFetching ? (
                         Array(10)
                             .fill("")
                             .map((_item, idx) => (
                                 <UserButtonSkeleton
-                                    className="mt-5 first:mt-0"
+                                    className="mt-3 first:mt-0"
                                     key={idx}
                                 />
                             ))
@@ -210,8 +210,10 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                                 return (
                                     <ChatButton
                                         aria-current={undefined}
-                                        className="mt-3 first:mt-0 "
-                                        onSelect={() => setInput("")}
+                                        className="mt-3 first:mt-0"
+                                        onClick={() =>
+                                            input.length > 0 && setInput("")
+                                        }
                                         session={session}
                                         chat={message.chat}
                                         isLastMessageSeen={true}
@@ -236,7 +238,9 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                                     return (
                                         <ChatButton
                                             className="mt-3 first:mt-0"
-                                            onSelect={() => setInput("")}
+                                            onClick={() =>
+                                                input.length > 0 && setInput("")
+                                            }
                                             session={session}
                                             chat={chat}
                                             key={user.id}
@@ -247,7 +251,10 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
                                 return (
                                     <UserButton
-                                        onSelect={() => setInput("")}
+                                        className="mt-3 first:mt-0"
+                                        onSelect={() =>
+                                            input.length > 0 && setInput("")
+                                        }
                                         key={user.id}
                                         user={user}
                                     />
@@ -266,7 +273,9 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                                 return (
                                     <ChatButton
                                         className="mt-3 first:mt-0"
-                                        onSelect={() => setInput("")}
+                                        onClick={() =>
+                                            input.length > 0 && setInput("")
+                                        }
                                         session={session}
                                         chat={chat}
                                         key={user.id}
@@ -277,7 +286,10 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
                             return (
                                 <UserButton
-                                    onSelect={() => setInput("")}
+                                    className="mt-3 first:mt-0"
+                                    onSelect={() =>
+                                        input.length > 0 && setInput("")
+                                    }
                                     key={user.id}
                                     user={user}
                                 />
