@@ -103,7 +103,7 @@ export function ChatButton({
                     <p
                         title={lastMessageText}
                         className={cn(
-                            "line-clamp-1 overflow-ellipsis break-all text-sm",
+                            "mr-1 line-clamp-1 overflow-ellipsis break-all text-sm",
                             isLastMessageSeen ? "text-foreground/70" : ""
                         )}
                     >
@@ -112,7 +112,7 @@ export function ChatButton({
                     {unseenCount > 0 && (
                         <span
                             title={`${unseenCount} unread messages`}
-                            className="ml-1 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
+                            className="ml-auto inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[.7rem] font-semibold text-white"
                         >
                             {unseenCount > 99 ? "99+" : unseenCount}
                         </span>
