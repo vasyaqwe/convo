@@ -9,6 +9,7 @@ import dynamic from "next/dynamic"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
 import { startTransition, useEffect } from "react"
+import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
@@ -46,6 +47,8 @@ export function ChatButton({
         messages: chat.messages ?? [],
     })
 
+    const { setHighlightedMessageId } = useMessageHelpersStore()
+
     useEffect(() => {
         setChats(chat.id, unseenCount)
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,6 +69,11 @@ export function ChatButton({
             onClick={(e) => {
                 startTransition(() => {
                     router.push(`/chat/${chat.id}`)
+
+                    if (lastMatchingQueryMessage) {
+                        setHighlightedMessageId(lastMatchingQueryMessage.id)
+                    }
+
                     if (onClick) onClick(e)
                 })
             }}

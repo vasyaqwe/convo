@@ -11,7 +11,7 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
 import { type MessagePayload } from "@/lib/validations/message"
-import { useReplyStore } from "@/stores/use-reply-store.tsx"
+import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -42,7 +42,7 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
     const queryClient = useQueryClient()
     const router = useRouter()
-    const { replyTo, isReplying, setIsReplying } = useReplyStore()
+    const { replyTo, isReplying, setIsReplying } = useMessageHelpersStore()
 
     const { refetch: refetchStartTyping } = useQuery({
         queryKey: ["chat-start-typing"],
@@ -287,7 +287,7 @@ function MessageFormShell({
     className,
     ...props
 }: React.ComponentProps<"div">) {
-    const { setIsReplying, isReplying, replyTo } = useReplyStore()
+    const { setIsReplying, isReplying, replyTo } = useMessageHelpersStore()
 
     return (
         <div

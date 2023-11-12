@@ -10,6 +10,7 @@ import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { pusherClient } from "@/lib/pusher"
 import { addDisplaySender, cn, groupByDate, reverseArray } from "@/lib/utils"
+import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 import type { ExtendedMessage, UserType } from "@/types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import type { Session } from "next-auth"
@@ -96,6 +97,53 @@ export function Chat({
         unseenCount,
         chatPartnerName,
     })
+
+    const { highlightedMessageId, setHighlightedMessageId } =
+        useMessageHelpersStore()
+
+    useEffect(() => {
+        if (highlightedMessageId === "") return
+
+        let timeout: NodeJS.Timeout | null = null
+
+        function scrollToMessage() {
+            const messageNode = document.getElementById(highlightedMessageId)
+
+            if (timeout) {
+                clearTimeout(timeout)
+            }
+
+            if (messageNode) {
+                messageNode.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                })
+
+                timeout = setTimeout(() => {
+                    setHighlightedMessageId("")
+                }, 1500)
+
+                return
+            } else {
+                if (wrapperRef.current) {
+                    wrapperRef.current.scrollTop = 0
+                    setTimeout(() => {
+                        scrollToMessage()
+                    }, 500)
+                }
+            }
+        }
+
+        scrollToMessage()
+
+        return () => {
+            if (timeout) {
+                clearTimeout(timeout)
+            }
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [highlightedMessageId])
 
     useEffect(() => {
         if (entry?.isIntersecting && hasNextPage) {

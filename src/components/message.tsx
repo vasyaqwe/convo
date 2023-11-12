@@ -22,7 +22,7 @@ import { toast } from "sonner"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useContextMenu } from "@/hooks/use-context-menu"
-import { useReplyStore } from "@/stores/use-reply-store.tsx"
+import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 import { useShallow } from "zustand/react/shallow"
 import {
     Tooltip,
@@ -61,15 +61,20 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         const {
             setReplyTo,
             setIsReplying,
-            setHighlightedMessageId,
+            setHighlightedReplyId,
+            highlightedReplyId,
             highlightedMessageId,
-        } = useReplyStore(
+        } = useMessageHelpersStore(
             useShallow((state) => ({
                 highlightedMessageId:
                     message.id === state.highlightedMessageId
                         ? state.highlightedMessageId
                         : undefined,
-                setHighlightedMessageId: state.setHighlightedMessageId,
+                highlightedReplyId:
+                    message.id === state.highlightedReplyId
+                        ? state.highlightedReplyId
+                        : undefined,
+                setHighlightedReplyId: state.setHighlightedReplyId,
                 setReplyTo: state.setReplyTo,
                 setIsReplying: state.setIsReplying,
             }))
@@ -167,7 +172,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     behavior: "smooth",
                     block: "center",
                 })
-                if (message.replyToId) setHighlightedMessageId(replyTo.id)
+                if (message.replyToId) setHighlightedReplyId(replyTo.id)
 
                 return
             } else {
@@ -220,7 +225,10 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     !isLast
                         ? "scroll-mt-[calc(var(--chat-padding-block)-1px)]"
                         : "",
-                    highlightedMessageId === message.id ? "bg-secondary" : "",
+                    highlightedReplyId === message.id ||
+                        highlightedMessageId === message.id
+                        ? "bg-secondary"
+                        : "",
                     !isOwn ? "flex-row-reverse" : ""
                 )}
                 id={message.id}
