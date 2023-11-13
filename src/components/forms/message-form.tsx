@@ -302,7 +302,9 @@ function MessageFormShell({
                     <Icons.reply className="flex-shrink-0 stroke-primary" />
                     <div>
                         <p className="font-medium">{replyTo?.sender.name}</p>
-                        <p className="line-clamp-1 text-sm">{replyTo?.body}</p>
+                        <p className="line-clamp-1 break-all text-sm">
+                            {replyTo?.body}
+                        </p>
                     </div>
                     <Button
                         onClick={() => setIsReplying(false)}

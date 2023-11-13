@@ -17,8 +17,8 @@ export default async function Home() {
                 session={session}
                 className="md:hidden"
             />
-            <h1 className="text-2xl font-semibold max-md:hidden">
-                Select a chat or create a new group
+            <h1 className="rounded-full border border-primary/75 bg-secondary px-3 py-1 text-lg font-semibold max-md:hidden">
+                Select or search for a chat to start messaging
             </h1>
             <MobileNav session={session} />
         </div>

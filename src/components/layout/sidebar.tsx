@@ -25,7 +25,7 @@ export function Sidebar({ session }: { session: Session }) {
         >
             <nav className="h-full">
                 <ul className="flex h-full flex-col items-center gap-2">
-                    <li>
+                    {/* <li>
                         <Button
                             title="New Group"
                             size={"icon"}
@@ -34,7 +34,7 @@ export function Sidebar({ session }: { session: Session }) {
                             <span className="sr-only">New group</span>
                             <Icons.people />
                         </Button>
-                    </li>
+                    </li> */}
                     <li>
                         <Dialog
                             onOpenChange={setDialogOpen}
