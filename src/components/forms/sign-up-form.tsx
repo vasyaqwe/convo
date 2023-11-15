@@ -22,7 +22,7 @@ type SignUpFormProps = React.ComponentProps<"div">
 
 export function SignUpForm({ className, ...rest }: SignUpFormProps) {
     const { isPending, mutate: login } = useMutation({
-        mutationFn: () => signIn("google"),
+        mutationFn: () => signIn("google", { callbackUrl: "/chats" }),
         onError: () => {
             toast.error("An unknown error occured")
         },
@@ -51,6 +51,7 @@ export function SignUpForm({ className, ...rest }: SignUpFormProps) {
             signIn("credentials", {
                 username: formData.username,
                 password: formData.password,
+                callbackUrl: "/chats",
             })
         },
     })

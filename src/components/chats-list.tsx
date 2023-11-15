@@ -179,7 +179,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                         height={19}
                     />
                     <Input
-                        placeholder="Enter a message, name or @..."
+                        placeholder="Enter a message, name or @username"
                         value={input}
                         className="pl-8"
                         onChange={(e) => setInput(e.target.value)}

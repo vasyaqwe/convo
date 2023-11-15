@@ -46,7 +46,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
         },
         onSuccess: () => {
             toast.success("Chat deleted")
-            router.push("/")
+            router.push("/chats")
             router.refresh()
             queryClient.invalidateQueries({ queryKey: ["messages"] })
         },

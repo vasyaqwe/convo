@@ -25,7 +25,7 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
     const [signInLoading, setSignInLoading] = useState(false)
 
     const { isPending, mutate: login } = useMutation({
-        mutationFn: () => signIn("google"),
+        mutationFn: () => signIn("google", { callbackUrl: "/chats" }),
         onError: () => {
             toast.error("An unknown error occured")
         },
@@ -41,7 +41,7 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
 
         await signIn("credentials", {
             ...formData,
-            redirect: false,
+            callbackUrl: "/chats",
         })
             .then((cb) => {
                 if (cb?.error) {

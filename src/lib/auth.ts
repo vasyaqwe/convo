@@ -101,7 +101,7 @@ export const authOptions: NextAuthOptions = {
             }
         },
         redirect({ baseUrl }) {
-            return baseUrl
+            return `${baseUrl}/chats`
         },
     },
 }
