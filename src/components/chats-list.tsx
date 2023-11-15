@@ -69,8 +69,15 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         return chatsMap.reduce((a, b) => a + b.unseenMessagesCount, 0)
     }, [chatsMap])
 
+    const openChat = chats.find((chat) => pathname?.includes(chat.id))
+
+    const chatPartnerName =
+        openChat?.users.find((user) => user.id !== session?.user.id)?.name ??
+        "convo."
+
     useDynamicMetadata({
         unseenCount,
+        chatPartnerName,
     })
 
     useEffect(() => {

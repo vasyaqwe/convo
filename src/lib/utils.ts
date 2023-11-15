@@ -127,7 +127,7 @@ export function groupByDate<T extends { createdAt: Date }>(arr: T[]) {
         const currentDate = formatDate(item.createdAt, "long", false)
         if (currentDate !== prevDate) {
             prevDate = currentDate
-            return { ...item, dateAbove: currentDate }
+            return { ...item, dateAbove: currentDate, displaySender: true }
         }
         return item
     }) as (T & { dateAbove: string | undefined })[]

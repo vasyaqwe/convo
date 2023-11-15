@@ -83,14 +83,10 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         useQuery({
             queryKey: ["see-message"],
             queryFn: async () => {
-                const lastMessage = queryClient.getQueryData<ExtendedMessage>([
-                    "see-message",
-                ])
                 if (!message.seenByIds.includes(session?.user.id)) {
-                    await axiosInstance.patch(
-                        `/message/${lastMessage ? lastMessage.id : message.id}`,
-                        { chatId: message.chatId }
-                    )
+                    await axiosInstance.patch(`/message/${message.id}`, {
+                        chatId: message.chatId,
+                    })
 
                     return "OK"
                 }
