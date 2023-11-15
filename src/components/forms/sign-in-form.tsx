@@ -48,7 +48,7 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
                     toast.error(cb.error)
                 }
                 if (cb?.ok) {
-                    router.push("/")
+                    router.push("/chats")
                 }
             })
             .finally(() => setSignInLoading(false))

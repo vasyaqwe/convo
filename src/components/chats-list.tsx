@@ -143,7 +143,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                 pathname?.includes(deletedChat.id)
             ) {
                 toast.message("Chat your were in was deleted")
-                router.push("/")
+                router.push("/chats")
             }
         }
 
