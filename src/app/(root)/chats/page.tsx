@@ -9,7 +9,7 @@ export const fetchCache = "force-no-store"
 export default async function Page() {
     const session = await getAuthSession()
 
-    if (!session) redirect("/sign-in")
+    if (!session) redirect("/")
 
     return (
         <div className="flex-1 md:grid md:place-content-center">

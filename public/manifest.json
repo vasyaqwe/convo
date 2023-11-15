@@ -18,6 +18,6 @@
     "display": "standalone",
     "scope": "/",
     "orientation": "portrait",
-    "start_url": "/",
+    "start_url": "/chats",
     "description": "convo is a modern messaging app. Built with Next.js 13."
 }
