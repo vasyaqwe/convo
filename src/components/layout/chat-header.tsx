@@ -66,7 +66,7 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                 >
                     <Link
                         prefetch={false}
-                        href={"/"}
+                        href={"/chats"}
                     >
                         <Icons.chevronLeft />
                         {unseenCount > 0 && (
