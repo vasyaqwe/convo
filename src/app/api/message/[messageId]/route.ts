@@ -41,6 +41,10 @@ export const PATCH = withErrorHandling(async function (
     }
 
     await db.$transaction(async (tx) => {
+
+        //wait because otherwise an error is thrown which I can't find out anything about
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
         const updatedMessage = await tx.message.update({
             where: {
                 id: messageId,

@@ -64,7 +64,7 @@ export function ChatButton({
             : lastMessage?.body ?? "Chat started") ?? chatLastMessageText
 
     return (
-        <button
+        <button                        
             role="link"
             onClick={(e) => {
                 startTransition(() => {
@@ -79,7 +79,7 @@ export function ChatButton({
             }}
             aria-current={pathname?.includes(chat.id) ? "page" : undefined}
             className={cn(
-                "flex w-full items-center rounded-lg p-2 text-start transition-colors duration-100 hover:bg-secondary aria-[current=page]:bg-secondary",
+                "flex w-full max-md:active:scale-[102%] items-center rounded-lg p-2 text-start transition-all duration-300 hover:bg-secondary aria-[current=page]:bg-secondary",
                 className
             )}
             {...props}
