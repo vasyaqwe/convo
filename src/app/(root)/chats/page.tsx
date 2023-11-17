@@ -17,7 +17,7 @@ export default async function Page() {
                 session={session}
                 className="md:hidden"
             />
-            <h1 className="rounded-full border border-primary/75 bg-secondary px-3 py-1 text-lg font-semibold max-md:hidden">
+            <h1 className="pill text-lg font-semibold max-md:hidden">
                 Select or search for a chat to start messaging
             </h1>
             <MobileNav session={session} />

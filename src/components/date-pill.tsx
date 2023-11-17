@@ -73,7 +73,7 @@ export function DatePill({
             id="message-date-pill"
             ref={ref}
             className={cn(
-                "sticky -top-[1px] left-1/2 z-[2] min-h-[30px] w-fit -translate-x-1/2 rounded-full border border-primary/75 bg-secondary px-3 text-center transition-opacity ",
+                "pill sticky -top-[1px] left-1/2 z-[2] min-h-[30px] w-fit -translate-x-1/2 py-0 text-center transition-opacity ",
                 className,
                 (isSticking && !isLast && scrollDirection === "down") ||
                     stickingPills.slice(0, -1).includes(messageId)

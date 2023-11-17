@@ -105,8 +105,11 @@ export function Chat({
         if (highlightedMessageId === "") return
 
         let timeout: NodeJS.Timeout | null = null
+        let isScrolling = false
 
         function scrollToMessage() {
+            if (isScrolling) return
+
             const messageNode = document.getElementById(highlightedMessageId)
 
             if (timeout) {
@@ -114,6 +117,8 @@ export function Chat({
             }
 
             if (messageNode) {
+                isScrolling = true
+
                 messageNode.scrollIntoView({
                     behavior: "smooth",
                     block: "center",
@@ -134,7 +139,7 @@ export function Chat({
             }
         }
 
-        scrollToMessage()
+        if (messages.length > 0) scrollToMessage()
 
         return () => {
             if (timeout) {
@@ -143,7 +148,7 @@ export function Chat({
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [highlightedMessageId])
+    }, [highlightedMessageId, messages])
 
     useEffect(() => {
         if (entry?.isIntersecting && hasNextPage) {
@@ -245,7 +250,7 @@ export function Chat({
             )}
 
             {messages.length < 1 ? (
-                <p className="my-auto self-center text-2xl font-semibold">
+                <p className="pill my-auto self-center text-lg font-semibold">
                     No history yet.
                 </p>
             ) : (
