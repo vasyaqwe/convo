@@ -236,33 +236,28 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     )}
                 >
                     {message.displaySender && (
-                        <UserAvatar
-                            className={cn(
-                                "mb-0.5 md:hidden",
-                                isOwn ? "ml-auto" : "mr-auto"
-                            )}
-                            user={message.sender}
-                        />
-                    )}
-                    {message.displaySender && (
                         <p className={cn(isOwn ? "text-right" : "text-left")}>
                             {isOwn ? (
                                 <>
-                                    {message.sender.name}{" "}
-                                    <Date className="text-xs text-foreground/75">
+                                    <Date className="text-xs text-foreground/75 md:mr-2">
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
                                     </Date>
+                                    <span className="max-md:hidden">
+                                        {message.sender.name}
+                                    </span>
                                 </>
                             ) : (
                                 <>
-                                    <Date className="text-xs text-foreground/75">
+                                    <span className="max-md:hidden">
+                                        {message.sender.name}
+                                    </span>
+                                    <Date className="text-xs text-foreground/75 md:ml-2">
                                         {formatDateToTimestamp(
                                             message.createdAt
                                         )}
-                                    </Date>{" "}
-                                    {message.sender.name}
+                                    </Date>
                                 </>
                             )}
                         </p>
@@ -287,7 +282,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                 body: "❤️",
                                             })
                                         }}
-                                        ref={triggerRef}
                                         className={cn(
                                             "relative my-1 inline-block w-fit rounded-3xl bg-primary p-3 text-sm max-md:select-none",
                                             isOwn
@@ -299,6 +293,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                     : "md:ml-[calc(var(--avatar-size)+var(--message-gap))]"
                                                 : ""
                                         )}
+                                        ref={triggerRef}
                                         onPointerDown={onPointerDown}
                                         onPointerUp={onPointerUp}
                                     >
