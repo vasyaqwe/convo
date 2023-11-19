@@ -119,7 +119,7 @@ export function ChatButton({
                         pathname?.includes(chat.id) ? "page" : undefined
                     }
                     className={cn(
-                        "flex w-full items-center rounded-lg p-2 text-start transition-all hover:bg-secondary aria-[current=page]:bg-secondary max-md:duration-300 max-md:active:scale-[97%]",
+                        "flex w-full items-center rounded-lg p-2 text-start transition-all hover:bg-secondary aria-[current=page]:bg-secondary max-md:select-none max-md:duration-300 max-md:active:scale-[97%]",
                         className
                     )}
                     {...props}
