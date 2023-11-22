@@ -197,6 +197,52 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
         ...filteredChats,
     ]
 
+    const chatButtons = useMemo(() => {
+        {
+            /* filter out the last item if it is showing in filteredChats*/
+        }
+        return matchingQueryMessages
+            .filter(
+                (message) =>
+                    !filteredChats.some(
+                        (chat) =>
+                            chat.messages?.[chat.messages?.length - 1]?.id ===
+                            message.id
+                    )
+            )
+            .map((message) => (
+                <ChatButton
+                    aria-current={undefined}
+                    className="mt-3 first:mt-0"
+                    onClick={() => input.length > 0 && setInput("")}
+                    session={session}
+                    chat={message.chat}
+                    isLastMessageSeen={true}
+                    key={message.id}
+                    user={{
+                        ...message.chat.users.find(
+                            (u) => u.id !== currentUserId
+                        )!,
+                    }}
+                    lastMessage={message}
+                />
+            ))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [matchingQueryMessages, filteredChats])
+
+    const userButtons = useMemo(() => {
+        // Memoized function for better performance
+        return results?.matchingUsers?.map((user) => (
+            <UserButton
+                className="mt-3 first:mt-0"
+                onSelect={() => input.length > 0 && setInput("")}
+                key={user.id}
+                user={user}
+            />
+        ))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [results?.matchingUsers])
+
     return (
         <div className="h-full overflow-hidden px-1.5">
             <div className="flex h-[70px] items-center">
@@ -251,65 +297,11 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                 {input.length > 0 ? (
                     matchingQueryMessages.length > 0 ? (
                         <>
-                            {/* filter out the last item if it is showing in filteredChats*/}
-                            {matchingQueryMessages
-                                .filter(
-                                    (message) =>
-                                        !filteredChats.some(
-                                            (chat) =>
-                                                chat.messages?.[
-                                                    chat.messages?.length - 1
-                                                ]?.id === message.id
-                                        )
-                                )
-                                .map((message) => {
-                                    return (
-                                        <ChatButton
-                                            aria-current={undefined}
-                                            className="mt-3 first:mt-0"
-                                            onClick={() =>
-                                                input.length > 0 && setInput("")
-                                            }
-                                            session={session}
-                                            chat={message.chat}
-                                            isLastMessageSeen={true}
-                                            key={message.id}
-                                            user={{
-                                                ...message.chat.users.find(
-                                                    (u) =>
-                                                        u.id !== currentUserId
-                                                )!,
-                                            }}
-                                            lastMessage={message}
-                                        />
-                                    )
-                                })}
-                            {results?.matchingUsers?.map((user) => {
-                                return (
-                                    <UserButton
-                                        className="mt-3 first:mt-0"
-                                        onSelect={() =>
-                                            input.length > 0 && setInput("")
-                                        }
-                                        key={user.id}
-                                        user={user}
-                                    />
-                                )
-                            })}
+                            {chatButtons}
+                            {userButtons}
                         </>
                     ) : (
-                        results?.matchingUsers?.map((user) => {
-                            return (
-                                <UserButton
-                                    className="mt-3 first:mt-0"
-                                    onSelect={() =>
-                                        input.length > 0 && setInput("")
-                                    }
-                                    key={user.id}
-                                    user={user}
-                                />
-                            )
-                        })
+                        userButtons
                     )
                 ) : null}
 
