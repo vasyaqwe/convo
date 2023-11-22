@@ -6,23 +6,46 @@ type UseDebounceArgs<T extends string> = {
     delayFirstLetter?: boolean
 }
 
+type DebounceResult<T extends string> = {
+    debouncedValue: T
+    debounceElapsed: boolean
+}
+
 export function useDebounce<T extends string>({
     value,
     delay,
     delayFirstLetter = true,
-}: UseDebounceArgs<T>): T {
+}: UseDebounceArgs<T>): DebounceResult<T> {
     const [debouncedValue, setDebouncedValue] = useState<T>(value)
+    const [debounceElapsed, setDebounceElapsed] = useState(false)
 
     useEffect(() => {
-        const timer = setTimeout(
-            () => setDebouncedValue(value),
-            value.length === 1 && delayFirstLetter ? 0 : delay ?? 500
-        )
+        let timer: NodeJS.Timeout | null = null
+
+        if (value.length === 0 || (value.length === 1 && !delayFirstLetter)) {
+            setDebouncedValue(value)
+            setDebounceElapsed(false)
+            return
+        }
+
+        if (timer) {
+            clearTimeout(timer)
+        }
+
+        timer = setTimeout(() => {
+            setDebouncedValue(value)
+            setDebounceElapsed(true)
+        }, delay ?? 500)
 
         return () => {
-            clearTimeout(timer)
+            if (timer) {
+                clearTimeout(timer)
+            }
         }
     }, [value, delay, delayFirstLetter])
 
-    return debouncedValue
+    return {
+        debouncedValue,
+        debounceElapsed,
+    }
 }

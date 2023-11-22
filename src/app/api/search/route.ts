@@ -18,8 +18,6 @@ export const GET = withErrorHandling(async function (req: Request) {
 
     if (!q) return new NextResponse("Invalid query", { status: 400 })
 
-    await new Promise((resolve) => setTimeout(resolve, 750))
-
     const results = await db.user.findMany({
         where: {
             OR: [
@@ -45,11 +43,25 @@ export const GET = withErrorHandling(async function (req: Request) {
                         startsWith: q,
                         mode: "insensitive",
                     },
+                    chats: {
+                        none: {
+                            userIds: {
+                                has: session.user.id,
+                            },
+                        },
+                    },
                 },
                 {
                     username: {
                         startsWith: q.startsWith("@") ? q.replace("@", "") : q,
                         mode: "insensitive",
+                    },
+                    chats: {
+                        none: {
+                            userIds: {
+                                has: session.user.id,
+                            },
+                        },
                     },
                 },
             ],

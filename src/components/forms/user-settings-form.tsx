@@ -8,7 +8,6 @@ import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { useFormValidation } from "@/hooks/use-form-validation"
 import { useUploadThing } from "@/lib/uploadthing"
-import { cn } from "@/lib/utils"
 import {
     type SettingsPayload,
     settingsSchema,
@@ -27,7 +26,6 @@ type UserSettingsFormProps = React.ComponentProps<"form"> & {
 }
 
 export function UserSettingsForm({
-    className,
     session,
     closeDialog,
     ...props
@@ -95,7 +93,6 @@ export function UserSettingsForm({
 
     return (
         <form
-            className={cn(className)}
             onSubmit={(e) => {
                 e.preventDefault()
                 safeOnSubmit()
