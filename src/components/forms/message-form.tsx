@@ -27,7 +27,7 @@ const IMAGE_MARGIN = 12
 
 export function MessageForm({ chatId }: MessageFormProps) {
     const [body, setBody] = useState("")
-    const debouncedBody = useDebounce<string>({
+    const { debouncedValue: debouncedBody } = useDebounce<string>({
         value: body,
         delay: 1500,
         delayFirstLetter: false,
