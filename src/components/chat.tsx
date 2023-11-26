@@ -169,6 +169,8 @@ export function Chat({
         pusherClient.subscribe(chatId)
 
         function onNewMessage(newMessage: ExtendedMessage) {
+            if (newMessage.senderId === currentUserId) return
+
             flushSync(() => {
                 setMessages((prev) => {
                     if (
@@ -230,8 +232,7 @@ export function Chat({
             pusherClient.unbind("message:update", onUpdateMessage)
             pusherClient.unbind("message:delete", onDeleteMessage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chatId])
+    }, [chatId, currentUserId])
 
     const filteredTypingUsers = typingUsers.filter(
         (u) => u.id !== currentUserId

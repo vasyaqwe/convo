@@ -101,8 +101,7 @@ export function addDisplaySender(messages: ExtendedMessage[]) {
         if (message.senderId === prevSenderId) {
             const currentTimestamp = new Date(message.createdAt).getTime()
             const timeDiff = currentTimestamp - prevMessageTimestamp!
-            if (timeDiff < 5 * 60 * 1000) {
-                // 5 minutes in milliseconds
+            if (isRecent(timeDiff)) {
                 message.displaySender = false
             } else {
                 message.displaySender = true
@@ -117,6 +116,15 @@ export function addDisplaySender(messages: ExtendedMessage[]) {
     })
 
     return newMessages
+}
+
+export function isRecent(timeDiff: number) {
+    if (timeDiff < 5 * 60 * 1000) {
+        // 5 minutes in milliseconds
+        return true
+    } else {
+        return false
+    }
 }
 
 export function groupByDate<T extends { createdAt: Date }>(arr: T[]) {

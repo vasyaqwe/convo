@@ -9,7 +9,7 @@ import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useUploadThing } from "@/lib/uploadthing"
-import { cn } from "@/lib/utils"
+import { cn, isRecent } from "@/lib/utils"
 import { type MessagePayload } from "@/lib/validations/message"
 import {
     messagesQueryKey,
@@ -97,12 +97,23 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
             await queryClient.cancelQueries({
                 queryKey: messagesQueryKey,
             })
-            const prevData =
-                queryClient.getQueryData<InfiniteData<ExtendedMessage[]>>(
-                    messagesQueryKey
-                )
 
-            if (prevData && session?.user) {
+            const prevData = queryClient.getQueryData<
+                InfiniteData<ExtendedMessage[]>
+            >(messagesQueryKey) ?? { pageParams: [1], pages: [[]] }
+
+            if (session?.user) {
+                const messages = prevData.pages.flat()
+                const lastMessage = messages[messages.length - 1]
+
+                const prevTimestamp = new Date(
+                    lastMessage?.createdAt ?? new Date()
+                ).getTime()
+                const currentTimestamp = new Date().getTime()
+                const timeDiff = currentTimestamp - prevTimestamp
+
+                const currentTime = new Date().toISOString() as unknown as Date
+
                 queryClient.setQueryData<InfiniteData<ExtendedMessage[]>>(
                     messagesQueryKey,
                     {
@@ -118,18 +129,20 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                                           image: sentMessage.image ?? null,
                                           sender: {
                                               id: session?.user.id,
-                                              image: null,
+                                              image: session.user.image ?? null,
                                               name: session.user.name,
                                               username:
                                                   session.user.username ?? "",
                                           },
+                                          displaySender:
+                                              messages.length === 0
+                                                  ? true
+                                                  : !isRecent(timeDiff),
                                           seenBy: [],
                                           seenByIds: [],
                                           senderId: session.user.id,
-                                          createdAt:
-                                              new Date().toISOString() as unknown as Date,
-                                          updatedAt:
-                                              new Date().toISOString() as unknown as Date,
+                                          createdAt: currentTime,
+                                          updatedAt: currentTime,
                                           replyTo:
                                               isReplying && replyTo
                                                   ? replyTo
@@ -145,15 +158,18 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                     }
                 )
             }
+
             setTimeout(() => {
                 document
                     .querySelector(".chat-wrapper")
                     ?.lastElementChild?.scrollIntoView({ behavior: "smooth" })
             }, 0)
+
             setBody("")
             setImage(undefined)
             setIsReplying(false)
             refetchEndTyping()
+
             document.documentElement.style.setProperty(
                 "--message-form-image-height",
                 `0px`
