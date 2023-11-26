@@ -13,7 +13,6 @@ import { cn, isRecent } from "@/lib/utils"
 import { type MessagePayload } from "@/lib/validations/message"
 import {
     messagesQueryKey,
-    optimisticMessageId,
     useMessageHelpersStore,
 } from "@/stores/use-message-helpers-store.tsx"
 import { type ExtendedMessage } from "@/types"
@@ -23,6 +22,7 @@ import {
     useQuery,
     useQueryClient,
 } from "@tanstack/react-query"
+import { nanoid } from "nanoid"
 import { type Session } from "next-auth"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -125,7 +125,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                                       {
                                           body: sentMessage.body ?? null,
                                           chatId,
-                                          id: optimisticMessageId,
+                                          id: nanoid(),
                                           image: sentMessage.image ?? null,
                                           sender: {
                                               id: session?.user.id,

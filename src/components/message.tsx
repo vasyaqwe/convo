@@ -24,7 +24,6 @@ import { useRouter } from "next/navigation"
 import { useContextMenu } from "@/hooks/use-context-menu"
 import {
     messagesQueryKey,
-    optimisticMessageId,
     useMessageHelpersStore,
 } from "@/stores/use-message-helpers-store.tsx"
 import { useShallow } from "zustand/react/shallow"
@@ -98,7 +97,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 return null
             },
             enabled:
-                isLast && isTabFocused && message.id !== optimisticMessageId,
+                isLast && isTabFocused && message.senderId !== session?.user.id,
         })
 
         const { isPending, mutate: onDelete } = useMutation({

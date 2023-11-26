@@ -62,14 +62,10 @@ export function Chat({
             const reversedPages = reverseArray(
                 data.pages.filter((page) => page.length !== 0)
             )
-            const messages = reversedPages?.flatMap((page) => page)
+            const messages = reversedPages?.flat()
             if (messages && messages[0]?.chatId === chatId) {
                 setMessages(messages)
-                if (messages[messages.length - 1]?.senderId !== currentUserId) {
-                    wrapperRef.current?.lastElementChild?.scrollIntoView({
-                        behavior: "smooth",
-                    })
-                }
+
                 if (
                     // only load new page if there's more than one page & if scroll position is at the very top
                     data.pages.length > 1 &&
@@ -83,12 +79,12 @@ export function Chat({
                         const prevPageFirstMessage = document.getElementById(
                             prevPage[0].id
                         )
+                        console.log(prevPageFirstMessage)
                         prevPageFirstMessage?.scrollIntoView()
                     }
                 }
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, chatId])
 
     const { isTabFocused } = useIsTabFocused()
@@ -232,7 +228,8 @@ export function Chat({
             pusherClient.unbind("message:update", onUpdateMessage)
             pusherClient.unbind("message:delete", onDeleteMessage)
         }
-    }, [chatId, currentUserId])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chatId])
 
     const filteredTypingUsers = typingUsers.filter(
         (u) => u.id !== currentUserId
@@ -259,40 +256,14 @@ export function Chat({
                     No history yet.
                 </p>
             ) : (
-                <>
-                    {groupByDate(messages).map((message, idx, array) => {
-                        const messagesWidthDatesIds = array
-                            .filter((m) => m.dateAbove)
-                            .map((m) => m.id)
+                groupByDate(messages).map((message, idx, array) => {
+                    const messagesWidthDatesIds = array
+                        .filter((m) => m.dateAbove)
+                        .map((m) => m.id)
 
-                        if (idx === 3) {
-                            return (
-                                <React.Fragment key={idx}>
-                                    {message.dateAbove && (
-                                        <DatePill
-                                            messagesWidthDatesIds={
-                                                messagesWidthDatesIds
-                                            }
-                                            messageId={message.id}
-                                            wrapperRef={wrapperRef}
-                                        >
-                                            {message.dateAbove}
-                                        </DatePill>
-                                    )}
-                                    <Message
-                                        wrapperRef={wrapperRef}
-                                        isTabFocused={isTabFocused}
-                                        isLast={messages.length === 4}
-                                        session={session}
-                                        message={message}
-                                        ref={ref}
-                                    />
-                                </React.Fragment>
-                            )
-                        }
-
+                    if (idx === 3) {
                         return (
-                            <React.Fragment key={idx}>
+                            <React.Fragment key={message.id}>
                                 {message.dateAbove && (
                                     <DatePill
                                         messagesWidthDatesIds={
@@ -307,23 +278,38 @@ export function Chat({
                                 <Message
                                     wrapperRef={wrapperRef}
                                     isTabFocused={isTabFocused}
-                                    isLast={idx === messages.length - 1}
+                                    isLast={messages.length === 4}
                                     session={session}
                                     message={message}
+                                    ref={ref}
                                 />
                             </React.Fragment>
                         )
-                    })}
-                    {/* {sendMessagePending && sentMessage && (
-                        <Message
-                            wrapperRef={wrapperRef}
-                            isTabFocused={isTabFocused}
-                            isLast={false}
-                            session={session}
-                            message={sentMessage}
-                        />
-                    )} */}
-                </>
+                    }
+
+                    return (
+                        <React.Fragment key={message.id}>
+                            {message.dateAbove && (
+                                <DatePill
+                                    messagesWidthDatesIds={
+                                        messagesWidthDatesIds
+                                    }
+                                    messageId={message.id}
+                                    wrapperRef={wrapperRef}
+                                >
+                                    {message.dateAbove}
+                                </DatePill>
+                            )}
+                            <Message
+                                wrapperRef={wrapperRef}
+                                isTabFocused={isTabFocused}
+                                isLast={idx === messages.length - 1}
+                                session={session}
+                                message={message}
+                            />
+                        </React.Fragment>
+                    )
+                })
             )}
             {filteredTypingUsers.length > 0 && (
                 <div className="relative h-full ">

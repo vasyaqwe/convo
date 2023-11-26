@@ -13,7 +13,6 @@ type StoreState = {
 }
 
 export const messagesQueryKey = ["messages"]
-export const optimisticMessageId = "optimisticMessageId"
 
 let timeout: NodeJS.Timeout | null = null
 
