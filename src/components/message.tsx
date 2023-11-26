@@ -22,7 +22,11 @@ import { toast } from "sonner"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useContextMenu } from "@/hooks/use-context-menu"
-import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
+import {
+    messagesQueryKey,
+    optimisticMessageId,
+    useMessageHelpersStore,
+} from "@/stores/use-message-helpers-store.tsx"
 import { useShallow } from "zustand/react/shallow"
 import {
     Tooltip,
@@ -93,7 +97,8 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
 
                 return null
             },
-            enabled: isLast && isTabFocused,
+            enabled:
+                isLast && isTabFocused && message.id !== optimisticMessageId,
         })
 
         const { isPending, mutate: onDelete } = useMutation({
@@ -102,7 +107,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             },
             onSuccess: () => {
                 toast.success("Message deleted")
-                queryClient.invalidateQueries({ queryKey: ["messages"] })
+                queryClient.invalidateQueries({ queryKey: messagesQueryKey })
                 router.refresh()
             },
             onError: () => {

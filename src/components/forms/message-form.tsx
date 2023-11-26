@@ -11,8 +11,19 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn } from "@/lib/utils"
 import { type MessagePayload } from "@/lib/validations/message"
-import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+    messagesQueryKey,
+    optimisticMessageId,
+    useMessageHelpersStore,
+} from "@/stores/use-message-helpers-store.tsx"
+import { type ExtendedMessage } from "@/types"
+import {
+    type InfiniteData,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from "@tanstack/react-query"
+import { type Session } from "next-auth"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
@@ -20,12 +31,13 @@ import { toast } from "sonner"
 
 type MessageFormProps = {
     chatId: string
+    session: Session | null
 }
 
 const IMAGE_SIZE = 100
 const IMAGE_MARGIN = 12
 
-export function MessageForm({ chatId }: MessageFormProps) {
+export function MessageForm({ chatId, session }: MessageFormProps) {
     const [body, setBody] = useState("")
     const { debouncedValue: debouncedBody } = useDebounce<string>({
         value: body,
@@ -81,7 +93,63 @@ export function MessageForm({ chatId }: MessageFormProps) {
 
             return "OK"
         },
-        onMutate: () => {
+        onMutate: async (sentMessage) => {
+            await queryClient.cancelQueries({
+                queryKey: messagesQueryKey,
+            })
+            const prevData =
+                queryClient.getQueryData<InfiniteData<ExtendedMessage[]>>(
+                    messagesQueryKey
+                )
+
+            if (prevData && session?.user) {
+                queryClient.setQueryData<InfiniteData<ExtendedMessage[]>>(
+                    messagesQueryKey,
+                    {
+                        ...prevData,
+                        pages: prevData.pages.map((page, idx, arr) =>
+                            idx === arr.length - 1
+                                ? [
+                                      ...page,
+                                      {
+                                          body: sentMessage.body ?? null,
+                                          chatId,
+                                          id: optimisticMessageId,
+                                          image: sentMessage.image ?? null,
+                                          sender: {
+                                              id: session?.user.id,
+                                              image: null,
+                                              name: session.user.name,
+                                              username:
+                                                  session.user.username ?? "",
+                                          },
+                                          seenBy: [],
+                                          seenByIds: [],
+                                          senderId: session.user.id,
+                                          createdAt:
+                                              new Date().toISOString() as unknown as Date,
+                                          updatedAt:
+                                              new Date().toISOString() as unknown as Date,
+                                          replyTo:
+                                              isReplying && replyTo
+                                                  ? replyTo
+                                                  : null,
+                                          replyToId:
+                                              isReplying && replyTo
+                                                  ? replyTo.id
+                                                  : null,
+                                      },
+                                  ]
+                                : page
+                        ),
+                    }
+                )
+            }
+            setTimeout(() => {
+                document
+                    .querySelector(".chat-wrapper")
+                    ?.lastElementChild?.scrollIntoView({ behavior: "smooth" })
+            }, 0)
             setBody("")
             setImage(undefined)
             setIsReplying(false)
@@ -90,14 +158,19 @@ export function MessageForm({ chatId }: MessageFormProps) {
                 "--message-form-image-height",
                 `0px`
             )
+
+            return { prevData, sentMessage }
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["messages"] })
-            queryClient.invalidateQueries({ queryKey: ["users-search"] })
-            router.refresh()
-        },
-        onError: () => {
+        onError: (_err, _newData, context) => {
+            queryClient.setQueryData(messagesQueryKey, context?.prevData)
             return toast.error("Something went wrong")
+        },
+        onSettled: () => {
+            router.refresh()
+            queryClient.invalidateQueries({ queryKey: ["users-search"] })
+            queryClient.invalidateQueries({
+                queryKey: messagesQueryKey,
+            })
         },
     })
 

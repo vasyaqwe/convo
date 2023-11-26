@@ -12,6 +12,9 @@ type StoreState = {
     setHighlightedReplyId: (id: string) => void
 }
 
+export const messagesQueryKey = ["messages"]
+export const optimisticMessageId = "optimisticMessageId"
+
 let timeout: NodeJS.Timeout | null = null
 
 export const useMessageHelpersStore = create<StoreState>()((set) => ({
