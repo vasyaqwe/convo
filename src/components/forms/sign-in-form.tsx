@@ -42,6 +42,7 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
         await signIn("credentials", {
             ...formData,
             callbackUrl: "/chats",
+            redirect: false,
         })
             .then((cb) => {
                 if (cb?.error) {
