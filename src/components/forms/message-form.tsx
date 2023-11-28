@@ -51,6 +51,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
 
     const messageBodyRef = useRef<HTMLTextAreaElement | null>(null)
 
+    const queryKey = [...messagesQueryKey, chatId]
     const queryClient = useQueryClient()
     const router = useRouter()
     const { replyTo, isReplying, setIsReplying } = useMessageHelpersStore()
@@ -94,12 +95,12 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
         },
         onMutate: async (sentMessage) => {
             await queryClient.cancelQueries({
-                queryKey: messagesQueryKey,
+                queryKey,
             })
 
             const prevData = queryClient.getQueryData<
                 InfiniteData<ExtendedMessage[]>
-            >(messagesQueryKey) ?? { pageParams: [1], pages: [[]] }
+            >(queryKey) ?? { pageParams: [1], pages: [[]] }
 
             if (session?.user) {
                 const messages = prevData.pages.flat()
@@ -113,7 +114,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                 const currentTime = new Date().toISOString() as unknown as Date
 
                 queryClient.setQueryData<InfiniteData<ExtendedMessage[]>>(
-                    messagesQueryKey,
+                    queryKey,
                     {
                         ...prevData,
                         pages: prevData.pages.map((page, idx, arr) =>
@@ -178,24 +179,24 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
             return { prevData, sentMessage }
         },
         onError: (_err, _newData, context) => {
-            queryClient.setQueryData(messagesQueryKey, context?.prevData)
+            queryClient.setQueryData(queryKey, context?.prevData)
             return toast.error("Something went wrong")
         },
         onSettled: () => {
             router.refresh()
             queryClient.invalidateQueries({ queryKey: ["users-search"] })
             queryClient.invalidateQueries({
-                queryKey: messagesQueryKey,
+                queryKey,
             })
         },
     })
 
-    useEffect(() => {
-        return () => {
-            refetchEndTyping()
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    // useEffect(() => {
+    //     return () => {
+    //         refetchEndTyping()
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [])
 
     useEffect(() => {
         setTimeout(() => {

@@ -38,9 +38,10 @@ export function Chat({
     chatPartnerName,
 }: ChatProps) {
     const queryClient = useQueryClient()
+    const queryKey = [...messagesQueryKey, chatId]
     const { fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, data } =
         useInfiniteQuery({
-            queryKey: messagesQueryKey,
+            queryKey,
             queryFn: async ({ pageParam = 1 }) => {
                 const query = `/messages?limit=${MESSAGES_INFINITE_SCROLL_COUNT}&page=${pageParam}&chatId=${chatId}`
 
@@ -50,6 +51,7 @@ export function Chat({
             },
             initialPageParam: 1,
             refetchOnWindowFocus: false,
+            enabled: false,
             refetchOnReconnect: false,
             getNextPageParam: (lastPage, allPages) => {
                 return lastPage.length ? allPages.length + 1 : undefined
@@ -64,14 +66,11 @@ export function Chat({
         data.pages.filter((page) => page.length !== 0)
     )
     const messages = reversedPages?.flat()
+
     const [typingUsers, setTypingUsers] = useState<UserType[]>([])
 
     useEffect(() => {
         if (data?.pages) {
-            const reversedPages = reverseArray(
-                data.pages.filter((page) => page.length !== 0)
-            )
-            const messages = reversedPages?.flat()
             if (messages && messages[0]?.chatId === chatId) {
                 if (
                     // only load new page if there's more than one page & if scroll position is at the very top
@@ -91,6 +90,7 @@ export function Chat({
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, chatId])
 
     const { isTabFocused } = useIsTabFocused()
@@ -172,7 +172,7 @@ export function Chat({
             prevData: InfiniteData<ExtendedMessage[]>
         ) => InfiniteData<ExtendedMessage[]>
     ) {
-        queryClient.setQueryData(messagesQueryKey, cb)
+        queryClient.setQueryData(queryKey, cb)
     }
 
     useEffect(() => {
