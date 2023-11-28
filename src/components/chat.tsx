@@ -15,7 +15,11 @@ import {
     useMessageHelpersStore,
 } from "@/stores/use-message-helpers-store.tsx"
 import type { ExtendedMessage, UserType } from "@/types"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import {
+    type InfiniteData,
+    useInfiniteQuery,
+    useQueryClient,
+} from "@tanstack/react-query"
 import type { Session } from "next-auth"
 import React, { forwardRef, useEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
@@ -33,6 +37,7 @@ export function Chat({
     initialMessages,
     chatPartnerName,
 }: ChatProps) {
+    const queryClient = useQueryClient()
     const { fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, data } =
         useInfiniteQuery({
             queryKey: messagesQueryKey,
@@ -49,12 +54,16 @@ export function Chat({
             getNextPageParam: (lastPage, allPages) => {
                 return lastPage.length ? allPages.length + 1 : undefined
             },
+            initialData: { pageParams: [1], pages: [initialMessages] },
         })
 
     const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
-    const [messages, setMessages] = useState<ExtendedMessage[]>(initialMessages)
+    const reversedPages = reverseArray(
+        data.pages.filter((page) => page.length !== 0)
+    )
+    const messages = reversedPages?.flat()
     const [typingUsers, setTypingUsers] = useState<UserType[]>([])
 
     useEffect(() => {
@@ -64,8 +73,6 @@ export function Chat({
             )
             const messages = reversedPages?.flat()
             if (messages && messages[0]?.chatId === chatId) {
-                setMessages(messages)
-
                 if (
                     // only load new page if there's more than one page & if scroll position is at the very top
                     data.pages.length > 1 &&
@@ -79,7 +86,6 @@ export function Chat({
                         const prevPageFirstMessage = document.getElementById(
                             prevPage[0].id
                         )
-                        console.log(prevPageFirstMessage)
                         prevPageFirstMessage?.scrollIntoView()
                     }
                 }
@@ -161,43 +167,74 @@ export function Chat({
         wrapperRef.current?.lastElementChild?.scrollIntoView()
     }, [isLoading])
 
+    function updateMessages(
+        cb: (
+            prevData: InfiniteData<ExtendedMessage[]>
+        ) => InfiniteData<ExtendedMessage[]>
+    ) {
+        queryClient.setQueryData(messagesQueryKey, cb)
+    }
+
     useEffect(() => {
         pusherClient.subscribe(chatId)
 
         function onNewMessage(newMessage: ExtendedMessage) {
-            if (newMessage.senderId === currentUserId) return
-
-            flushSync(() => {
-                setMessages((prev) => {
-                    if (
-                        prev.some(
-                            (prevMessage) => prevMessage.id === newMessage.id
-                        )
-                    )
-                        return prev
-                    return addDisplaySender([...prev, newMessage])
+            if (newMessage.senderId !== currentUserId) {
+                flushSync(() => {
+                    updateMessages((prev) => {
+                        return {
+                            ...prev,
+                            pages: prev.pages.map((page, idx, arr) =>
+                                idx === arr.length - 1 &&
+                                !page.some((m) => m.id === newMessage.id)
+                                    ? addDisplaySender([...page, newMessage])
+                                    : page
+                            ),
+                        }
+                    })
                 })
-            })
-            wrapperRef.current?.lastElementChild?.scrollIntoView({
-                behavior: "smooth",
-            })
+
+                wrapperRef.current?.lastElementChild?.scrollIntoView({
+                    behavior: "smooth",
+                })
+            }
         }
 
         function onUpdateMessage(newMessage: ExtendedMessage) {
-            setMessages((prev) =>
-                prev.map((oldMessage) => {
-                    if (oldMessage.id === newMessage.id) return newMessage
-
-                    return oldMessage
-                })
-            )
-            setMessages((prev) => addDisplaySender(prev))
+            updateMessages((prev) => {
+                return {
+                    ...prev,
+                    pages: prev.pages.map((page, idx, arr) =>
+                        idx === arr.length - 1
+                            ? addDisplaySender(
+                                  page.map((oldMessage) => {
+                                      if (oldMessage.id === newMessage.id)
+                                          return newMessage
+                                      return oldMessage
+                                  })
+                              )
+                            : page
+                    ),
+                }
+            })
         }
 
         function onDeleteMessage(deletedMessageId: string) {
-            setMessages((prev) =>
-                prev.filter((message) => message.id !== deletedMessageId)
-            )
+            updateMessages((prev) => {
+                return {
+                    ...prev,
+                    pages: prev.pages.map((page, idx, arr) =>
+                        idx === arr.length - 1
+                            ? addDisplaySender(
+                                  page.filter(
+                                      (message) =>
+                                          message.id !== deletedMessageId
+                                  )
+                              )
+                            : page
+                    ),
+                }
+            })
         }
 
         function onStartTyping({ typingUser }: { typingUser: UserType }) {

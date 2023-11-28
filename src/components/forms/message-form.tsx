@@ -42,7 +42,6 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     const { debouncedValue: debouncedBody } = useDebounce<string>({
         value: body,
         delay: 1500,
-        delayFirstLetter: false,
     })
 
     const [startedTyping, setStartedTyping] = useState(false)
@@ -105,7 +104,6 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
             if (session?.user) {
                 const messages = prevData.pages.flat()
                 const lastMessage = messages[messages.length - 1]
-
                 const prevTimestamp = new Date(
                     lastMessage?.createdAt ?? new Date()
                 ).getTime()
@@ -137,7 +135,9 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                                           displaySender:
                                               messages.length === 0
                                                   ? true
-                                                  : !isRecent(timeDiff),
+                                                  : !isRecent(timeDiff) ||
+                                                    lastMessage?.senderId !==
+                                                        session.user.id,
                                           seenBy: [],
                                           seenByIds: [],
                                           senderId: session.user.id,
@@ -189,6 +189,13 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
             })
         },
     })
+
+    useEffect(() => {
+        return () => {
+            refetchEndTyping()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     useEffect(() => {
         setTimeout(() => {
