@@ -16,6 +16,8 @@ import SessionProvider from "@/components/session-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
+export const dynamic = "force-dynamic"
+
 export const viewport: Viewport = viewportConfig
 export const metadata: Metadata = metadataConfig
 

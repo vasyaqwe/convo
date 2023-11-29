@@ -1,21 +1,21 @@
 import { ChatsList } from "@/components/chats-list"
+
+import { cn, reverseArray } from "@/lib/utils"
+import type { Session } from "next-auth"
 import {
     MESSAGES_INFINITE_SCROLL_COUNT,
     MESSAGE_INCLUDE,
     USERS_SELECT,
 } from "@/config"
 import { db } from "@/lib/db"
-import { cn, reverseArray } from "@/lib/utils"
-import type { Session } from "next-auth"
-
-export const dynamic = "force-dynamic"
-export const fetchCache = "force-no-store"
 
 export async function Chats({
     className,
     session,
     ...props
-}: React.ComponentProps<"aside"> & { session: Session }) {
+}: React.ComponentProps<"aside"> & {
+    session: Session
+}) {
     const chats = await db.chat.findMany({
         where: {
             userIds: {
@@ -54,7 +54,7 @@ export async function Chats({
                 session={session}
                 initialChats={chats.map((chat) => ({
                     ...chat,
-                    messages: reverseArray(chat.messages),
+                    messages: reverseArray(chat.messages ?? []),
                 }))}
             />
         </aside>

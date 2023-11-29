@@ -44,6 +44,10 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
     const currentUserId = session?.user?.id
 
+    useEffect(() => {
+        setChats(initialChats)
+    }, [initialChats])
+
     const {
         data: results,
         refetch,

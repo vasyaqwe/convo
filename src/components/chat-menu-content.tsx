@@ -51,6 +51,9 @@ export function ChatMenuContent({
         onSuccess: (res) => {
             toast.success(res)
             router.refresh()
+            document.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "Escape" })
+            )
         },
         onError: () => {
             toast.error("Something went wrong")
