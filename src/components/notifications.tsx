@@ -2,6 +2,7 @@
 
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
+import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 import type { ExtendedMessage } from "@/types"
 import type { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
@@ -16,6 +17,7 @@ export function Notifications({ session }: NotificationsProps) {
     const pathname = usePathname()
     const router = useRouter()
     const { isTabFocused } = useIsTabFocused()
+    const { setHighlightedMessageId } = useMessageHelpersStore()
 
     function sendNewMessageNotification(newMessage: ExtendedMessage) {
         const notification = new Notification(newMessage.sender.name, {
@@ -28,6 +30,7 @@ export function Notifications({ session }: NotificationsProps) {
             setTimeout(() => {
                 document.getElementById(newMessage.id)?.scrollIntoView()
             }, 200)
+            setHighlightedMessageId(newMessage.id)
         }
     }
 

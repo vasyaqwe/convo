@@ -83,10 +83,13 @@ export const POST = withErrorHandling(async function (req: Request) {
             })
         }
 
-        await pusherServer.trigger(partnerId!, "chat:new-message", {
-            chatId,
-            newMessage,
-        })
+        // if chat is not muted
+        if (!updatedChat.mutedByIds.includes(partnerId!)) {
+            await pusherServer.trigger(partnerId!, "chat:new-message", {
+                chatId,
+                newMessage,
+            })
+        }
     })
 
     return new NextResponse("OK")

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import type { ExtendedChat } from "@/types"
 import { ContextMenuItem } from "@/components/ui/context-menu"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { axiosInstance } from "@/config"
 import { toast } from "sonner"
 import { Loading } from "@/components/ui/loading"
@@ -25,7 +25,6 @@ export function ChatMenuContent({
     ...props
 }: ChatMenuContentProps) {
     const router = useRouter()
-    const queryClient = useQueryClient()
 
     const { isPending, mutate: onDelete } = useMutation({
         mutationFn: async () => {
@@ -35,7 +34,6 @@ export function ChatMenuContent({
             toast.success("Chat deleted")
             router.push("/chats")
             router.refresh()
-            queryClient.invalidateQueries({ queryKey: ["messages"] })
         },
         onError: () => {
             toast.error("Something went wrong")
@@ -53,7 +51,6 @@ export function ChatMenuContent({
         onSuccess: (res) => {
             toast.success(res)
             router.refresh()
-            queryClient.invalidateQueries({ queryKey: ["chats"] })
         },
         onError: () => {
             toast.error("Something went wrong")
