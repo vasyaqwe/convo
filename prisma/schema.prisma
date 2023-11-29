@@ -44,9 +44,11 @@ model User {
   seenMessageIds String[]  @db.ObjectId
   seenMessages   Message[] @relation("SeenBy", fields: [seenMessageIds], references: [id])
 
-  accounts Account[]
-  messages Message[]
-  Reaction Reaction[]
+  accounts  Account[]
+  messages  Message[]
+  reactions Reaction[]
+
+  mutedUserIds String[] @db.ObjectId
 }
 
 model Chat {

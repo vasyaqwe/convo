@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
+import { useEventListener } from "@/hooks/use-event-listener"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn, isRecent } from "@/lib/utils"
 import { type MessagePayload } from "@/lib/validations/message"
@@ -191,17 +192,14 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
         },
     })
 
-    // useEffect(() => {
-    //     return () => {
-    //         refetchEndTyping()
-    //     }
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [])
+    useEventListener("keydown", (e) => {
+        e.key === "Escape" && setIsReplying(false)
+    })
 
     useEffect(() => {
         setTimeout(() => {
             messageBodyRef?.current?.focus()
-        }, 0)
+        }, 1)
     }, [replyTo])
 
     useEffect(() => {
