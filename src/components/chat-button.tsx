@@ -13,15 +13,10 @@ import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 import {
     ContextMenu,
     ContextMenuContent,
-    ContextMenuItem,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { axiosInstance } from "@/config"
-import { toast } from "sonner"
-import { Loading } from "@/components/ui/loading"
-import { Icons } from "@/components/ui/icons"
 import { useContextMenu } from "@/hooks/use-context-menu"
+import { ChatMenuContent } from "@/components/chat-menu-content"
 
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
@@ -46,7 +41,6 @@ export function ChatButton({
     const pathname = usePathname()
     const { setChats } = useTotalMessagesCountStore()
     const router = useRouter()
-    const queryClient = useQueryClient()
 
     const currentUserId = session?.user.id
 
@@ -67,21 +61,6 @@ export function ChatButton({
         setChats(chat.id, unseenCount)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chat, unseenCount])
-
-    const { isPending, mutate: onDelete } = useMutation({
-        mutationFn: async () => {
-            await axiosInstance.delete(`/chat/${chat.id}`)
-        },
-        onSuccess: () => {
-            toast.success("Chat deleted")
-            router.push("/chats")
-            router.refresh()
-            queryClient.invalidateQueries({ queryKey: ["messages"] })
-        },
-        onError: () => {
-            toast.error("Something went wrong")
-        },
-    })
 
     const lastMessage = lastMatchingQueryMessage ?? chatLastMessage
     const isLastMessageSeen =
@@ -172,21 +151,11 @@ export function ChatButton({
                 </button>
             </ContextMenuTrigger>
             <ContextMenuContent>
-                <ContextMenuItem
-                    disabled={isPending}
-                    className="!text-destructive"
-                    onSelect={(e) => {
-                        e.preventDefault()
-                        onDelete()
-                    }}
-                >
-                    {isPending ? (
-                        <Loading className="mr-2" />
-                    ) : (
-                        <Icons.trash className="mr-2" />
-                    )}{" "}
-                    Delete chat
-                </ContextMenuItem>
+                <ChatMenuContent
+                    variant="context-menu"
+                    session={session}
+                    chat={chat}
+                />
             </ContextMenuContent>
         </ContextMenu>
     )

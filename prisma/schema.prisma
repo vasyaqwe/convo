@@ -47,8 +47,6 @@ model User {
   accounts  Account[]
   messages  Message[]
   reactions Reaction[]
-
-  mutedUserIds String[] @db.ObjectId
 }
 
 model Chat {
@@ -62,6 +60,8 @@ model Chat {
 
   userIds String[] @db.ObjectId
   users   User[]   @relation(fields: [userIds], references: [id])
+
+  mutedByIds String[]
 }
 
 model Message {

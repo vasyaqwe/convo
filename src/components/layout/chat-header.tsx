@@ -4,34 +4,27 @@ import {
     DropdownMenu,
     DropdownMenuTrigger,
     DropdownMenuContent,
-    DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import type { ExtendedChat } from "@/types"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-import { axiosInstance } from "@/config"
-import { Loading } from "@/components/ui/loading"
 import Link from "next/link"
-import type { User } from "next-auth"
+import type { Session } from "next-auth"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
 import { useMemo } from "react"
+import { ChatMenuContent } from "@/components/chat-menu-content"
 
 type ChatHeaderProps = {
-    user: User
-    chat: Omit<ExtendedChat, "messages">
+    session: Session | null
+    chat: ExtendedChat
 }
 
-export function ChatHeader({ user, chat }: ChatHeaderProps) {
-    const chatPartner = chat.users.find((u) => u.id !== user.id)!
+export function ChatHeader({ session, chat }: ChatHeaderProps) {
+    const chatPartner = chat.users.find((u) => u.id !== session?.user.id)!
 
-    const queryClient = useQueryClient()
-    const router = useRouter()
     const { chats: chatsMap } = useTotalMessagesCountStore()
 
     const unseenCount = useMemo(() => {
@@ -39,21 +32,6 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
             .filter((mapChat) => mapChat.id !== chat.id)
             .reduce((a, b) => a + b.unseenMessagesCount, 0)
     }, [chatsMap, chat.id])
-
-    const { isPending, mutate: onDelete } = useMutation({
-        mutationFn: async () => {
-            await axiosInstance.delete(`/chat/${chat.id}`)
-        },
-        onSuccess: () => {
-            toast.success("Chat deleted")
-            router.push("/chats")
-            router.refresh()
-            queryClient.invalidateQueries({ queryKey: ["messages"] })
-        },
-        onError: () => {
-            toast.error("Something went wrong")
-        },
-    })
 
     return (
         <ChatHeaderShell>
@@ -97,21 +75,10 @@ export function ChatHeader({ user, chat }: ChatHeaderProps) {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                        disabled={isPending}
-                        className="!text-destructive"
-                        onSelect={(e) => {
-                            e.preventDefault()
-                            onDelete()
-                        }}
-                    >
-                        {isPending ? (
-                            <Loading className="mr-2" />
-                        ) : (
-                            <Icons.trash className="mr-2" />
-                        )}{" "}
-                        Delete chat
-                    </DropdownMenuItem>
+                    <ChatMenuContent
+                        session={session}
+                        chat={chat}
+                    />
                 </DropdownMenuContent>
             </DropdownMenu>
         </ChatHeaderShell>

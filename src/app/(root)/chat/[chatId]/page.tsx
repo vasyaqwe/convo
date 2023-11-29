@@ -58,7 +58,7 @@ export default async function Page({ params: { chatId } }: PageProps) {
         <div className="flex flex-1 flex-col bg-accent">
             <ChatHeader
                 chat={chat}
-                user={session!.user}
+                session={session}
             />
 
             <Chat
