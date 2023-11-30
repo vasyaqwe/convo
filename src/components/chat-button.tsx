@@ -34,8 +34,8 @@ export function ChatButton({
     chat,
     session,
     onClick,
-    lastMessage: lastMatchingQueryMessage,
-    isLastMessageSeen: lastMatchingQueryMessageSeen,
+    lastMessage: lastMatchingSearchQueryMessage,
+    isLastMessageSeen: lastMatchingSearchQueryMessageSeen,
     ...props
 }: ChatButtonProps) {
     const pathname = usePathname()
@@ -62,14 +62,19 @@ export function ChatButton({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chat, unseenCount])
 
-    const lastMessage = lastMatchingQueryMessage ?? chatLastMessage
+    const lastMessage = lastMatchingSearchQueryMessage ?? chatLastMessage
     const isLastMessageSeen =
-        lastMatchingQueryMessageSeen ?? chatLastMessageSeen
+        lastMatchingSearchQueryMessageSeen ?? chatLastMessageSeen
 
-    const lastMessageText =
-        (lastMatchingQueryMessage?.image
-            ? "Sent an image"
-            : lastMessage?.body ?? "Chat started") ?? chatLastMessageText
+    function lastMessageText() {
+        if (lastMessage?.image) {
+            return "Sent an image"
+        } else if (lastMessage?.body) {
+            return lastMessage.body
+        } else {
+            return chatLastMessageText
+        }
+    }
 
     return (
         <ContextMenu>
@@ -85,9 +90,9 @@ export function ChatButton({
                         startTransition(() => {
                             router.push(`/chat/${chat.id}`)
 
-                            if (lastMatchingQueryMessage) {
+                            if (lastMatchingSearchQueryMessage) {
                                 setHighlightedMessageId(
-                                    lastMatchingQueryMessage.id
+                                    lastMatchingSearchQueryMessage.id
                                 )
                             }
 
@@ -128,7 +133,7 @@ export function ChatButton({
                         </div>
                         <div className="mt-1 flex items-center">
                             <p
-                                title={lastMessageText}
+                                title={lastMessageText()}
                                 className={cn(
                                     "mr-1 line-clamp-1 overflow-ellipsis break-all text-sm",
                                     isLastMessageSeen
@@ -136,7 +141,7 @@ export function ChatButton({
                                         : ""
                                 )}
                             >
-                                {lastMessageText}
+                                {lastMessageText()}
                             </p>
                             {unseenCount > 0 && (
                                 <span
