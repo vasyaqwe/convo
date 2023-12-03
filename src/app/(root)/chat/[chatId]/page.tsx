@@ -2,7 +2,7 @@ import { Chat } from "@/components/chat"
 import { MessageForm } from "@/components/forms/message-form"
 import { ChatHeader } from "@/components/layout/chat-header"
 import { getAuthSession } from "@/lib/auth"
-import { addDisplaySender, reverseArray } from "@/lib/utils"
+import { addDisplaySender, isObjectId, reverseArray } from "@/lib/utils"
 import { notFound, redirect } from "next/navigation"
 import {
     MESSAGES_INFINITE_SCROLL_COUNT,
@@ -15,11 +15,6 @@ type PageProps = {
     params: {
         chatId: string
     }
-}
-
-function isObjectId(string: string) {
-    const objectIdRegex = /^[0-9a-fA-F]{24}$/
-    return objectIdRegex.test(string)
 }
 
 export const dynamic = "force-dynamic"

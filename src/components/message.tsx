@@ -4,8 +4,8 @@ import { Icons } from "@/components/ui/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
-import { cn, formatDateToTimestamp } from "@/lib/utils"
-import { type Emoji, type ExtendedMessage } from "@/types"
+import { cn, formatDateToTimestamp, isObjectId } from "@/lib/utils"
+import { type UserType, type Emoji, type ExtendedMessage } from "@/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type Session } from "next-auth"
 import Image from "next/image"
@@ -60,6 +60,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         const router = useRouter()
         const [reactTooltipOpen, setReactTooltipOpen] = useState(false)
         const { triggerRef, onPointerDown, onPointerUp } = useContextMenu()
+        const queryKey = [...messagesQueryKey, message.chatId]
 
         const {
             setReplyTo,
@@ -106,11 +107,15 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             },
             onSuccess: () => {
                 toast.success("Message deleted")
-                queryClient.invalidateQueries({ queryKey: messagesQueryKey })
                 router.refresh()
             },
             onError: () => {
                 toast.error("Something went wrong")
+            },
+            onSettled: async () => {
+                queryClient.invalidateQueries({
+                    queryKey,
+                })
             },
         })
 
@@ -133,6 +138,11 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             onError: () => {
                 toast.error("Couldn't react to message, something went wrong.")
             },
+            onSettled: async () => {
+                return await queryClient.invalidateQueries({
+                    queryKey,
+                })
+            },
         })
 
         const {
@@ -148,9 +158,13 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     }
                 )
             },
-            onError: (e) => {
-                console.log(e)
+            onError: () => {
                 toast.error("Couldn't remove reaction, something went wrong.")
+            },
+            onSettled: async () => {
+                return await queryClient.invalidateQueries({
+                    queryKey,
+                })
             },
         })
 
@@ -275,6 +289,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             <ContextMenu>
                                 <TooltipTrigger asChild>
                                     <ContextMenuTrigger
+                                        disabled={!isObjectId(message.id)}
                                         onClick={(e) => e.preventDefault()}
                                         onDoubleClick={() => {
                                             const isTouchDevice =
@@ -376,63 +391,40 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         )}
                                         <div className="mt-2 flex flex-wrap gap-1 empty:hidden">
                                             {filteredReactions}
-                                            {isAddReactionPending &&
-                                                !message.reactions?.some(
-                                                    (r) =>
-                                                        r.sender.id ===
-                                                            session?.user.id &&
-                                                        r.body ===
-                                                            addedReaction.body
-                                                ) && (
-                                                    <ReactionButton
-                                                        disabled={
-                                                            isAddReactionPending ||
-                                                            isRemoveReactionPending
-                                                        }
-                                                        session={session}
-                                                        reaction={{
-                                                            ...addedReaction,
-                                                            id: "id",
-                                                            sender: {
-                                                                id: session
-                                                                    ?.user.id,
-                                                                image:
-                                                                    session
-                                                                        ?.user
-                                                                        .image ??
-                                                                    "",
-                                                                username:
-                                                                    session
-                                                                        ?.user
-                                                                        .username ??
-                                                                    "",
-                                                                name:
-                                                                    session
-                                                                        ?.user
-                                                                        .name ??
-                                                                    "",
-                                                            },
-                                                        }}
-                                                    />
-                                                )}
+                                            {isAddReactionPending && (
+                                                <ReactionButton
+                                                    disabled={
+                                                        isAddReactionPending ||
+                                                        isRemoveReactionPending
+                                                    }
+                                                    session={session}
+                                                    reaction={{
+                                                        ...addedReaction,
+                                                        id: "id",
+                                                        sender: session?.user as UserType,
+                                                    }}
+                                                />
+                                            )}
                                         </div>
                                     </ContextMenuTrigger>
                                 </TooltipTrigger>
-                                <TooltipContent
-                                    className="bg-transparent p-0"
-                                    align={isOwn ? "start" : "end"}
-                                    alignOffset={-20}
-                                    side="bottom"
-                                    sideOffset={-12}
-                                >
-                                    <EmojiPicker
-                                        onEmojiClick={(emoji) =>
-                                            onReact({
-                                                body: emoji,
-                                            })
-                                        }
-                                    />
-                                </TooltipContent>
+                                {isObjectId(message.id) && (
+                                    <TooltipContent
+                                        className="bg-transparent p-0"
+                                        align={isOwn ? "start" : "end"}
+                                        alignOffset={-20}
+                                        side="bottom"
+                                        sideOffset={-12}
+                                    >
+                                        <EmojiPicker
+                                            onEmojiClick={(emoji) =>
+                                                onReact({
+                                                    body: emoji,
+                                                })
+                                            }
+                                        />
+                                    </TooltipContent>
+                                )}
                                 <ContextMenuContent>
                                     {message.senderId === session?.user.id ? (
                                         <>

@@ -9,7 +9,7 @@ import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { pusherClient } from "@/lib/pusher"
-import { addDisplaySender, cn, groupByDate, reverseArray } from "@/lib/utils"
+import { addDisplaySender, cn, groupByDate } from "@/lib/utils"
 import {
     messagesQueryKey,
     useMessageHelpersStore,
@@ -51,7 +51,6 @@ export function Chat({
             },
             initialPageParam: 1,
             refetchOnWindowFocus: false,
-            enabled: false,
             refetchOnReconnect: false,
             getNextPageParam: (lastPage, allPages) => {
                 return lastPage.length ? allPages.length + 1 : undefined
@@ -62,10 +61,7 @@ export function Chat({
     const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
-    const reversedPages = reverseArray(
-        data.pages.filter((page) => page.length !== 0)
-    )
-    const messages = reversedPages?.flat()
+    const messages = data.pages.filter((page) => page.length !== 0)?.flat()
 
     const [typingUsers, setTypingUsers] = useState<UserType[]>([])
 
