@@ -93,7 +93,7 @@ export function reverseArray<T>(arr: T[]) {
     return reversed
 }
 
-export function addDisplaySender(messages: ExtendedMessage[]) {
+export function addIsRecent(messages: ExtendedMessage[]) {
     let prevSenderId: string | null = null
     let prevMessageTimestamp: number | null = null
 
@@ -102,15 +102,15 @@ export function addDisplaySender(messages: ExtendedMessage[]) {
             const currentTimestamp = new Date(message.createdAt).getTime()
             const timeDiff = currentTimestamp - prevMessageTimestamp!
             if (isRecent(timeDiff)) {
-                message.displaySender = false
+                message.isRecent = true
             } else {
-                message.displaySender = true
+                message.isRecent = false
             }
             prevMessageTimestamp = currentTimestamp // Update timestamp
         } else {
             prevSenderId = message.senderId
             prevMessageTimestamp = new Date(message.createdAt).getTime()
-            message.displaySender = true
+            message.isRecent = false
         }
         return message
     })
@@ -135,7 +135,7 @@ export function groupByDate<T extends { createdAt: Date }>(arr: T[]) {
         const currentDate = formatDate(item.createdAt, "long", false)
         if (currentDate !== prevDate) {
             prevDate = currentDate
-            return { ...item, dateAbove: currentDate, displaySender: true }
+            return { ...item, dateAbove: currentDate, isRecent: false }
         }
         return item
     }) as (T & { dateAbove: string | undefined })[]

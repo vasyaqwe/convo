@@ -253,7 +253,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         isOwn ? "ml-auto flex flex-col items-end" : "mr-auto"
                     )}
                 >
-                    {message.displaySender && (
+                    {!message.isRecent && (
                         <p className={cn(isOwn ? "text-right" : "text-left")}>
                             {isOwn ? (
                                 <>
@@ -306,7 +306,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                             isOwn
                                                 ? "rounded-tr-none"
                                                 : "rounded-tl-none",
-                                            !message.displaySender
+                                            message.isRecent
                                                 ? isOwn
                                                     ? "md:mr-[calc(var(--avatar-size)+var(--message-gap))]"
                                                     : "md:ml-[calc(var(--avatar-size)+var(--message-gap))]"
@@ -375,7 +375,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                                 )}
                                             />
                                         )}
-                                        {!message.displaySender && (
+                                        {message.isRecent && (
                                             <Date
                                                 className={cn(
                                                     "pointer-events-none absolute top-0 whitespace-nowrap text-xs text-foreground/75 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 max-md:hidden",
@@ -489,7 +489,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         </p>
                     )}
                 </div>
-                {message.displaySender && (
+                {!message.isRecent && (
                     <UserAvatar
                         className="max-md:hidden"
                         user={message.sender}

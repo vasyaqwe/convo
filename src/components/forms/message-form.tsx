@@ -134,10 +134,10 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                                               username:
                                                   session.user.username ?? "",
                                           },
-                                          displaySender:
+                                          isRecent:
                                               messages.length === 0
-                                                  ? true
-                                                  : !isRecent(timeDiff) ||
+                                                  ? false
+                                                  : isRecent(timeDiff) ||
                                                     lastMessage?.senderId !==
                                                         session.user.id,
                                           seenBy: [],

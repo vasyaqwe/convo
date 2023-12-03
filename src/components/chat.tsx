@@ -9,7 +9,7 @@ import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { pusherClient } from "@/lib/pusher"
-import { addDisplaySender, cn, groupByDate } from "@/lib/utils"
+import { addIsRecent, cn, groupByDate } from "@/lib/utils"
 import {
     messagesQueryKey,
     useMessageHelpersStore,
@@ -183,7 +183,7 @@ export function Chat({
                             pages: prev.pages.map((page, idx, arr) =>
                                 idx === arr.length - 1 &&
                                 !page.some((m) => m.id === newMessage.id)
-                                    ? addDisplaySender([...page, newMessage])
+                                    ? addIsRecent([...page, newMessage])
                                     : page
                             ),
                         }
@@ -202,7 +202,7 @@ export function Chat({
                     ...prev,
                     pages: prev.pages.map((page, idx, arr) =>
                         idx === arr.length - 1
-                            ? addDisplaySender(
+                            ? addIsRecent(
                                   page.map((oldMessage) => {
                                       if (oldMessage.id === newMessage.id)
                                           return newMessage
@@ -221,7 +221,7 @@ export function Chat({
                     ...prev,
                     pages: prev.pages.map((page, idx, arr) =>
                         idx === arr.length - 1
-                            ? addDisplaySender(
+                            ? addIsRecent(
                                   page.filter(
                                       (message) =>
                                           message.id !== deletedMessageId

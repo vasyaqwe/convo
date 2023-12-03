@@ -6,7 +6,7 @@ export type UserType = Pick<User, "name" | "username" | "id" | "image">
 export type ExtendedMessage = Message & {
     sender: UserType
     seenBy: UserType[]
-    displaySender?: boolean
+    isRecent?: boolean
     reactions?: ExtendedReaction[]
     replyTo:
         | (Message & {

@@ -1,6 +1,6 @@
 import { MESSAGE_INCLUDE } from "@/config"
 import { db } from "@/lib/db"
-import { addDisplaySender, reverseArray, withErrorHandling } from "@/lib/utils"
+import { addIsRecent, reverseArray, withErrorHandling } from "@/lib/utils"
 import { messagesQuerySchema } from "@/lib/validations/message"
 import { NextResponse } from "next/server"
 
@@ -25,7 +25,5 @@ export const GET = withErrorHandling(async function (req: Request) {
         include: MESSAGE_INCLUDE,
     })
 
-    return new NextResponse(
-        JSON.stringify(addDisplaySender(reverseArray(messages)))
-    )
+    return new NextResponse(JSON.stringify(addIsRecent(reverseArray(messages))))
 })
