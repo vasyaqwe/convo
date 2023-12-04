@@ -50,6 +50,6 @@ export const useMessageHelpersStore = create<StoreState>()((set) => ({
                 `0px`
             )
         }
-        set(() => ({ isReplying }))
+        set(() => ({ isReplying: isReplying }))
     },
 }))
