@@ -5,9 +5,12 @@ import reactions from "@public/images/reactions.png"
 import replies from "@public/images/replies.png"
 import { Button } from "@/components/ui/button"
 import { getAuthSession } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 export default async function Page() {
     const session = await getAuthSession()
+
+    if (session) redirect("/chats")
 
     return (
         <section className="flex-1 px-10 py-10 md:grid md:place-content-center md:py-20">
@@ -60,18 +63,11 @@ export default async function Page() {
                 but also messages. <br /> Reactions, and replies.
             </p>
             <div className="mt-10 flex items-center justify-center gap-4">
-                {!session && (
-                    <Button
-                        variant={"secondary"}
-                        asChild
-                    >
-                        <Link href={"/sign-in"}>Sign in</Link>
-                    </Button>
-                )}
-                <Button asChild>
-                    <Link href={session ? "/chats" : "/sign-up"}>
-                        Start messaging
-                    </Link>
+                <Button
+                    variant={"secondary"}
+                    asChild
+                >
+                    <Link href={"/sign-in"}>Sign in</Link>
                 </Button>
             </div>
         </section>
