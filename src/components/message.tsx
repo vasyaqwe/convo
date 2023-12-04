@@ -391,20 +391,27 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         )}
                                         <div className="mt-2 flex flex-wrap gap-1 empty:hidden">
                                             {filteredReactions}
-                                            {isAddReactionPending && (
-                                                <ReactionButton
-                                                    disabled={
-                                                        isAddReactionPending ||
-                                                        isRemoveReactionPending
-                                                    }
-                                                    session={session}
-                                                    reaction={{
-                                                        ...addedReaction,
-                                                        id: "id",
-                                                        sender: session?.user as UserType,
-                                                    }}
-                                                />
-                                            )}
+                                            {isAddReactionPending &&
+                                                !message.reactions?.some(
+                                                    (r) =>
+                                                        r.sender.id ===
+                                                            session?.user.id &&
+                                                        r.body ===
+                                                            addedReaction.body
+                                                ) && (
+                                                    <ReactionButton
+                                                        disabled={
+                                                            isAddReactionPending ||
+                                                            isRemoveReactionPending
+                                                        }
+                                                        session={session}
+                                                        reaction={{
+                                                            ...addedReaction,
+                                                            id: "id",
+                                                            sender: session?.user as UserType,
+                                                        }}
+                                                    />
+                                                )}
                                         </div>
                                     </ContextMenuTrigger>
                                 </TooltipTrigger>
