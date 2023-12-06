@@ -180,8 +180,8 @@ export function Chat({
                     updateMessages((prev) => {
                         return {
                             ...prev,
-                            pages: prev.pages.map((page, idx, arr) =>
-                                idx === arr.length - 1 &&
+                            pages: prev.pages.map((page, idx) =>
+                                idx === 0 &&
                                 !page.some((m) => m.id === newMessage.id)
                                     ? addIsRecent([...page, newMessage])
                                     : page
@@ -200,8 +200,8 @@ export function Chat({
             updateMessages((prev) => {
                 return {
                     ...prev,
-                    pages: prev.pages.map((page, idx, arr) =>
-                        idx === arr.length - 1
+                    pages: prev.pages.map((page, idx) =>
+                        idx === 0
                             ? addIsRecent(
                                   page.map((oldMessage) => {
                                       if (oldMessage.id === newMessage.id)
