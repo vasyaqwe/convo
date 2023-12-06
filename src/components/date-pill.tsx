@@ -21,9 +21,9 @@ export function DatePill({
         messagesWidthDatesIds[messagesWidthDatesIds.length - 1] === messageId
 
     const ref = useRef<HTMLParagraphElement | null>(null)
-    const [isSticking, setIsSticking] = useState(false)
+    const [isSticking, setIsSticking] = useState(true)
     const [y, setY] = useState(wrapperRef.current?.scrollHeight ?? 0)
-    const [scrollDirection, setScrollDirection] = useState("up")
+    const [scrollDirection, setScrollDirection] = useState("down")
 
     useEffect(() => {
         const wrapper = wrapperRef.current

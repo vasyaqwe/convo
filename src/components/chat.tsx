@@ -61,7 +61,11 @@ export function Chat({
     const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
-    const messages = data.pages.filter((page) => page.length !== 0)?.flat()
+    const messages = groupByDate(
+        addIsRecent(
+            reverseArray(data.pages.filter((page) => page.length !== 0)?.flat())
+        )
+    )
 
     useEffect(() => {
         if (data?.pages) {
@@ -250,38 +254,12 @@ export function Chat({
                     No history yet.
                 </p>
             ) : (
-                groupByDate(addIsRecent(reverseArray(messages))).map(
-                    (message, idx, array) => {
-                        const messagesWidthDatesIds = array
-                            .filter((m) => m.dateAbove)
-                            .map((m) => m.id)
+                messages.map((message, idx, array) => {
+                    const messagesWidthDatesIds = array
+                        .filter((m) => m.dateAbove)
+                        .map((m) => m.id)
 
-                        if (idx === 3) {
-                            return (
-                                <React.Fragment key={message.id}>
-                                    {message.dateAbove && (
-                                        <DatePill
-                                            messagesWidthDatesIds={
-                                                messagesWidthDatesIds
-                                            }
-                                            messageId={message.id}
-                                            wrapperRef={wrapperRef}
-                                        >
-                                            {message.dateAbove}
-                                        </DatePill>
-                                    )}
-                                    <Message
-                                        wrapperRef={wrapperRef}
-                                        isTabFocused={isTabFocused}
-                                        isLast={messages.length === 4}
-                                        session={session}
-                                        message={message}
-                                        ref={ref}
-                                    />
-                                </React.Fragment>
-                            )
-                        }
-
+                    if (idx === 3) {
                         return (
                             <React.Fragment key={message.id}>
                                 {message.dateAbove && (
@@ -298,14 +276,38 @@ export function Chat({
                                 <Message
                                     wrapperRef={wrapperRef}
                                     isTabFocused={isTabFocused}
-                                    isLast={idx === messages.length - 1}
+                                    isLast={messages.length === 4}
                                     session={session}
                                     message={message}
+                                    ref={ref}
                                 />
                             </React.Fragment>
                         )
                     }
-                )
+
+                    return (
+                        <React.Fragment key={message.id}>
+                            {message.dateAbove && (
+                                <DatePill
+                                    messagesWidthDatesIds={
+                                        messagesWidthDatesIds
+                                    }
+                                    messageId={message.id}
+                                    wrapperRef={wrapperRef}
+                                >
+                                    {message.dateAbove}
+                                </DatePill>
+                            )}
+                            <Message
+                                wrapperRef={wrapperRef}
+                                isTabFocused={isTabFocused}
+                                isLast={idx === messages.length - 1}
+                                session={session}
+                                message={message}
+                            />
+                        </React.Fragment>
+                    )
+                })
             )}
         </div>
     )
