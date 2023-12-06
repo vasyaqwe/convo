@@ -61,11 +61,7 @@ export function Chat({
     const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
-    const messages = groupByDate(
-        addIsRecent(
-            reverseArray(data.pages.filter((page) => page.length !== 0)?.flat())
-        )
-    )
+    const messages = groupByDate(addIsRecent(reverseArray(data.pages?.flat())))
 
     useEffect(() => {
         if (data?.pages) {
@@ -180,6 +176,13 @@ export function Chat({
             if (newMessage.senderId !== currentUserId) {
                 flushSync(() => {
                     updateMessages((prev) => {
+                        if (
+                            prev.pages
+                                .flat()
+                                .some((m) => m.id === newMessage.id)
+                        )
+                            return prev
+
                         const newData = prev.pages.flatMap((messages) => [
                             newMessage,
                             ...messages,
@@ -188,7 +191,8 @@ export function Chat({
                         return {
                             ...prev,
                             pages: chunk(
-                                newData,
+                                //remove last item due to adding new one
+                                newData.slice(0, -1),
                                 MESSAGES_INFINITE_SCROLL_COUNT
                             ),
                         }
