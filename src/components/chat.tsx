@@ -195,9 +195,11 @@ export function Chat({
                     })
                 })
 
-                wrapperRef.current?.lastElementChild?.scrollIntoView({
-                    behavior: "smooth",
-                })
+                setTimeout(() => {
+                    wrapperRef.current?.lastElementChild?.scrollIntoView({
+                        behavior: "smooth",
+                    })
+                }, 50)
             }
         }
 
