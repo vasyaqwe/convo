@@ -14,14 +14,14 @@ import {
     messagesQueryKey,
     useMessageHelpersStore,
 } from "@/stores/use-message-helpers-store.tsx"
-import type { ExtendedMessage, UserType } from "@/types"
+import type { ExtendedMessage } from "@/types"
 import {
     type InfiniteData,
     useInfiniteQuery,
     useQueryClient,
 } from "@tanstack/react-query"
 import type { Session } from "next-auth"
-import React, { forwardRef, useEffect, useRef, useState } from "react"
+import React, { forwardRef, useEffect, useRef } from "react"
 import { flushSync } from "react-dom"
 
 type ChatProps = {
@@ -64,8 +64,6 @@ export function Chat({
     const messages = reverseArray(
         data.pages.filter((page) => page.length !== 0)
     )?.flat()
-
-    const [typingUsers, setTypingUsers] = useState<UserType[]>([])
 
     useEffect(() => {
         if (data?.pages) {
@@ -235,46 +233,18 @@ export function Chat({
             })
         }
 
-        function onStartTyping({ typingUser }: { typingUser: UserType }) {
-            setTypingUsers((prev) => {
-                if (prev.some((u) => u.id === typingUser.id)) {
-                    return prev
-                }
-
-                return [...prev, typingUser]
-            })
-        }
-
-        function onEndTyping({ typingUser }: { typingUser: UserType }) {
-            setTypingUsers((prev) => prev.filter((u) => u.id !== typingUser.id))
-        }
-
-        pusherClient.bind("chat:start-typing", onStartTyping)
-        pusherClient.bind("chat:end-typing", onEndTyping)
         pusherClient.bind("message:new", onNewMessage)
         pusherClient.bind("message:update", onUpdateMessage)
         pusherClient.bind("message:delete", onDeleteMessage)
 
         return () => {
             pusherClient.unsubscribe(chatId)
-            pusherClient.unbind("chat:start-typing", onStartTyping)
-            pusherClient.unbind("chat:end-typing", onEndTyping)
             pusherClient.unbind("message:new", onNewMessage)
             pusherClient.unbind("message:update", onUpdateMessage)
             pusherClient.unbind("message:delete", onDeleteMessage)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId])
-
-    const filteredTypingUsers = typingUsers.filter(
-        (u) => u.id !== currentUserId
-    )
-
-    const typingUsersList = `${filteredTypingUsers
-        .map((u) => u.name)
-        .join(", ")} ${
-        filteredTypingUsers.length === 1 ? "is" : "are"
-    } typing...`
 
     return (
         <div
@@ -345,16 +315,6 @@ export function Chat({
                         </React.Fragment>
                     )
                 })
-            )}
-            {filteredTypingUsers.length > 0 && (
-                <div className="relative h-full ">
-                    <p
-                        className={cn(`absolute -bottom-[calc(var(--chat-padding-block)-0.5rem)] left-0
-            px-4 text-xs text-foreground/70`)}
-                    >
-                        {typingUsersList}
-                    </p>
-                </div>
             )}
         </div>
     )

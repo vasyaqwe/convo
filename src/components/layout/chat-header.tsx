@@ -6,7 +6,7 @@ import {
     DropdownMenuContent,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/ui/user-avatar"
-import type { ExtendedChat } from "@/types"
+import type { ExtendedChat, UserType } from "@/types"
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -14,8 +14,10 @@ import type { Session } from "next-auth"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ChatMenuContent } from "@/components/chat-menu-content"
+import { pusherClient } from "@/lib/pusher"
+import { Loading } from "@/components/ui/loading"
 
 type ChatHeaderProps = {
     session: Session | null
@@ -23,6 +25,7 @@ type ChatHeaderProps = {
 }
 
 export function ChatHeader({ session, chat }: ChatHeaderProps) {
+    const [typingUsers, setTypingUsers] = useState<UserType[]>([])
     const chatPartner = chat.users.find((u) => u.id !== session?.user.id)!
 
     const { chats: chatsMap } = useTotalMessagesCountStore()
@@ -32,6 +35,37 @@ export function ChatHeader({ session, chat }: ChatHeaderProps) {
             .filter((mapChat) => mapChat.id !== chat.id)
             .reduce((a, b) => a + b.unseenMessagesCount, 0)
     }, [chatsMap, chat.id])
+
+    useEffect(() => {
+        pusherClient.subscribe(chat.id)
+
+        function onStartTyping({ typingUser }: { typingUser: UserType }) {
+            setTypingUsers((prev) => {
+                if (prev.some((u) => u.id === typingUser.id)) {
+                    return prev
+                }
+
+                return [...prev, typingUser]
+            })
+        }
+
+        function onEndTyping({ typingUser }: { typingUser: UserType }) {
+            setTypingUsers((prev) => prev.filter((u) => u.id !== typingUser.id))
+        }
+
+        pusherClient.bind("chat:start-typing", onStartTyping)
+        pusherClient.bind("chat:end-typing", onEndTyping)
+
+        return () => {
+            pusherClient.unsubscribe(chat.id)
+            pusherClient.unbind("chat:start-typing", onStartTyping)
+            pusherClient.unbind("chat:end-typing", onEndTyping)
+        }
+    }, [chat.id])
+
+    const filteredTypingUsers = typingUsers.filter(
+        (u) => u.id !== session?.user.id
+    )
 
     return (
         <ChatHeaderShell>
@@ -60,9 +94,22 @@ export function ChatHeader({ session, chat }: ChatHeaderProps) {
                 <UserAvatar user={chatPartner} />
                 <div>
                     <p>{chatPartner.name} </p>
-                    <p className="text-sm text-foreground/75 md:mt-0.5">
-                        @{chatPartner.username}
-                    </p>
+
+                    {filteredTypingUsers.length > 0 ? (
+                        <p className={cn(`text-sm text-foreground/70 `)}>
+                            {filteredTypingUsers.some(
+                                (u) => u.id === chatPartner.id
+                            )
+                                ? "typing"
+                                : ""}
+                            <Loading className="ml-2 align-middle" />
+                        </p>
+                    ) : (
+                        <p className="text-sm text-foreground/75">
+                            @{chatPartner.username}
+                            <Loading className="invisible ml-2 align-middle" />
+                        </p>
+                    )}
                 </div>
             </div>
             <DropdownMenu>

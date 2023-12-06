@@ -105,7 +105,9 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
 
             if (session?.user) {
                 const messages = prevData.pages.flat()
-                const lastMessage = messages[messages.length - 1]
+                const lastPage = prevData.pages[0]
+                const lastMessage = lastPage?.[lastPage.length - 1]
+
                 const prevTimestamp = new Date(
                     lastMessage?.createdAt ?? new Date()
                 ).getTime()
@@ -118,8 +120,8 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                     queryKey,
                     {
                         ...prevData,
-                        pages: prevData.pages.map((page, idx, arr) =>
-                            idx === arr.length - 1
+                        pages: prevData.pages.map((page, idx) =>
+                            idx === 0
                                 ? [
                                       ...page,
                                       {
@@ -135,11 +137,11 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                                                   session.user.username ?? "",
                                           },
                                           isRecent:
-                                              messages.length === 0
+                                              messages.length === 0 ||
+                                              lastMessage?.senderId !==
+                                                  session.user.id
                                                   ? false
-                                                  : isRecent(timeDiff) ||
-                                                    lastMessage?.senderId !==
-                                                        session.user.id,
+                                                  : isRecent(timeDiff),
                                           seenBy: [],
                                           seenByIds: [],
                                           senderId: session.user.id,
