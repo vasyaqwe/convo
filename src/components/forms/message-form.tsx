@@ -105,8 +105,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
 
             if (session?.user) {
                 const messages = prevData.pages.flat()
-                const lastPage = prevData.pages[0]
-                const lastMessage = lastPage?.[lastPage.length - 1]
+                const lastMessage = prevData.pages?.[0]?.[0]
 
                 const prevTimestamp = new Date(
                     lastMessage?.createdAt ?? new Date()
@@ -123,7 +122,6 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                         pages: prevData.pages.map((page, idx) =>
                             idx === 0
                                 ? [
-                                      ...page,
                                       {
                                           body: sentMessage.body ?? null,
                                           chatId,
@@ -156,6 +154,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                                                   ? replyTo.id
                                                   : null,
                                       },
+                                      ...page,
                                   ]
                                 : page
                         ),

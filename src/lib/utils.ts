@@ -93,10 +93,19 @@ export function reverseArray<T>(arr: T[]) {
     return reversed
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function chunk(arr: any[], chunkSize: number) {
+    const chunkedArr = []
+    for (let i = 0; i < arr.length; i += chunkSize) {
+        const chunk = arr.slice(i, i + chunkSize)
+        chunkedArr.push(chunk)
+    }
+    return chunkedArr
+}
+
 export function addIsRecent(messages: ExtendedMessage[]) {
     let prevSenderId: string | null = null
     let prevMessageTimestamp: number | null = null
-
     const newMessages = [...messages].map((message) => {
         if (message.senderId === prevSenderId) {
             const currentTimestamp = new Date(message.createdAt).getTime()

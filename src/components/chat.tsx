@@ -9,7 +9,7 @@ import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { pusherClient } from "@/lib/pusher"
-import { addIsRecent, cn, groupByDate, reverseArray } from "@/lib/utils"
+import { addIsRecent, chunk, cn, groupByDate, reverseArray } from "@/lib/utils"
 import {
     messagesQueryKey,
     useMessageHelpersStore,
@@ -61,9 +61,7 @@ export function Chat({
     const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
-    const messages = reverseArray(
-        data.pages.filter((page) => page.length !== 0)
-    )?.flat()
+    const messages = data.pages.filter((page) => page.length !== 0)?.flat()
 
     useEffect(() => {
         if (data?.pages) {
@@ -79,7 +77,7 @@ export function Chat({
                     const prevPage = data.pages[data.pages.length - 2]
                     if (prevPage && prevPage[0]) {
                         const prevPageFirstMessage = document.getElementById(
-                            prevPage[0].id
+                            prevPage[prevPage.length - 1]?.id ?? ""
                         )
                         prevPageFirstMessage?.scrollIntoView()
                     }
@@ -178,13 +176,16 @@ export function Chat({
             if (newMessage.senderId !== currentUserId) {
                 flushSync(() => {
                     updateMessages((prev) => {
+                        const newData = prev.pages.flatMap((messages) => [
+                            newMessage,
+                            ...messages,
+                        ])
+
                         return {
                             ...prev,
-                            pages: prev.pages.map((page, idx) =>
-                                idx === 0 &&
-                                !page.some((m) => m.id === newMessage.id)
-                                    ? addIsRecent([...page, newMessage])
-                                    : page
+                            pages: chunk(
+                                newData,
+                                MESSAGES_INFINITE_SCROLL_COUNT
                             ),
                         }
                     })
@@ -198,37 +199,25 @@ export function Chat({
 
         function onUpdateMessage(newMessage: ExtendedMessage) {
             updateMessages((prev) => {
+                const newData = prev.pages.flatMap((messages) =>
+                    messages.map((m) =>
+                        m.id === newMessage.id ? newMessage : m
+                    )
+                )
                 return {
                     ...prev,
-                    pages: prev.pages.map((page, idx) =>
-                        idx === 0
-                            ? addIsRecent(
-                                  page.map((oldMessage) => {
-                                      if (oldMessage.id === newMessage.id)
-                                          return newMessage
-                                      return oldMessage
-                                  })
-                              )
-                            : page
-                    ),
+                    pages: chunk(newData, MESSAGES_INFINITE_SCROLL_COUNT),
                 }
             })
         }
-
         function onDeleteMessage(deletedMessageId: string) {
             updateMessages((prev) => {
+                const newData = prev.pages.flatMap((messages) =>
+                    messages.filter((m) => m.id !== deletedMessageId)
+                )
                 return {
                     ...prev,
-                    pages: prev.pages.map((page, idx, arr) =>
-                        idx === arr.length - 1
-                            ? addIsRecent(
-                                  page.filter(
-                                      (message) =>
-                                          message.id !== deletedMessageId
-                                  )
-                              )
-                            : page
-                    ),
+                    pages: chunk(newData, MESSAGES_INFINITE_SCROLL_COUNT),
                 }
             })
         }
@@ -261,12 +250,38 @@ export function Chat({
                     No history yet.
                 </p>
             ) : (
-                groupByDate(messages).map((message, idx, array) => {
-                    const messagesWidthDatesIds = array
-                        .filter((m) => m.dateAbove)
-                        .map((m) => m.id)
+                groupByDate(addIsRecent(reverseArray(messages))).map(
+                    (message, idx, array) => {
+                        const messagesWidthDatesIds = array
+                            .filter((m) => m.dateAbove)
+                            .map((m) => m.id)
 
-                    if (idx === 3) {
+                        if (idx === 3) {
+                            return (
+                                <React.Fragment key={message.id}>
+                                    {message.dateAbove && (
+                                        <DatePill
+                                            messagesWidthDatesIds={
+                                                messagesWidthDatesIds
+                                            }
+                                            messageId={message.id}
+                                            wrapperRef={wrapperRef}
+                                        >
+                                            {message.dateAbove}
+                                        </DatePill>
+                                    )}
+                                    <Message
+                                        wrapperRef={wrapperRef}
+                                        isTabFocused={isTabFocused}
+                                        isLast={messages.length === 4}
+                                        session={session}
+                                        message={message}
+                                        ref={ref}
+                                    />
+                                </React.Fragment>
+                            )
+                        }
+
                         return (
                             <React.Fragment key={message.id}>
                                 {message.dateAbove && (
@@ -283,38 +298,14 @@ export function Chat({
                                 <Message
                                     wrapperRef={wrapperRef}
                                     isTabFocused={isTabFocused}
-                                    isLast={messages.length === 4}
+                                    isLast={idx === messages.length - 1}
                                     session={session}
                                     message={message}
-                                    ref={ref}
                                 />
                             </React.Fragment>
                         )
                     }
-
-                    return (
-                        <React.Fragment key={message.id}>
-                            {message.dateAbove && (
-                                <DatePill
-                                    messagesWidthDatesIds={
-                                        messagesWidthDatesIds
-                                    }
-                                    messageId={message.id}
-                                    wrapperRef={wrapperRef}
-                                >
-                                    {message.dateAbove}
-                                </DatePill>
-                            )}
-                            <Message
-                                wrapperRef={wrapperRef}
-                                isTabFocused={isTabFocused}
-                                isLast={idx === messages.length - 1}
-                                session={session}
-                                message={message}
-                            />
-                        </React.Fragment>
-                    )
-                })
+                )
             )}
         </div>
     )

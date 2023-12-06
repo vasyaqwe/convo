@@ -2,7 +2,7 @@ import { Chat } from "@/components/chat"
 import { MessageForm } from "@/components/forms/message-form"
 import { ChatHeader } from "@/components/layout/chat-header"
 import { getAuthSession } from "@/lib/auth"
-import { addIsRecent, isObjectId, reverseArray } from "@/lib/utils"
+import { isObjectId } from "@/lib/utils"
 import { notFound, redirect } from "next/navigation"
 import {
     MESSAGES_INFINITE_SCROLL_COUNT,
@@ -58,7 +58,7 @@ export default async function Page({ params: { chatId } }: PageProps) {
 
             <Chat
                 chatPartnerName={chatPartnerName}
-                initialMessages={addIsRecent(reverseArray(chat.messages ?? []))}
+                initialMessages={chat.messages ?? []}
                 session={session}
                 chatId={chatId}
             />
