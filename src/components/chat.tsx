@@ -9,7 +9,7 @@ import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { pusherClient } from "@/lib/pusher"
-import { addIsRecent, cn, groupByDate } from "@/lib/utils"
+import { addIsRecent, cn, groupByDate, reverseArray } from "@/lib/utils"
 import {
     messagesQueryKey,
     useMessageHelpersStore,
@@ -61,7 +61,9 @@ export function Chat({
     const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
-    const messages = data.pages.filter((page) => page.length !== 0)?.flat()
+    const messages = reverseArray(
+        data.pages.filter((page) => page.length !== 0)
+    )?.flat()
 
     const [typingUsers, setTypingUsers] = useState<UserType[]>([])
 
