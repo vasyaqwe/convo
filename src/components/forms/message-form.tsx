@@ -198,12 +198,6 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     })
 
     useEffect(() => {
-        setTimeout(() => {
-            messageBodyRef?.current?.focus()
-        }, 1)
-    }, [replyTo])
-
-    useEffect(() => {
         if (debouncedBody.length === 0) return
 
         refetchEndTyping()
@@ -212,6 +206,14 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     }, [debouncedBody])
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            messageBodyRef.current?.focus()
+        }, 100)
+
+        return () => clearTimeout(timeout)
+    }, [replyTo, isReplying])
 
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === "Backspace") {

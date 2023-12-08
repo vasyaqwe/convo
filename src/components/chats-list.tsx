@@ -8,6 +8,7 @@ import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useDynamicMetadata } from "@/hooks/use-dynamic-metadata"
 import { pusherClient } from "@/lib/pusher"
+import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 import { useTotalMessagesCountStore } from "@/stores/use-total-messages-count-store"
 import type { ExtendedChat, ExtendedMessage, SearchQueryMessage } from "@/types"
 import type { User } from "@prisma/client"
@@ -39,8 +40,14 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
 
     const router = useRouter()
     const pathname = usePathname()
+    const { setIsReplying } = useMessageHelpersStore()
     const { chats: chatsMap, removeChat: removeChatFromTotalMessagesCount } =
         useTotalMessagesCountStore()
+
+    useEffect(() => {
+        setIsReplying(false)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pathname])
 
     const currentUserId = session?.user?.id
 
