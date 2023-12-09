@@ -415,6 +415,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         </div>
                                     </ContextMenuTrigger>
                                 </TooltipTrigger>
+                                {/* check for optimistic message */}
                                 {isObjectId(message.id) && (
                                     <TooltipContent
                                         className="bg-transparent p-0"
@@ -433,29 +434,35 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                     </TooltipContent>
                                 )}
                                 <ContextMenuContent>
-                                    {message.senderId === session?.user.id ? (
-                                        <>
-                                            <ContextMenuItem
-                                                disabled={isPending}
-                                                className="!text-destructive"
-                                                onSelect={(e) => {
-                                                    e.preventDefault()
-                                                    onDelete()
-                                                }}
-                                            >
-                                                {isPending ? (
-                                                    <Loading className="mr-2" />
-                                                ) : (
-                                                    <Icons.trash className="mr-2" />
-                                                )}{" "}
-                                                Delete message
-                                            </ContextMenuItem>
-                                        </>
+                                    {message.senderId === session?.user.id &&
+                                    message.replies.length < 1 ? (
+                                        <ContextMenuItem
+                                            disabled={isPending}
+                                            className="!text-destructive"
+                                            onSelect={(e) => {
+                                                e.preventDefault()
+                                                onDelete()
+                                            }}
+                                        >
+                                            {isPending ? (
+                                                <Loading className="mr-2" />
+                                            ) : (
+                                                <Icons.trash className="mr-2" />
+                                            )}{" "}
+                                            Delete message
+                                        </ContextMenuItem>
                                     ) : (
                                         <ContextMenuItem
                                             onSelect={() => {
                                                 setIsReplying(true)
                                                 setReplyTo(message)
+                                                setTimeout(() => {
+                                                    document
+                                                        .getElementById(
+                                                            "message-input"
+                                                        )
+                                                        ?.focus()
+                                                }, 0)
                                             }}
                                         >
                                             <Icons.reply className="mr-2" />

@@ -125,7 +125,7 @@ export function ChatButton({
                             >
                                 {user.name}
                             </p>
-                            {lastMessage && (
+                            {lastMessage?.createdAt && (
                                 <Date className="flex-shrink-0 text-xs text-foreground/60">
                                     {formatDate(lastMessage.createdAt, "short")}
                                 </Date>

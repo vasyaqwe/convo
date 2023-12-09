@@ -145,6 +145,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
                                           senderId: session.user.id,
                                           createdAt: currentTime,
                                           updatedAt: currentTime,
+                                          replies: [],
                                           replyTo:
                                               isReplying && replyTo
                                                   ? replyTo
@@ -206,14 +207,6 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     }, [debouncedBody])
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            messageBodyRef.current?.focus()
-        }, 100)
-
-        return () => clearTimeout(timeout)
-    }, [replyTo, isReplying])
 
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === "Backspace") {

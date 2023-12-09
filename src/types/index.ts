@@ -13,6 +13,9 @@ export type ExtendedMessage = Message & {
               sender: UserType
           })
         | null
+    replies: {
+        id: string
+    }[]
 }
 
 export type SearchQueryMessage = Message & {

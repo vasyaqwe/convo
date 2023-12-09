@@ -56,6 +56,11 @@ export const MESSAGE_INCLUDE = {
     reactions: {
         select: REACTION_SELECT,
     },
+    replies: {
+        select: {
+            id: true,
+        },
+    },
 }
 
 export const emojis = [
