@@ -394,7 +394,7 @@ function MessageFormShell({
                     <div>
                         <p className="font-medium">{replyTo?.sender.name}</p>
                         <p className="line-clamp-1 break-all text-sm">
-                            {replyTo?.body}
+                            {replyTo?.image ? "Sent an image" : replyTo?.body}
                         </p>
                     </div>
                     <Button

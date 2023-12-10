@@ -64,6 +64,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
 
         const {
             setReplyTo,
+            isReplying,
             setIsReplying,
             setHighlightedReplyId,
             highlightedReplyId,
@@ -80,6 +81,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         : undefined,
                 setHighlightedReplyId: state.setHighlightedReplyId,
                 setReplyTo: state.setReplyTo,
+                isReplying: state.isReplying,
                 setIsReplying: state.setIsReplying,
             }))
         )
@@ -433,7 +435,19 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                         />
                                     </TooltipContent>
                                 )}
-                                <ContextMenuContent>
+                                <ContextMenuContent
+                                    onAnimationEndCapture={() => {
+                                        if (isReplying) {
+                                            setTimeout(() => {
+                                                document
+                                                    .getElementById(
+                                                        "message-input"
+                                                    )
+                                                    ?.focus()
+                                            }, 100)
+                                        }
+                                    }}
+                                >
                                     {message.senderId === session?.user.id &&
                                     message.replies.length < 1 ? (
                                         <ContextMenuItem
@@ -456,13 +470,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                                             onSelect={() => {
                                                 setIsReplying(true)
                                                 setReplyTo(message)
-                                                setTimeout(() => {
-                                                    document
-                                                        .getElementById(
-                                                            "message-input"
-                                                        )
-                                                        ?.focus()
-                                                }, 0)
                                             }}
                                         >
                                             <Icons.reply className="mr-2" />
