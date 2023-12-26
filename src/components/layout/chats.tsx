@@ -1,6 +1,6 @@
 import { ChatsList } from "@/components/chats-list"
 
-import { cn, reverseArray } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import type { Session } from "next-auth"
 import {
     MESSAGES_INFINITE_SCROLL_COUNT,
@@ -54,7 +54,7 @@ export async function Chats({
                 session={session}
                 initialChats={chats.map((chat) => ({
                     ...chat,
-                    messages: reverseArray(chat.messages ?? []),
+                    messages: [...chat.messages].reverse(),
                 }))}
             />
         </aside>

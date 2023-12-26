@@ -88,11 +88,6 @@ export function formatDate(
     }
 }
 
-export function reverseArray<T>(arr: T[]) {
-    const reversed = arr.reverse()
-    return reversed
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function chunk(arr: any[], chunkSize: number) {
     const chunkedArr = []
