@@ -55,10 +55,6 @@ export function Chat({
             getNextPageParam: (lastPage, allPages) => {
                 return lastPage.length ? allPages.length + 1 : undefined
             },
-            select: (data) => ({
-                pages: [...data.pages].reverse(),
-                pageParams: [...data.pageParams].reverse(),
-            }),
             initialData: { pageParams: [1], pages: [initialMessages] },
         })
     const wrapperRef = useRef<HTMLDivElement>(null)
