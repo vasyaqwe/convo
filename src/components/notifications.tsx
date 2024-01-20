@@ -4,6 +4,7 @@ import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { pusherClient } from "@/lib/pusher"
 import { useMessageHelpersStore } from "@/stores/use-message-helpers-store.tsx"
 import type { ExtendedMessage } from "@/types"
+import { type Chat } from "@prisma/client"
 import type { Session } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
@@ -24,7 +25,6 @@ export function Notifications({ session }: NotificationsProps) {
             body: newMessage.body ?? undefined,
             image: newMessage.image ?? undefined,
         })
-        console.log(notification)
 
         notification.onclick = () => {
             router.push(`/chat/${newMessage.chatId}`)
@@ -43,33 +43,48 @@ export function Notifications({ session }: NotificationsProps) {
         pusherClient.subscribe(currentUserId)
 
         function onNewMessage({
-            chatId,
-            newMessage,
+            id,
+            message,
+            updatedChat,
         }: {
-            chatId: string
-            newMessage: ExtendedMessage
+            id: string
+            message: ExtendedMessage
+            updatedChat?: Pick<Chat, "mutedByIds" | "userIds">
         }) {
-            if ("Notification" in window && navigator.serviceWorker) {
+            if (!updatedChat) return
+
+            const partnerId = updatedChat.userIds.find(
+                (id) => id !== session?.user.id
+            )
+
+            if (
+                "Notification" in window &&
+                navigator.serviceWorker &&
+                currentUserId !== message.senderId &&
+                !updatedChat.mutedByIds.includes(partnerId!)
+                // if chat is not muted
+            ) {
                 navigator.permissions
                     .query({ name: "notifications" })
                     .then((permission) => {
                         if (
                             // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-                            (pathname?.includes(chatId) && isTabFocused) ||
+                            (pathname?.includes(id) && isTabFocused) ||
                             permission.state !== "granted"
-                        )
+                        ) {
                             return
+                        }
 
-                        sendNewMessageNotification(newMessage)
+                        sendNewMessageNotification(message)
                     })
             }
         }
 
-        pusherClient.bind("chat:new-message", onNewMessage)
+        pusherClient.bind("chat:update", onNewMessage)
 
         return () => {
             pusherClient.unsubscribe(currentUserId)
-            pusherClient.unbind("chat:new-message", onNewMessage)
+            pusherClient.unbind("chat:update", onNewMessage)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUserId, isTabFocused, pathname, router])

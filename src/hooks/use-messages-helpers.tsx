@@ -24,7 +24,7 @@ export function useMessagesHelpers({
         ? false
         : isTabFocused && pathname?.includes(lastMessage?.chatId ?? "")
           ? true
-          : lastMessage.seenBy.some((u) => u.id === currentUserId) ||
+          : lastMessage.seenByIds.includes(currentUserId) ||
             lastMessageText === "Chat started"
 
     const chatPartnersMessages = messages?.filter(

@@ -1,4 +1,3 @@
-import { MESSAGE_INCLUDE } from "@/config"
 import { getAuthSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { pusherServer } from "@/lib/pusher"
@@ -54,19 +53,18 @@ export const POST = withErrorHandling(async function (req: Request) {
     await db.$transaction(async (tx) => {
         const newMessage = await tx.message.create({
             data,
-            include: MESSAGE_INCLUDE,
-        })
-
-        const updatedChat = await tx.chat.update({
-            where: {
-                id: chatId,
-            },
-            data: {
-                messages: {
-                    connect: {
-                        id: newMessage.id,
+            include: {
+                sender: {
+                    select: {
+                        name: true,
                     },
                 },
+            },
+        })
+
+        const updatedChat = await tx.chat.findFirst({
+            where: {
+                id: chatId,
             },
             select: {
                 userIds: true,
@@ -74,22 +72,14 @@ export const POST = withErrorHandling(async function (req: Request) {
             },
         })
 
-        const partnerId = updatedChat.userIds.find(
-            (id) => id !== session.user.id
-        )
-
-        for (const userId of updatedChat.userIds) {
-            await pusherServer.trigger(userId, "chat:update", {
-                id: chatId,
-                message: newMessage,
-            })
-        }
-        // if chat is not muted
-        if (!updatedChat.mutedByIds.includes(partnerId!)) {
-            await pusherServer.trigger(partnerId!, "chat:new-message", {
-                chatId,
-                newMessage,
-            })
+        if (updatedChat) {
+            for (const userId of updatedChat.userIds) {
+                await pusherServer.trigger(userId, "chat:update", {
+                    id: chatId,
+                    message: newMessage,
+                    updatedChat,
+                })
+            }
         }
     })
 
