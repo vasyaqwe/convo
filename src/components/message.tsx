@@ -6,7 +6,7 @@ import { UserAvatar } from "@/components/ui/user-avatar"
 import { axiosInstance } from "@/config"
 import { cn, formatDateToTimestamp, isObjectId } from "@/lib/utils"
 import { type UserType, type Emoji, type ExtendedMessage } from "@/types"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type Session } from "next-auth"
 import Image from "next/image"
 import Link from "next/link"
@@ -16,6 +16,7 @@ import {
     type ComponentProps,
     memo,
     type RefObject,
+    useEffect,
 } from "react"
 import { Loading } from "@/components/ui/loading"
 import { toast } from "sonner"
@@ -43,6 +44,9 @@ import {
     ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { ReactionButton } from "@/components/reaction-button"
+import { seeMessage } from "@/lib/actions"
+import { useAction } from "@/hooks/use-action"
+
 const Date = dynamic(() => import("@/components/date"), { ssr: false })
 
 type MessageProps = {
@@ -86,22 +90,34 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
             }))
         )
 
-        useQuery({
-            queryKey: ["see-message"],
-            queryFn: async () => {
-                if (!message.seenByIds.includes(session?.user.id)) {
-                    await axiosInstance.patch(`/message/${message.id}`, {
-                        chatId: message.chatId,
-                    })
+        const { isPending: seeMessagePending, execute: executeSeeMessage } =
+            useAction(seeMessage)
 
-                    return "OK"
-                }
+        useEffect(() => {
+            if (
+                seeMessagePending ||
+                !isLast ||
+                !isTabFocused ||
+                message.seenByIds.includes(session?.user.id) ||
+                message.senderId === session?.user.id
+            ) {
+                return
+            }
 
-                return null
-            },
-            enabled:
-                isLast && isTabFocused && message.senderId !== session?.user.id,
-        })
+            executeSeeMessage({
+                messageId: message.id,
+                userId: session?.user.id,
+            })
+        }, [
+            isLast,
+            isTabFocused,
+            message.id,
+            message.senderId,
+            session,
+            message.seenByIds,
+            seeMessagePending,
+            executeSeeMessage,
+        ])
 
         const { isPending, mutate: onDelete } = useMutation({
             mutationFn: async () => {

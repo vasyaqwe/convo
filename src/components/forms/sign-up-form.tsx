@@ -95,6 +95,7 @@ export function SignUpForm({ className, ...rest }: SignUpFormProps) {
                 <div>
                     <Label htmlFor="name">Name</Label>
                     <Input
+                        autoFocus
                         name="name"
                         type="text"
                         value={formData.name}

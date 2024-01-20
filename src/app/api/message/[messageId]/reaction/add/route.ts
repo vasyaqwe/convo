@@ -58,29 +58,24 @@ export const POST = withErrorHandling(async function (
 
     if (existingReaction) return new NextResponse("Already reacted")
 
-    await db.$transaction(async (tx) => {
-        const createdReaction = await tx.reaction.create({
-            data: {
-                body,
-                message: {
-                    connect: {
-                        id: messageId,
-                    },
-                },
-                sender: {
-                    connect: {
-                        id: session.user.id,
-                    },
+    await db.reaction.create({
+        data: {
+            body,
+            message: {
+                connect: {
+                    id: messageId,
                 },
             },
-            select: REACTION_SELECT,
-        })
-
-        await pusherServer.trigger(message.chatId, "message:update", {
-            ...message,
-            reactions: [...message.reactions, createdReaction],
-        })
+            sender: {
+                connect: {
+                    id: session.user.id,
+                },
+            },
+        },
+        select: REACTION_SELECT,
     })
+
+    await pusherServer.trigger(message.chatId, "message:update", {})
 
     return new NextResponse("OK")
 })

@@ -95,6 +95,7 @@ export function SignInForm({ className, ...rest }: SignInFormProps) {
                     <Label htmlFor="username">Username</Label>
                     <div className="relative">
                         <Input
+                            autoFocus
                             type="text"
                             name="username"
                             value={formData.username}

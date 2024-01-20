@@ -317,6 +317,7 @@ export function ChatsList({ session, initialChats }: ChatsListProps) {
                 ) : null}
 
                 {isFetching &&
+                    input.length > 0 &&
                     SKELETONS_COUNT - totalItems.length > 0 &&
                     Array(SKELETONS_COUNT - totalItems.length)
                         .fill("")

@@ -24,6 +24,7 @@ export function Notifications({ session }: NotificationsProps) {
             body: newMessage.body ?? undefined,
             image: newMessage.image ?? undefined,
         })
+        console.log(notification)
 
         notification.onclick = () => {
             router.push(`/chat/${newMessage.chatId}`)

@@ -5,24 +5,21 @@ import { Message, MessageSkeleton } from "@/components/message"
 import { Loading } from "@/components/ui/loading"
 import { MESSAGES_INFINITE_SCROLL_COUNT, axiosInstance } from "@/config"
 import { useDynamicMetadata } from "@/hooks/use-dynamic-metadata"
+import { useEventListener } from "@/hooks/use-event-listener"
 import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
 import { pusherClient } from "@/lib/pusher"
-import { addIsRecent, chunk, cn, groupByDate } from "@/lib/utils"
+import { addIsRecent, cn, groupByDate } from "@/lib/utils"
 import {
     messagesQueryKey,
     useMessageHelpersStore,
 } from "@/stores/use-message-helpers-store.tsx"
 import type { ExtendedMessage } from "@/types"
-import {
-    type InfiniteData,
-    useInfiniteQuery,
-    useQueryClient,
-} from "@tanstack/react-query"
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
 import type { Session } from "next-auth"
+import { useRouter } from "next/navigation"
 import React, { forwardRef, useEffect, useRef } from "react"
-import { flushSync } from "react-dom"
 
 type ChatProps = {
     session: Session | null
@@ -38,6 +35,7 @@ export function Chat({
     chatPartnerName,
 }: ChatProps) {
     const queryClient = useQueryClient()
+    const router = useRouter()
     const queryKey = [...messagesQueryKey, chatId]
     const { fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, data } =
         useInfiniteQuery({
@@ -57,10 +55,15 @@ export function Chat({
             },
             initialData: { pageParams: [1], pages: [initialMessages] },
         })
+
     const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
     const messages = groupByDate(addIsRecent([...data.pages?.flat()].reverse()))
+
+    useEventListener("keydown", (e) => {
+        if (e.key === "Escape") router.push("/chats")
+    })
 
     useEffect(() => {
         if (data?.pages) {
@@ -160,84 +163,23 @@ export function Chat({
         wrapperRef.current?.lastElementChild?.scrollIntoView()
     }, [isLoading])
 
-    function updateMessages(
-        cb: (
-            prevData: InfiniteData<ExtendedMessage[]>
-        ) => InfiniteData<ExtendedMessage[]>
-    ) {
-        queryClient.setQueryData(queryKey, cb)
+    function refetchMessages() {
+        queryClient.invalidateQueries({ queryKey: messagesQueryKey })
     }
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
 
-        function onNewMessage(newMessage: ExtendedMessage) {
-            if (newMessage.senderId !== currentUserId) {
-                flushSync(() => {
-                    updateMessages((prev) => {
-                        if (
-                            prev.pages
-                                .flat()
-                                .some((m) => m.id === newMessage.id)
-                        )
-                            return prev
-
-                        const newData = prev.pages
-                            .filter((p) => p.length !== 0)
-                            .flatMap((messages) => [newMessage, ...messages])
-
-                        return {
-                            ...prev,
-                            pages: chunk(
-                                newData,
-                                MESSAGES_INFINITE_SCROLL_COUNT
-                            ),
-                        }
-                    })
-                })
-
-                setTimeout(() => {
-                    wrapperRef.current?.lastElementChild?.scrollIntoView({
-                        behavior: "smooth",
-                    })
-                }, 50)
-            }
-        }
-
-        function onUpdateMessage(newMessage: ExtendedMessage) {
-            updateMessages((prev) => {
-                const newData = prev.pages.flatMap((messages) =>
-                    messages.map((m) =>
-                        m.id === newMessage.id ? newMessage : m
-                    )
-                )
-                return {
-                    ...prev,
-                    pages: chunk(newData, MESSAGES_INFINITE_SCROLL_COUNT),
-                }
-            })
-        }
-        function onDeleteMessage(deletedMessageId: string) {
-            updateMessages((prev) => {
-                const newData = prev.pages.flatMap((messages) =>
-                    messages.filter((m) => m.id !== deletedMessageId)
-                )
-                return {
-                    ...prev,
-                    pages: chunk(newData, MESSAGES_INFINITE_SCROLL_COUNT),
-                }
-            })
-        }
-
-        pusherClient.bind("message:new", onNewMessage)
-        pusherClient.bind("message:update", onUpdateMessage)
-        pusherClient.bind("message:delete", onDeleteMessage)
+        pusherClient.bind("message:new", refetchMessages)
+        pusherClient.bind("message:update", refetchMessages)
+        pusherClient.bind("message:delete", refetchMessages)
 
         return () => {
             pusherClient.unsubscribe(chatId)
-            pusherClient.unbind("message:new", onNewMessage)
-            pusherClient.unbind("message:update", onUpdateMessage)
-            pusherClient.unbind("message:delete", onDeleteMessage)
+
+            pusherClient.unbind("message:new", refetchMessages)
+            pusherClient.unbind("message:update", refetchMessages)
+            pusherClient.unbind("message:delete", refetchMessages)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId])

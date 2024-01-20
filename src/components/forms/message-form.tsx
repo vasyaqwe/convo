@@ -9,6 +9,7 @@ import { TextArea } from "@/components/ui/textarea"
 import { axiosInstance } from "@/config"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useEventListener } from "@/hooks/use-event-listener"
+import { endTyping, startTyping } from "@/lib/actions"
 import { useUploadThing } from "@/lib/uploadthing"
 import { cn, isRecent } from "@/lib/utils"
 import { type MessagePayload } from "@/lib/validations/message"
@@ -20,7 +21,6 @@ import { type ExtendedMessage } from "@/types"
 import {
     type InfiniteData,
     useMutation,
-    useQuery,
     useQueryClient,
 } from "@tanstack/react-query"
 import { nanoid } from "nanoid"
@@ -56,26 +56,6 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     const queryClient = useQueryClient()
     const router = useRouter()
     const { replyTo, isReplying, setIsReplying } = useMessageHelpersStore()
-
-    const { refetch: refetchStartTyping } = useQuery({
-        queryKey: ["chat-start-typing"],
-        queryFn: async () => {
-            await axiosInstance.patch(`/chat/${chatId}/start-typing`)
-
-            return "OK"
-        },
-        enabled: false,
-    })
-
-    const { refetch: refetchEndTyping } = useQuery({
-        queryKey: ["chat-end-typing"],
-        queryFn: async () => {
-            await axiosInstance.patch(`/chat/${chatId}/end-typing`)
-
-            return "OK"
-        },
-        enabled: false,
-    })
 
     const { mutate, isPending } = useMutation({
         mutationFn: async ({
@@ -172,7 +152,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
             setBody("")
             setImage(undefined)
             setIsReplying(false)
-            refetchEndTyping()
+            endTyping({ chatId, session: session! })
 
             document.documentElement.style.setProperty(
                 "--message-form-image-height",
@@ -201,7 +181,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     useEffect(() => {
         if (debouncedBody.length === 0) return
 
-        refetchEndTyping()
+        endTyping({ chatId, session: session! })
         setStartedTyping(false)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedBody])
@@ -209,13 +189,13 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-        if (e.key === "Backspace") {
+        if (e.key === "Backspace" || (e.key === "x" && e.ctrlKey)) {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current)
             }
 
             timeoutRef.current = setTimeout(() => {
-                refetchEndTyping()
+                endTyping({ chatId, session: session! })
                 setStartedTyping(false)
             }, 1500)
         }
@@ -237,7 +217,7 @@ export function MessageForm({ chatId, session }: MessageFormProps) {
     function onBodyChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         setBody(e.target.value)
         if (!startedTyping) {
-            refetchStartTyping()
+            startTyping({ chatId, session: session! })
         }
         setStartedTyping(true)
     }
