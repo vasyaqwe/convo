@@ -54,6 +54,12 @@ export const POST = withErrorHandling(async function (req: Request) {
         const newMessage = await tx.message.create({
             data,
             include: {
+                chat: {
+                    select: {
+                        userIds: true,
+                        mutedByIds: true,
+                    },
+                },
                 sender: {
                     select: {
                         name: true,
@@ -62,22 +68,12 @@ export const POST = withErrorHandling(async function (req: Request) {
             },
         })
 
-        const updatedChat = await tx.chat.findFirst({
-            where: {
-                id: chatId,
-            },
-            select: {
-                userIds: true,
-                mutedByIds: true,
-            },
-        })
-
-        if (updatedChat) {
-            for (const userId of updatedChat.userIds) {
+        if (newMessage) {
+            for (const userId of newMessage.chat.userIds) {
                 await pusherServer.trigger(userId, "chat:update", {
                     id: chatId,
                     message: newMessage,
-                    updatedChat,
+                    updatedChat: newMessage.chat,
                 })
             }
         }
