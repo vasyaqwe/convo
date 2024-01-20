@@ -51,42 +51,49 @@ export const POST = withErrorHandling(async function (req: Request) {
         }
     }
 
-    const newMessage = await db.message.create({
-        data,
-        include: MESSAGE_INCLUDE,
-    })
+    await db.$transaction(async (tx) => {
+        const newMessage = await tx.message.create({
+            data,
+            include: MESSAGE_INCLUDE,
+        })
 
-    const updatedChat = await db.chat.update({
-        where: {
-            id: chatId,
-        },
-        data: {
-            messages: {
-                connect: {
-                    id: newMessage.id,
+        const updatedChat = await tx.chat.update({
+            where: {
+                id: chatId,
+            },
+            data: {
+                messages: {
+                    connect: {
+                        id: newMessage.id,
+                    },
                 },
             },
-        },
+            select: {
+                userIds: true,
+                mutedByIds: true,
+            },
+        })
+
+        const partnerId = updatedChat.userIds.find(
+            (id) => id !== session.user.id
+        )
+
+        for (const userId of updatedChat.userIds) {
+            await pusherServer.trigger(userId, "chat:update", {
+                id: chatId,
+                message: newMessage,
+            })
+        }
+        // if chat is not muted
+        if (!updatedChat.mutedByIds.includes(partnerId!)) {
+            await pusherServer.trigger(partnerId!, "chat:new-message", {
+                chatId,
+                newMessage,
+            })
+        }
     })
 
-    const partnerId = updatedChat.userIds.find((id) => id !== session.user.id)
-
-    for (const userId of updatedChat.userIds) {
-        await pusherServer.trigger(userId, "chat:update", {
-            id: chatId,
-            message: newMessage,
-        })
-    }
-
     await pusherServer.trigger(chatId, "message:new", {})
-
-    // if chat is not muted
-    if (!updatedChat.mutedByIds.includes(partnerId!)) {
-        await pusherServer.trigger(partnerId!, "chat:new-message", {
-            chatId,
-            newMessage,
-        })
-    }
 
     return new NextResponse("OK")
 })
