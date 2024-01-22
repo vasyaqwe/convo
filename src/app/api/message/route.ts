@@ -67,6 +67,10 @@ export const POST = withErrorHandling(async function (req: Request) {
                 },
             },
         },
+        select: {
+            userIds: true,
+            mutedByIds: true,
+        },
     })
 
     await pusherServer.trigger(chatId, "message:new", newMessage)
@@ -77,6 +81,7 @@ export const POST = withErrorHandling(async function (req: Request) {
         await pusherServer.trigger(userId, "chat:update", {
             id: chatId,
             message: newMessage,
+            updatedChat,
         })
     }
 
