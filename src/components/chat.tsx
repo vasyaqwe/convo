@@ -18,7 +18,7 @@ import {
 } from "@/stores/use-message-helpers-store.tsx"
 import type { ExtendedMessage } from "@/types"
 import {
-    InfiniteData,
+    type InfiniteData,
     useInfiniteQuery,
     useQueryClient,
 } from "@tanstack/react-query"
@@ -57,7 +57,6 @@ export function Chat({
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
             getNextPageParam: (lastPage, allPages) => {
-                console.log(lastPage.length ? allPages.length + 1 : undefined)
                 return lastPage.length ? allPages.length + 1 : undefined
             },
             initialData: { pageParams: [1], pages: [initialMessages] },

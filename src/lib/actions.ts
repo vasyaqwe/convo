@@ -55,7 +55,11 @@ export async function seeMessage({
         message: updatedMessage,
     })
 
-    await pusherServer.trigger(updatedMessage.chatId, "message:update", {})
+    await pusherServer.trigger(
+        updatedMessage.chatId,
+        "message:update",
+        updatedMessage
+    )
 
     return "OK"
 }

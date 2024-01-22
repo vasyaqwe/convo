@@ -20,77 +20,73 @@ export const POST = withErrorHandling(async function (req: Request) {
 
     const { chatId, body, image, replyToId } = messageSchema.parse(_body)
 
-    await db.$transaction(async (tx) => {
-        let data: Prisma.MessageCreateInput = {
-            chat: {
-                connect: {
-                    id: chatId,
-                },
-            },
-            sender: {
-                connect: {
-                    id: session.user.id,
-                },
-            },
-            seenBy: {
-                connect: {
-                    id: session.user.id,
-                },
-            },
-            body,
-            image,
-        }
-
-        if (replyToId) {
-            data = {
-                ...data,
-                replyTo: {
-                    connect: {
-                        id: replyToId,
-                    },
-                },
-            }
-        }
-
-        const newMessage = await tx.message.create({
-            data,
-            include: MESSAGE_INCLUDE,
-        })
-
-        const updatedChat = await tx.chat.update({
-            where: {
+    let data: Prisma.MessageCreateInput = {
+        chat: {
+            connect: {
                 id: chatId,
             },
-            data: {
-                messages: {
-                    connect: {
-                        id: newMessage.id,
-                    },
+        },
+        sender: {
+            connect: {
+                id: session.user.id,
+            },
+        },
+        seenBy: {
+            connect: {
+                id: session.user.id,
+            },
+        },
+        body,
+        image,
+    }
+
+    if (replyToId) {
+        data = {
+            ...data,
+            replyTo: {
+                connect: {
+                    id: replyToId,
                 },
             },
-        })
-
-        await pusherServer.trigger(chatId, "message:new", newMessage)
-
-        const partnerId = updatedChat.userIds.find(
-            (id) => id !== session.user.id
-        )
-
-        for (const userId of updatedChat.userIds) {
-            await pusherServer.trigger(userId, "chat:update", {
-                id: chatId,
-                message: newMessage,
-            })
         }
+    }
 
-        // if chat is not muted
-        if (!updatedChat.mutedByIds.includes(partnerId!)) {
-            await pusherServer.trigger(partnerId!, "chat:new-message", {
-                chatId,
-                newMessage,
-            })
-        }
+    const newMessage = await db.message.create({
+        data,
+        include: MESSAGE_INCLUDE,
     })
+
+    const updatedChat = await db.chat.update({
+        where: {
+            id: chatId,
+        },
+        data: {
+            messages: {
+                connect: {
+                    id: newMessage.id,
+                },
+            },
+        },
+    })
+
+    await pusherServer.trigger(chatId, "message:new", newMessage)
+
+    const partnerId = updatedChat.userIds.find((id) => id !== session.user.id)
+
+    for (const userId of updatedChat.userIds) {
+        await pusherServer.trigger(userId, "chat:update", {
+            id: chatId,
+            message: newMessage,
+        })
+    }
+
+    // if chat is not muted
+    if (!updatedChat.mutedByIds.includes(partnerId!)) {
+        await pusherServer.trigger(partnerId!, "chat:new-message", {
+            chatId,
+            newMessage,
+        })
+    }
 
     return new NextResponse("OK")
 })

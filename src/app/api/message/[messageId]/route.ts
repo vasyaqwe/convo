@@ -40,7 +40,7 @@ export const DELETE = withErrorHandling(async function (
         return new NextResponse("Forbidden", { status: 403 })
     }
 
-    await db.message.delete({
+    const deletedMessage = await db.message.delete({
         where: {
             id: messageId,
         },
@@ -84,7 +84,11 @@ export const DELETE = withErrorHandling(async function (
         })
     }
 
-    await pusherServer.trigger(message.chatId, "message:delete", {})
+    await pusherServer.trigger(
+        message.chatId,
+        "message:delete",
+        deletedMessage.id
+    )
 
     return new NextResponse("OK")
 })
