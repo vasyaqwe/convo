@@ -24,12 +24,6 @@ export const DELETE = withErrorHandling(async function (
         where: {
             id: messageId,
         },
-        select: {
-            id: true,
-            senderId: true,
-            chatId: true,
-            image: true,
-        },
     })
 
     if (!message) {
