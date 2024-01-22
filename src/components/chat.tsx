@@ -9,17 +9,23 @@ import { useEventListener } from "@/hooks/use-event-listener"
 import { useIntersection } from "@/hooks/use-intersection"
 import { useIsTabFocused } from "@/hooks/use-is-tab-focused"
 import { useMessagesHelpers } from "@/hooks/use-messages-helpers"
+import { useStableScrollPosition } from "@/hooks/use-stable-scroll-position"
 import { pusherClient } from "@/lib/pusher"
-import { addIsRecent, cn, groupByDate } from "@/lib/utils"
+import { addIsRecent, chunk, cn, groupByDate } from "@/lib/utils"
 import {
     messagesQueryKey,
     useMessageHelpersStore,
 } from "@/stores/use-message-helpers-store.tsx"
 import type { ExtendedMessage } from "@/types"
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
+import {
+    InfiniteData,
+    useInfiniteQuery,
+    useQueryClient,
+} from "@tanstack/react-query"
 import type { Session } from "next-auth"
 import { useRouter } from "next/navigation"
-import React, { forwardRef, useEffect, useRef } from "react"
+import React, { forwardRef, useEffect } from "react"
+import { flushSync } from "react-dom"
 
 type ChatProps = {
     session: Session | null
@@ -51,43 +57,20 @@ export function Chat({
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
             getNextPageParam: (lastPage, allPages) => {
+                console.log(lastPage.length ? allPages.length + 1 : undefined)
                 return lastPage.length ? allPages.length + 1 : undefined
             },
             initialData: { pageParams: [1], pages: [initialMessages] },
         })
 
-    const wrapperRef = useRef<HTMLDivElement>(null)
     const currentUserId = session?.user.id
 
+    const { wrapperRef } = useStableScrollPosition(data)
     const messages = groupByDate(addIsRecent([...data.pages?.flat()].reverse()))
 
     useEventListener("keydown", (e) => {
         if (e.key === "Escape") router.push("/chats")
     })
-
-    useEffect(() => {
-        if (data?.pages) {
-            if (messages && messages[0]?.chatId === chatId) {
-                if (
-                    // only load new page if there's more than one page & if scroll position is at the very top
-                    data.pages.length > 1 &&
-                    wrapperRef.current &&
-                    wrapperRef.current.scrollTop < 1
-                ) {
-                    // as soon as new page of messages loads, scroll to the last message you saw before that (first message of the previos page).
-                    // otherwise it will scroll to the very top automatically (bad ux)
-                    const prevPage = data.pages[data.pages.length - 2]
-                    if (prevPage && prevPage[0]) {
-                        const prevPageFirstMessage = document.getElementById(
-                            prevPage[prevPage.length - 1]?.id ?? ""
-                        )
-                        prevPageFirstMessage?.scrollIntoView()
-                    }
-                }
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data, chatId])
 
     const { isTabFocused } = useIsTabFocused()
     const { ref, entry } = useIntersection({
@@ -154,32 +137,94 @@ export function Chat({
     }, [highlightedMessageId, messages])
 
     useEffect(() => {
-        if (entry?.isIntersecting && hasNextPage) {
+        async function loadMoreMessages() {
+            await queryClient.invalidateQueries({ queryKey })
             fetchNextPage()
         }
-    }, [entry, hasNextPage, fetchNextPage])
+        if (entry?.isIntersecting && hasNextPage) {
+            loadMoreMessages()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [entry, hasNextPage])
 
     useEffect(() => {
         wrapperRef.current?.lastElementChild?.scrollIntoView()
-    }, [isLoading])
+    }, [isLoading, wrapperRef])
 
-    function refetchMessages() {
-        queryClient.invalidateQueries({ queryKey: messagesQueryKey })
+    function updateMessages(
+        cb: (
+            prevData: InfiniteData<ExtendedMessage[]>
+        ) => InfiniteData<ExtendedMessage[]>
+    ) {
+        queryClient.setQueryData(queryKey, cb)
     }
 
     useEffect(() => {
         pusherClient.subscribe(chatId)
 
-        pusherClient.bind("message:new", refetchMessages)
-        pusherClient.bind("message:update", refetchMessages)
-        pusherClient.bind("message:delete", refetchMessages)
+        function onNewMessage(newMessage: ExtendedMessage) {
+            if (newMessage.senderId !== currentUserId) {
+                flushSync(() => {
+                    updateMessages((prev) => {
+                        if (
+                            prev.pages
+                                .flat()
+                                .some((m) => m.id === newMessage.id)
+                        )
+                            return prev
+
+                        return {
+                            ...prev,
+                            pages: prev.pages.map((page, idx) =>
+                                idx === 0 ? [newMessage, ...page] : page
+                            ),
+                        }
+                    })
+                })
+
+                setTimeout(() => {
+                    wrapperRef.current?.lastElementChild?.scrollIntoView({
+                        behavior: "smooth",
+                    })
+                }, 50)
+            }
+        }
+
+        function onUpdateMessage(newMessage: ExtendedMessage) {
+            updateMessages((prev) => {
+                const newData = prev.pages.flatMap((messages) =>
+                    messages.map((m) =>
+                        m.id === newMessage.id ? newMessage : m
+                    )
+                )
+                return {
+                    ...prev,
+                    pages: chunk(newData, MESSAGES_INFINITE_SCROLL_COUNT),
+                }
+            })
+        }
+
+        function onDeleteMessage(deletedMessageId: string) {
+            updateMessages((prev) => {
+                const newData = prev.pages.flatMap((messages) =>
+                    messages.filter((m) => m.id !== deletedMessageId)
+                )
+                return {
+                    ...prev,
+                    pages: chunk(newData, MESSAGES_INFINITE_SCROLL_COUNT),
+                }
+            })
+        }
+
+        pusherClient.bind("message:new", onNewMessage)
+        pusherClient.bind("message:update", onUpdateMessage)
+        pusherClient.bind("message:delete", onDeleteMessage)
 
         return () => {
             pusherClient.unsubscribe(chatId)
-
-            pusherClient.unbind("message:new", refetchMessages)
-            pusherClient.unbind("message:update", refetchMessages)
-            pusherClient.unbind("message:delete", refetchMessages)
+            pusherClient.unbind("message:new", onNewMessage)
+            pusherClient.unbind("message:update", onUpdateMessage)
+            pusherClient.unbind("message:delete", onDeleteMessage)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId])
@@ -190,6 +235,11 @@ export function Chat({
             className="chat-wrapper relative flex h-[calc(100svh-var(--header-height)-var(--message-form-height)-var(--message-form-image-height)-var(--message-form-reply-height))] flex-col 
             overflow-y-auto pb-[var(--chat-padding-block)] pt-[calc(var(--chat-padding-block)/2)] [--chat-padding-block:3rem] [--chat-padding-inline:0.5rem] md:[--chat-padding-inline:1rem]"
         >
+            <div
+                ref={ref}
+                aria-hidden={true}
+            ></div>
+
             {isFetchingNextPage && (
                 <Loading className=" absolute left-1/2 top-6 -translate-x-1/2" />
             )}
@@ -224,7 +274,6 @@ export function Chat({
                                     isLast={messages.length === 4}
                                     session={session}
                                     message={message}
-                                    ref={ref}
                                 />
                             </React.Fragment>
                         )
